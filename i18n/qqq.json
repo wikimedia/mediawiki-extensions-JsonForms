@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+
+	"jsonforms-extension-desc": "a label message",
+	"jsonforms-loading-placeholder": "a label message",
+	"jsonformsdemo": "a label message",
+	"specialpages-group-jsonforms": "a label message"
+}

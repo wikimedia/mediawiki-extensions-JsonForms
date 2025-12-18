@@ -1,0 +1,165 @@
+{
+	"name": "JsonForms",
+	"author": "thomas-topway-it",
+	"version": "0.5",
+	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
+	"descriptionmsg": "jsonforms-extension-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.39.13",
+		"extensions": {
+		}
+	},
+	"MessagesDirs": {
+		"JsonForms": [
+			"i18n"
+		]
+	},
+	"callback": "JsonFormsHooks::initExtension",
+	"AutoloadClasses": {
+		"SpecialJsonFormsDemo": "includes/specials/SpecialJsonFormsDemo.php",
+		"JsonForms": "includes/JsonForms.php",
+		"JsonFormsHooks": "includes/JsonFormsHooks.php"
+	},
+	"APIModules": {
+	},
+	"ExtensionMessagesFiles": {
+		"JsonFormsAlias": "JsonForms.alias.php",
+		"JsonFormsMagic": "JsonFormsMagic.i18n.magic.php"
+	},
+	"Hooks": {
+		"LoadExtensionSchemaUpdates": "JsonFormsHooks::onLoadExtensionSchemaUpdates",
+		"BeforeInitialize": "JsonFormsHooks::onBeforeInitialize",
+		"ParserFirstCallInit": "JsonFormsHooks::onParserFirstCallInit",
+		"BeforePageDisplay": "JsonFormsHooks::onBeforePageDisplay",
+		"SkinBuildSidebar": "JsonFormsHooks::onSkinBuildSidebar",
+		"ResourceLoaderGetConfigVars": "JsonFormsHooks::onResourceLoaderGetConfigVars"
+	},
+	"SpecialPages": {
+		"JsonFormsDemo": "SpecialJsonFormsDemo"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\JsonForms\\Aliases\\": "includes/aliases/",
+		"MediaWiki\\Extension\\JsonForms\\": "includes/classes/",
+		"MediaWiki\\Extension\\JsonForms\\Utils\\": "includes/utils/",
+		"MediaWiki\\Extension\\JsonForms\\Special\\": "includes/specials/"
+	},
+	"GroupPermissions": {
+		"sysop": {
+		},
+		"bureaucrat": {
+		},
+		"jsonforms-admin": {
+		}
+	},
+	"AddGroups": {
+		"jsonforms-admin": [
+		]
+	},
+	"RemoveGroups": {
+		"jsonforms-admin": [
+		]
+	},
+	"AvailableRights": [
+	],
+	"namespaces": [
+		{
+			"id": 2100,
+			"constant": "NS_JSONSCHEMA",
+			"name": "JsonSchema",
+			"defaultcontentmodel": "json"
+		},
+		{
+			"id": 2101,
+			"constant": "NS_JSONSCHEMA_TALK",
+			"name": "JsonSchemaTalk"
+		},
+		{
+			"id": 2110,
+			"constant": "NS_JSONDATA",
+			"name": "JsonData",
+			"defaultcontentmodel": "json"
+		},
+		{
+			"id": 2111,
+			"constant": "NS_JSONDATA_TALK",
+			"name": "JsonDataTalk"
+		},
+		{
+			"id": 2120,
+			"constant": "NS_JSONFORM",
+			"name": "JsonForm",
+			"defaultcontentmodel": "json"
+		},
+		{
+			"id": 2121,
+			"constant": "NS_JSONFORM_TALK",
+			"name": "JsonFormTalk"
+		}
+	],
+	"JobClasses": {
+	},
+	"ResourceModules": {
+		"ext.JsonForms": {
+			"position": "top",
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"scripts": [
+			],
+			"styles": [
+				"style.css"
+			],
+			"dependencies": [
+			],
+			"messages": [
+			]
+		},
+		"ext.JsonForms.editor": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+				"datatables/datatables.min.css",
+				"datatables/style.css",
+				"style.css"
+			],
+			"scripts": [
+				"datatables/object_hash.js",
+				"datatables/datatables.min.js",
+				"editor/jsonforms-editor.js",
+				"JsonForms.js"
+			],
+			"dependencies": [
+				"mediawiki.rcfilters.filters.base.styles",
+				"mediawiki.util",
+				"mediawiki.base",
+				"mediawiki.cookie",
+				"mediawiki.api",
+				"oojs-ui-core",
+				"oojs-ui-widgets",
+				"mediawiki.storage",
+				"oojs-ui.styles.icons-alerts",
+				"oojs-ui.styles.icons-interactions",
+				"oojs-ui.styles.icons-editing-core",
+				"oojs-ui.styles.icons-layout",
+				"oojs-ui.styles.icons-movement",
+				"oojs-ui.styles.icons-moderation",
+				"oojs-ui.styles.icons-accessibility",
+				"oojs-ui-toolbars",
+				"oojs-ui-windows",
+				"mediawiki.widgets",
+				"mediawiki.widgets.datetime",
+				"mediawiki.widgets.DateInputWidget",
+				"mediawiki.widgets.TitlesMultiselectWidget",
+				"mediawiki.widgets.CategoryMultiselectWidget",
+				"mediawiki.widgets.UserInputWidget",
+				"mediawiki.widgets.UsersMultiselectWidget",
+				"mediawiki.Upload"
+			],
+			"position": "top"
+		}
+	},
+	"config": {
+	},
+	"manifest_version": 1
+}

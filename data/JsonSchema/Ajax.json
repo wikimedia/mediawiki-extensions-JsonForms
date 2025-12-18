@@ -1,0 +1,19 @@
+{
+	"type": "array",
+	"title": "People",
+	"format": "tabs",
+	"items": {
+		"title": "Person",
+		"headerTemplate": "{{i}} - {{self.name}} ddffd",
+		"oneOf": [
+			{
+				"$ref": "BasicPerson.json",
+				"title": "Basic Person"
+			},
+			{
+				"$ref": "Person.json",
+				"title": "Complex Person"
+			}
+		]
+	}
+}

@@ -1,0 +1,728 @@
+{
+	"title": "Edit Schema",
+	"$ref": "#/definitions/schema",
+	"definitions": {
+		"inputOptions": {
+			"type": "object",
+			"additionalProperties": true,
+			"properties": {}
+		},
+		"numericConstraints": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"minimum": {
+					"type": "number"
+				},
+				"maximum": {
+					"type": "number"
+				},
+				"multipleOf": {
+					"type": "number"
+				},
+				"exclusiveMinimum": {
+					"type": "number"
+				},
+				"exclusiveMaximum": {
+					"type": "number"
+				}
+			}
+		},
+		"schemaArray": {
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"$ref": "#/definitions/schema"
+			}
+		},
+		"schemaMapping": {
+			"type": "object",
+			"additionalProperties": true,
+			"patternProperties": {
+				".*": {
+					"$ref": "#/definitions/schema"
+				}
+			}
+		},
+		"null": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "null"
+				},
+				"enum": {
+					"type": "array",
+					"items": {
+						"type": "null"
+					}
+				},
+				"default": {
+					"type": "null"
+				},
+				"propertyOrder": {
+					"type": "number"
+				},
+				"options": {
+					"$ref": "#/definitions/inputOptions"
+				}
+			}
+		},
+		"boolean": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "boolean"
+				},
+				"enum": {
+					"type": "array",
+					"items": {
+						"type": "boolean"
+					}
+				},
+				"format": {
+					"type": "string",
+					"enum": [
+						"toggle"
+					]
+				},
+				"default": {
+					"type": "boolean"
+				},
+				"propertyOrder": {
+					"type": "number"
+				},
+				"options": {
+					"$ref": "#/definitions/inputOptions"
+				}
+			}
+		},
+		"string": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "string"
+				},
+				"default": {
+					"type": "string"
+				},
+				"enum": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"format": {
+					"type": "string",
+					"enum": [
+						"color",
+						"date",
+						"datetime",
+						"email",
+						"month",
+						"password",
+						"number",
+						"range",
+						"tel",
+						"text",
+						"textarea",
+						"time",
+						"url",
+						"week"
+					]
+				},
+				"pattern": {
+					"type": "string",
+					"format": "regex"
+				},
+				"minLength": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"maxLength": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"options": {
+					"$ref": "#/definitions/inputOptions"
+				},
+				"media": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"type": {
+							"type": "string"
+						}
+					}
+				},
+				"template": {
+					"type": "string"
+				},
+				"propertyOrder": {
+					"type": "number"
+				}
+			}
+		},
+		"number": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "number"
+				},
+				"default": {
+					"type": "number"
+				},
+				"enum": {
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"options": {
+					"$ref": "#/definitions/inputOptions"
+				},
+				"constraints": {
+					"$ref": "#/definitions/numericConstraints"
+				},
+				"propertyOrder": {
+					"type": "number"
+				}
+			}
+		},
+		"integer": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "integer"
+				},
+				"default": {
+					"type": "integer"
+				},
+				"enum": {
+					"type": "array",
+					"items": {
+						"type": "integer"
+					}
+				},
+				"minimum": {
+					"type": "number"
+				},
+				"maximum": {
+					"type": "number"
+				},
+				"exclusiveMinimum": {
+					"type": "number"
+				},
+				"exclusiveMaximum": {
+					"type": "number"
+				},
+				"propertyOrder": {
+					"type": "integer"
+				},
+				"options": {
+					"$ref": "#/definitions/inputOptions"
+				},
+				"constraints": {
+					"$ref": "#/definitions/numericConstraints"
+				}
+			}
+		},
+		"object": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "object"
+				},
+				"options": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"collapsed": {
+							"type": "boolean"
+						},
+						"disable_collapse": {
+							"type": "boolean"
+						},
+						"disable_edit_json": {
+							"type": "boolean"
+						},
+						"disable_properties": {
+							"type": "boolean"
+						},
+						"remove_empty_properties": {
+							"type": "boolean"
+						},
+						"layout": {
+							"type": "string",
+							"enum": [
+								"grid"
+							]
+						}
+					}
+				},
+				"default": {
+					"type": "object"
+				},
+				"properties": {
+					"$ref": "#/definitions/schemaMapping"
+				},
+				"patternProperties": {
+					"$ref": "#/definitions/schemaMapping"
+				},
+				"dependentSchemas": {
+					"$ref": "#/definitions/schemaMapping"
+				},
+				"additionalProperties": {
+					"type": "boolean"
+				},
+				"required": {
+					"type": "array",
+					"uniqueItems": true,
+					"items": {
+						"type": "string"
+					}
+				},
+				"format": {
+					"type": "string",
+					"enum": [
+						"grid"
+					]
+				},
+				"propertyOrder": {
+					"type": "number"
+				}
+			}
+		},
+		"array": {
+			"type": "object",
+			"format": "tabs",
+			"additionalProperties": false,
+			"required": [
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "array"
+				},
+				"default": {
+					"type": "array"
+				},
+				"items": {
+					"oneOf": [
+						{
+							"$ref": "#/definitions/schemaNoname"
+						},
+						{
+							"$ref": "#/definitions/schemaArray"
+						}
+					]
+				},
+				"uniqueItems": {
+					"type": "boolean"
+				},
+				"minItems": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"maxItems": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"contains": {
+					"$ref": "#/definitions/schema"
+				},
+				"minContains": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"maxContains": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"additionalItems": {
+					"oneOf": [
+						{
+							"$ref": "#/definitions/schema"
+						},
+						{
+							"type": "boolean"
+						}
+					]
+				},
+				"options": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {}
+				},
+				"format": {
+					"type": "string",
+					"enum": [
+						"array",
+						"table",
+						"datatable",
+						"tabs",
+						"tabs-top",
+						"checkbox",
+						"select",
+						"categories"
+					]
+				},
+				"propertyOrder": {
+					"type": "number"
+				}
+			}
+		},
+		"schemaBase": {
+			"type": "object",
+			"defaultProperties": [
+				"name",
+				"type",
+				"title"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string",
+					"format": "uri"
+				},
+				"$schema": {
+					"type": "string",
+					"format": "uri"
+				},
+				"title": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string",
+					"format": "textarea"
+				},
+				"enum": {
+					"type": "array",
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"const": {},
+				"enumSource": {},
+				"$ref": {
+					"type": "string"
+				},
+				"oneOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"anyOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"allOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"not": {
+					"$ref": "#/definitions/schema"
+				},
+				"if": {
+					"$ref": "#/definitions/schema"
+				},
+				"then": {
+					"$ref": "#/definitions/schema"
+				},
+				"else": {
+					"$ref": "#/definitions/schema"
+				},
+				"propertyOrder": {
+					"type": "number",
+					"default": 1000
+				},
+				"links": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"watch": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"type": "string"
+						}
+					}
+				},
+				"headerTemplate": {
+					"type": "string"
+				},
+				"options": {
+					"type": "object"
+				}
+			}
+		},
+		"schemaBaseNoname": {
+			"type": "object",
+			"additionalProperties": false,
+			"defaultProperties": [
+				"type",
+				"title"
+			],
+			"properties": {
+				"type": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string",
+					"format": "uri"
+				},
+				"$schema": {
+					"type": "string",
+					"format": "uri"
+				},
+				"title": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string",
+					"format": "textarea"
+				},
+				"enum": {
+					"type": "array",
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"const": {},
+				"enumSource": {},
+				"$ref": {
+					"type": "string"
+				},
+				"oneOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"anyOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"allOf": {
+					"$ref": "#/definitions/schemaArray"
+				},
+				"not": {
+					"$ref": "#/definitions/schema"
+				},
+				"if": {
+					"$ref": "#/definitions/schema"
+				},
+				"then": {
+					"$ref": "#/definitions/schema"
+				},
+				"else": {
+					"$ref": "#/definitions/schema"
+				},
+				"propertyOrder": {
+					"type": "number",
+					"default": 1000
+				},
+				"links": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"watch": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"type": "string"
+						}
+					}
+				},
+				"headerTemplate": {
+					"type": "string"
+				},
+				"options": {
+					"type": "object"
+				}
+			}
+		},
+		"schema": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/schemaBase"
+				}
+			],
+			"oneOf": [
+				{
+					"description": "Field (string)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/string"
+				},
+				{
+					"description": "Field (number)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/number"
+				},
+				{
+					"description": "Field (integer)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/integer"
+				},
+				{
+					"description": "Field (boolean)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/boolean"
+				},
+				{
+					"description": "Subitem",
+					"additionalProperties": false,
+					"$ref": "#/definitions/object"
+				},
+				{
+					"description": "List",
+					"additionalProperties": false,
+					"$ref": "#/definitions/array"
+				},
+				{
+					"description": "Field (null)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/null"
+				}
+			]
+		},
+		"objectNoname": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/object"
+				}
+			],
+			"properties": {
+				"name": {
+					"not": {}
+				}
+			}
+		},
+		"arrayNoname": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/array"
+				}
+			],
+			"properties": {
+				"name": {
+					"not": {}
+				}
+			},
+			"items": {
+				"oneOf": [
+					{
+						"$ref": "#/definitions/schemaNoname"
+					},
+					{
+						"$ref": "#/definitions/schemaArray"
+					}
+				]
+			}
+		},
+		"stringNoname": {
+			"$ref": "#/definitions/string"
+		},
+		"numberNoname": {
+			"$ref": "#/definitions/number"
+		},
+		"integerNoname": {
+			"$ref": "#/definitions/integer"
+		},
+		"booleanNoname": {
+			"$ref": "#/definitions/boolean"
+		},
+		"nullNoname": {
+			"$ref": "#/definitions/null"
+		},
+		"schemaNoname": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/schemaBaseNoname"
+				}
+			],
+			"oneOf": [
+				{
+					"description": "Field (string)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/stringNoname"
+				},
+				{
+					"description": "Field (number)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/numberNoname"
+				},
+				{
+					"description": "Field (integer)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/integerNoname"
+				},
+				{
+					"description": "Field (boolean)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/booleanNoname"
+				},
+				{
+					"description": "Subitem",
+					"additionalProperties": false,
+					"$ref": "#/definitions/objectNoname"
+				},
+				{
+					"description": "List",
+					"additionalProperties": false,
+					"$ref": "#/definitions/arrayNoname"
+				},
+				{
+					"description": "Field (null)",
+					"additionalProperties": false,
+					"$ref": "#/definitions/nullNoname"
+				}
+			]
+		}
+	},
+	"properties": {
+		"definitions": {
+			"type": "object",
+			"additionalProperties": true,
+			"patternProperties": {
+				".*": {
+					"$ref": "#/definitions/schema"
+				}
+			}
+		}
+	}
+}

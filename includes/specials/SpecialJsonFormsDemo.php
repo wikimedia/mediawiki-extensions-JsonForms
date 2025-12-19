@@ -60,7 +60,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 		// 	exit;
 		// }
 
-		$par = 'Createarticle';
+		$par = 'CreateArticle';
 		$title_ = TitleClass::newFromText( 'JsonForm:' . $par );
 
 		if ( !$title_ || !$title_->isKnown() ) {

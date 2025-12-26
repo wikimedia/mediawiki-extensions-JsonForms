@@ -1,7 +1,6 @@
 {
 	"title": "Dependencies",
 	"type": "object",
-	"format": "grid",
 	"properties": {
 		"_text1": {
 			"title": "Dependencies Example",
@@ -98,3 +97,4 @@
 		}
 	}
 }
+

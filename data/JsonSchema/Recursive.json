@@ -1,6 +1,11 @@
 {
 	"title": "Person",
 	"$ref": "#/definitions/person",
+	"options": {
+		"layout": {
+			"name": "booklet"
+		}
+	},
 	"definitions": {
 		"person": {
 			"type": "object",
@@ -27,6 +32,11 @@
 				},
 				"bestFriend": {
 					"title": "best friend",
+					"options": {
+						"input": {
+							"name": "button-select"
+						}
+					},
 					"oneOf": [
 						{
 							"title": "none",
@@ -59,3 +69,4 @@
 		}
 	}
 }
+

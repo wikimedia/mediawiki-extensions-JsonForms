@@ -19,7 +19,6 @@
  * @copyright Copyright ©2025, https://wikisphere.org
  */
 
-
 JsonForms = function () {
 	let MetaSchema;
 
@@ -149,22 +148,22 @@ JsonForms = function () {
 		const Outerschema = {
 			title: '',
 			type: 'object',
-			format: 'tabs',
+			options: {
+				layout: {
+					name: 'booklet',
+				},
+			},
 			properties: {
 				schema: {
 					type: 'object',
 					properties: {
 						schema: {
 							type: 'string',
-							enum: ['', ...schemas].filter(
-								(x) => x.indexOf('WebPublication') === -1,
-							),
+							enum: ['', ...schemas],
 						},
 						uischema: {
 							type: 'string',
-							enum: ['', ...schemas].filter(
-								(x) => x.indexOf('WebPublication') === -1,
-							),
+							enum: ['', ...schemas],
 						},
 						info: {
 							type: 'info',
@@ -177,18 +176,18 @@ JsonForms = function () {
 					properties: {
 						title: {
 							type: 'string',
-							//	options: { input: 'title' }
+							options: { input: { name: 'title' } },
 						},
 						categories: {
 							type: 'array',
 							items: {
 								type: 'string',
-								//	options: { input: 'TagMultiselect' }
+								options: { input: { name: 'categorymultiselect' } },
 							},
 						},
 						wikitext: { type: 'string' },
 						slot: { type: 'string' },
-						content_model: { type: 'string' },
+						content_model: { title: 'content model', type: 'string' },
 						summary: { type: 'string', format: 'textarea' },
 					},
 					required: ['title', 'slot', 'content_model'],
@@ -270,9 +269,8 @@ $(function () {
 	const metaSchema = mw.config.get('jsonforms-metaschema');
 	// console.log('metaSchema', metaSchema);
 
-	$('.JsonFormsFormWrapper').each(function (index, el) {
+	$('.jsonforms-form-wrapper').each(function (index, el) {
 		const webPubCreatorJsonEditor = new JsonForms();
 		webPubCreatorJsonEditor.init(el, schemas, metaSchema);
 	});
 });
-

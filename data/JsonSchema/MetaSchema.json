@@ -1,7 +1,336 @@
 {
 	"title": "Edit Schema",
 	"$ref": "#/definitions/schema",
+	"options": {
+		"layout": {
+			"name": "paged"
+		}
+	},
 	"definitions": {
+		"BaseTextInputConfig": {
+			"type": "object",
+			"properties": {
+				"accessKey": {
+					"type": "string"
+				},
+				"autocomplete": {
+					"type": "boolean"
+				},
+				"autofocus": {
+					"type": "boolean"
+				},
+				"classes": {
+					"type": "string"
+				},
+				"dir": {
+					"type": "string"
+				},
+				"disabled": {
+					"type": "boolean"
+				},
+				"flags": {
+					"type": "string"
+				},
+				"icon": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"indicator": {
+					"type": "string"
+				},
+				"inputFilter": {
+					"type": "string"
+				},
+				"inputId": {
+					"type": "string"
+				},
+				"invisibleLabel": {
+					"type": "boolean"
+				},
+				"label": {
+					"type": "string"
+				},
+				"labelPosition": {
+					"type": "string"
+				},
+				"maxLength": {
+					"type": "integer"
+				},
+				"minLength": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"placeholder": {
+					"type": "string"
+				},
+				"readOnly": {
+					"type": "boolean"
+				},
+				"spellcheck": {
+					"type": "boolean"
+				},
+				"text": {
+					"type": "string"
+				},
+				"title": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"validate": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"TextInputWidgetConfig": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/BaseTextInputConfig"
+				}
+			]
+		},
+		"TextInputWidget": {
+			"title": "Text input",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"enum": [
+						"OO.ui.TextInputWidget",
+						"mw.widgets.UserInputWidget",
+						"mw.widgets.TitleInputWidget",
+						"LookupElement"
+					]
+				},
+				"config": {
+					"$ref": "#/definitions/TextInputWidgetConfig"
+				}
+			}
+		},
+		"MultilineTextInputWidgetConfig": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/BaseTextInputConfig"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"autosize": {
+							"type": "boolean"
+						},
+						"rows": {
+							"type": "integer"
+						},
+						"maxRows": {
+							"type": "integer"
+						}
+					}
+				}
+			]
+		},
+		"MultilineTextInputWidget": {
+			"title": "Multiline text",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"const": "OO.ui.MultilineTextInputWidget"
+				},
+				"config": {
+					"$ref": "#/definitions/MultilineTextInputWidgetConfig"
+				}
+			}
+		},
+		"DateInputWidgetConfig": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/TextInputWidgetConfig"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"precision": {
+							"type": "string",
+							"enum": [
+								"day",
+								"month"
+							]
+						},
+						"inputFormat": {
+							"type": "string"
+						},
+						"displayFormat": {
+							"type": "string"
+						},
+						"longDisplayFormat": {
+							"type": "boolean"
+						},
+						"placeholderLabel": {
+							"type": "string"
+						},
+						"placeholderDateFormat": {
+							"type": "string"
+						},
+						"mustBeAfter": {
+							"type": "string",
+							"format": "date"
+						},
+						"mustBeBefore": {
+							"type": "string",
+							"format": "date"
+						}
+					}
+				}
+			]
+		},
+		"DateInputWidget": {
+			"title": "Date input",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"const": "mw.widgets.DateInputWidget"
+				},
+				"config": {
+					"$ref": "#/definitions/DateInputWidgetConfig"
+				}
+			}
+		},
+		"DateTimeInputWidgetConfig": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/BaseTextInputConfig"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"min": {
+							"type": "string"
+						},
+						"max": {
+							"type": "string"
+						},
+						"required": {
+							"type": "boolean"
+						},
+						"clearable": {
+							"type": "boolean"
+						}
+					}
+				}
+			]
+		},
+		"DateTimeInputWidget": {
+			"title": "Date \u0026 time",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"enum": [
+						"DateTimeInputWidget",
+						"mw.widgets.datetime.DateTimeInputWidget"
+					]
+				},
+				"config": {
+					"$ref": "#/definitions/DateTimeInputWidgetConfig"
+				}
+			}
+		},
+		"NumberInputWidgetConfig": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/BaseTextInputConfig"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"min": {
+							"type": "number"
+						},
+						"max": {
+							"type": "number"
+						},
+						"step": {
+							"type": "integer"
+						},
+						"buttonStep": {
+							"type": "integer"
+						},
+						"pageStep": {
+							"type": "integer"
+						},
+						"showButtons": {
+							"type": "boolean"
+						}
+					}
+				}
+			]
+		},
+		"NumberInputWidget": {
+			"title": "Number input",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"const": "OO.ui.NumberInputWidget"
+				},
+				"config": {
+					"$ref": "#/definitions/NumberInputWidgetConfig"
+				}
+			}
+		},
+		"ToggleSwitchWidgetConfig": {
+			"type": "object",
+			"properties": {
+				"classes": {
+					"type": "string"
+				},
+				"disabled": {
+					"type": "boolean"
+				},
+				"id": {
+					"type": "string"
+				},
+				"text": {
+					"type": "string"
+				},
+				"title": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"ToggleSwitchWidget": {
+			"title": "Toggle switch",
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"const": "OO.ui.ToggleSwitchWidget"
+				},
+				"config": {
+					"$ref": "#/definitions/ToggleSwitchWidgetConfig"
+				}
+			}
+		},
 		"inputOptions": {
 			"type": "object",
 			"additionalProperties": true,
@@ -9,7 +338,6 @@
 		},
 		"numericConstraints": {
 			"type": "object",
-			"additionalProperties": false,
 			"properties": {
 				"minimum": {
 					"type": "number"
@@ -46,7 +374,6 @@
 		},
 		"null": {
 			"type": "object",
-			"format": "tabs",
 			"additionalProperties": false,
 			"required": [
 				"name",
@@ -65,9 +392,6 @@
 				"default": {
 					"type": "null"
 				},
-				"propertyOrder": {
-					"type": "number"
-				},
 				"options": {
 					"$ref": "#/definitions/inputOptions"
 				}
@@ -75,8 +399,6 @@
 		},
 		"boolean": {
 			"type": "object",
-			"format": "tabs",
-			"additionalProperties": false,
 			"required": [
 				"name",
 				"type"
@@ -91,27 +413,35 @@
 						"type": "boolean"
 					}
 				},
-				"format": {
-					"type": "string",
-					"enum": [
-						"toggle"
-					]
-				},
 				"default": {
 					"type": "boolean"
 				},
-				"propertyOrder": {
-					"type": "number"
-				},
 				"options": {
-					"$ref": "#/definitions/inputOptions"
+					"type": "object",
+					"properties": {
+						"input": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string",
+									"enum": [
+										"toggle",
+										"checkbox"
+									]
+								},
+								"config": {
+									"type": "object",
+									"properties": {},
+									"additionalProperties": true
+								}
+							}
+						}
+					}
 				}
 			}
 		},
 		"string": {
 			"type": "object",
-			"format": "tabs",
-			"additionalProperties": false,
 			"required": [
 				"name",
 				"type"
@@ -126,7 +456,12 @@
 				"enum": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"type": "string",
+						"options": {
+							"input": {
+								"name": "tagmultiselect"
+							}
+						}
 					}
 				},
 				"format": {
@@ -145,6 +480,7 @@
 						"textarea",
 						"time",
 						"url",
+						"uri",
 						"week"
 					]
 				},
@@ -160,12 +496,8 @@
 					"type": "integer",
 					"minimum": 0
 				},
-				"options": {
-					"$ref": "#/definitions/inputOptions"
-				},
 				"media": {
 					"type": "object",
-					"additionalProperties": false,
 					"properties": {
 						"type": {
 							"type": "string"
@@ -175,15 +507,49 @@
 				"template": {
 					"type": "string"
 				},
-				"propertyOrder": {
-					"type": "number"
+				"options": {
+					"type": "object",
+					"properties": {
+						"input": {
+							"oneOf": [
+								{
+									"$ref": "#/definitions/TextInputWidget"
+								},
+								{
+									"$ref": "#/definitions/MultilineTextInputWidget"
+								},
+								{
+									"$ref": "#/definitions/DropdownInputWidget"
+								},
+								{
+									"$ref": "#/definitions/DateInputWidget"
+								},
+								{
+									"$ref": "#/definitions/DateTimeInputWidget"
+								},
+								{
+									"$ref": "#/definitions/CategoryMultiselectWidget"
+								},
+								{
+									"$ref": "#/definitions/TitleInputWidget"
+								},
+								{
+									"$ref": "#/definitions/UserInputWidget"
+								},
+								{
+									"$ref": "#/definitions/ComboBoxInputWidget"
+								},
+								{
+									"$ref": "#/definitions/VisualEditor"
+								}
+							]
+						}
+					}
 				}
 			}
 		},
 		"number": {
 			"type": "object",
-			"format": "tabs",
-			"additionalProperties": false,
 			"required": [
 				"name",
 				"type"
@@ -202,20 +568,20 @@
 					}
 				},
 				"options": {
-					"$ref": "#/definitions/inputOptions"
+					"type": "object",
+					"properties": {
+						"input": {
+							"$ref": "#/definitions/NumberInputWidget"
+						}
+					}
 				},
 				"constraints": {
 					"$ref": "#/definitions/numericConstraints"
-				},
-				"propertyOrder": {
-					"type": "number"
 				}
 			}
 		},
 		"integer": {
 			"type": "object",
-			"format": "tabs",
-			"additionalProperties": false,
 			"required": [
 				"name",
 				"type"
@@ -245,11 +611,31 @@
 				"exclusiveMaximum": {
 					"type": "number"
 				},
-				"propertyOrder": {
-					"type": "integer"
-				},
 				"options": {
-					"$ref": "#/definitions/inputOptions"
+					"type": "object",
+					"properties": {
+						"input": {
+							"allOf": [
+								{
+									"$ref": "#/definitions/NumberInputWidget"
+								},
+								{
+									"type": "object",
+									"properties": {
+										"config": {
+											"type": "object",
+											"properties": {
+												"step": {
+													"const": 1
+												}
+											},
+											"additionalProperties": true
+										}
+									}
+								}
+							]
+						}
+					}
 				},
 				"constraints": {
 					"$ref": "#/definitions/numericConstraints"
@@ -258,8 +644,6 @@
 		},
 		"object": {
 			"type": "object",
-			"format": "tabs",
-			"additionalProperties": false,
 			"required": [
 				"name",
 				"type"
@@ -270,28 +654,25 @@
 				},
 				"options": {
 					"type": "object",
-					"additionalProperties": false,
 					"properties": {
-						"collapsed": {
-							"type": "boolean"
-						},
-						"disable_collapse": {
-							"type": "boolean"
-						},
-						"disable_edit_json": {
-							"type": "boolean"
-						},
-						"disable_properties": {
-							"type": "boolean"
-						},
-						"remove_empty_properties": {
-							"type": "boolean"
-						},
 						"layout": {
-							"type": "string",
-							"enum": [
-								"grid"
-							]
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string",
+									"enum": [
+										"default",
+										"tabs",
+										"booklet",
+										"horizontal"
+									]
+								},
+								"config": {
+									"type": "object",
+									"properties": {},
+									"additionalProperties": true
+								}
+							}
 						}
 					}
 				},
@@ -300,6 +681,9 @@
 				},
 				"properties": {
 					"$ref": "#/definitions/schemaMapping"
+				},
+				"geolocation": {
+					"$ref": "#/definitions/geolocation"
 				},
 				"patternProperties": {
 					"$ref": "#/definitions/schemaMapping"
@@ -314,23 +698,18 @@
 					"type": "array",
 					"uniqueItems": true,
 					"items": {
-						"type": "string"
+						"type": "string",
+						"options": {
+							"input": {
+								"name": "tagmultiselect"
+							}
+						}
 					}
-				},
-				"format": {
-					"type": "string",
-					"enum": [
-						"grid"
-					]
-				},
-				"propertyOrder": {
-					"type": "number"
 				}
 			}
 		},
 		"array": {
 			"type": "object",
-			"format": "tabs",
 			"additionalProperties": false,
 			"required": [
 				"type"
@@ -338,6 +717,25 @@
 			"properties": {
 				"type": {
 					"const": "array"
+				},
+				"layout": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string",
+							"enum": [
+								"default",
+								"table",
+								"tabs",
+								"booklet"
+							]
+						},
+						"config": {
+							"type": "object",
+							"properties": {},
+							"additionalProperties": true
+						}
+					}
 				},
 				"default": {
 					"type": "array"
@@ -383,27 +781,60 @@
 							"type": "boolean"
 						}
 					]
+				}
+			}
+		},
+		"geolocation": {
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
 				},
-				"options": {
-					"type": "object",
-					"additionalProperties": false,
-					"properties": {}
+				"label": {
+					"type": "string"
 				},
-				"format": {
+				"help": {
 					"type": "string",
-					"enum": [
-						"array",
-						"table",
-						"datatable",
-						"tabs",
-						"tabs-top",
-						"checkbox",
-						"select",
-						"categories"
-					]
+					"format": "textarea"
 				},
-				"propertyOrder": {
-					"type": "number"
+				"required": {
+					"type": "boolean",
+					"default": false
+				},
+				"layout": {
+					"type": "object",
+					"properties": {
+						"showCoordinates": {
+							"type": "boolean",
+							"default": true
+						},
+						"showMap": {
+							"type": "boolean",
+							"default": true
+						},
+						"showReverseGeocode": {
+							"type": "boolean",
+							"default": false
+						}
+					},
+					"additionalProperties": false
+				},
+				"reverseGeocoding": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean",
+							"default": false
+						},
+						"targetField": {
+							"type": "string",
+							"description": "Name of the string field where the address will be stored"
+						}
+					},
+					"additionalProperties": false
 				}
 			}
 		},
@@ -467,10 +898,6 @@
 				"else": {
 					"$ref": "#/definitions/schema"
 				},
-				"propertyOrder": {
-					"type": "number",
-					"default": 1000
-				},
 				"links": {
 					"type": "array",
 					"items": {
@@ -495,7 +922,6 @@
 		},
 		"schemaBaseNoname": {
 			"type": "object",
-			"additionalProperties": false,
 			"defaultProperties": [
 				"type",
 				"title"
@@ -550,10 +976,6 @@
 				"else": {
 					"$ref": "#/definitions/schema"
 				},
-				"propertyOrder": {
-					"type": "number",
-					"default": 1000
-				},
 				"links": {
 					"type": "array",
 					"items": {
@@ -585,37 +1007,30 @@
 			"oneOf": [
 				{
 					"description": "Field (string)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/string"
 				},
 				{
 					"description": "Field (number)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/number"
 				},
 				{
 					"description": "Field (integer)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/integer"
 				},
 				{
 					"description": "Field (boolean)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/boolean"
 				},
 				{
 					"description": "Subitem",
-					"additionalProperties": false,
 					"$ref": "#/definitions/object"
 				},
 				{
 					"description": "List",
-					"additionalProperties": false,
 					"$ref": "#/definitions/array"
 				},
 				{
 					"description": "Field (null)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/null"
 				}
 			]
@@ -678,37 +1093,30 @@
 			"oneOf": [
 				{
 					"description": "Field (string)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/stringNoname"
 				},
 				{
 					"description": "Field (number)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/numberNoname"
 				},
 				{
 					"description": "Field (integer)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/integerNoname"
 				},
 				{
 					"description": "Field (boolean)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/booleanNoname"
 				},
 				{
 					"description": "Subitem",
-					"additionalProperties": false,
 					"$ref": "#/definitions/objectNoname"
 				},
 				{
 					"description": "List",
-					"additionalProperties": false,
 					"$ref": "#/definitions/arrayNoname"
 				},
 				{
 					"description": "Field (null)",
-					"additionalProperties": false,
 					"$ref": "#/definitions/nullNoname"
 				}
 			]
@@ -726,3 +1134,4 @@
 		}
 	}
 }
+

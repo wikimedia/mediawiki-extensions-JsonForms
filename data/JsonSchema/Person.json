@@ -1,6 +1,11 @@
 {
 	"title": "Person",
 	"type": "object",
+	"options": {
+		"layout": {
+			"name": "paged"
+		}
+	},
 	"required": [
 		"name",
 		"age",
@@ -41,7 +46,7 @@
 			"type": "string",
 			"format": "date",
 			"options": {
-				"flatpickr": {}
+				"flatpickr": []
 			}
 		},
 		"location": {
@@ -69,7 +74,11 @@
 		},
 		"pets": {
 			"type": "array",
-			"format": "table",
+			"options": {
+				"layout": {
+					"name": "table"
+				}
+			},
 			"title": "Pets",
 			"uniqueItems": true,
 			"items": {
@@ -101,3 +110,4 @@
 		}
 	}
 }
+

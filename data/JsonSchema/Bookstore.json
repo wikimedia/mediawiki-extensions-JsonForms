@@ -1,15 +1,13 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"type": "object",
-	"title": "My schema",
-	"additionalProperties": false,
+	"title": "Bookstore",
 	"properties": {
 		"Book": {
 			"type": "array",
 			"additionalItems": false,
 			"items": {
 				"type": "object",
-				"additionalProperties": false,
 				"properties": {
 					"Title": {
 						"type": "string"
@@ -27,7 +25,6 @@
 						"type": "array",
 						"items": {
 							"type": "object",
-							"additionalProperties": false,
 							"properties": {
 								"FirstName": {
 									"type": "string"
@@ -43,3 +40,4 @@
 		}
 	}
 }
+

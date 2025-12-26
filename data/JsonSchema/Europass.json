@@ -3,6 +3,11 @@
 	"id": "http://europass.cedefop.europa.eu/json/schema/v3.3.0/Europass_JSONSchema.json",
 	"description": "A JSON Representation of a Europass Document corresponding to Europass XML 3.3.0",
 	"type": "object",
+	"options": {
+		"layout": {
+			"name": "paged"
+		}
+	},
 	"definitions": {
 		"documentTypeType": {
 			"type": "string",
@@ -1302,3 +1307,4 @@
 		}
 	}
 }
+

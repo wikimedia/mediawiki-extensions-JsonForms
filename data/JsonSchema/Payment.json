@@ -1,5 +1,10 @@
 {
 	"title": "Payment Method",
+	"options": {
+		"input": {
+			"name": "button-select"
+		}
+	},
 	"oneOf": [
 		{
 			"title": "None",
@@ -18,19 +23,18 @@
 			"required": [
 				"method"
 			],
-			"additionalProperties": false,
 			"options": {
-				"hidden": true,
-				"theme": "bootstrap3",
-				"disable_collapse": true,
-				"disable_edit_json": true,
-				"disable_properties": true
+				"hidden": true
 			}
 		},
 		{
 			"title": "Bank EFT",
 			"type": "object",
-			"format": "grid",
+			"options": {
+				"layout": {
+					"name": "horizontal"
+				}
+			},
 			"properties": {
 				"method": {
 					"type": "string",
@@ -62,19 +66,16 @@
 				"bankName",
 				"routingNumber",
 				"accountNumber"
-			],
-			"additionalProperties": false,
-			"options": {
-				"theme": "bootstrap3",
-				"disable_collapse": true,
-				"disable_edit_json": true,
-				"disable_properties": true
-			}
+			]
 		},
 		{
 			"title": "Credit Card",
 			"type": "object",
-			"format": "grid",
+			"options": {
+				"layout": {
+					"name": "horizontal"
+				}
+			},
 			"properties": {
 				"method": {
 					"type": "string",
@@ -132,19 +133,8 @@
 				"expiration",
 				"CCV"
 			],
-			"additionalProperties": false,
-			"options": {
-				"theme": "bootstrap3",
-				"disable_collapse": true,
-				"disable_edit_json": true,
-				"disable_properties": true
-			}
+			"additionalProperties": false
 		}
-	],
-	"options": {
-		"theme": "bootstrap3",
-		"disable_collapse": true,
-		"disable_edit_json": true,
-		"disable_properties": true
-	}
+	]
 }
+

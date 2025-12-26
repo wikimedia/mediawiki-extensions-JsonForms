@@ -114,7 +114,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 
 		$loadingPlaceholder = HtmlClass::rawElement(
 			'div',
-			[ 'class' => 'JsonFormsFormWrapperPlaceholder' ],
+			[ 'class' => 'jsonforms-form-placeholder' ],
 			$this->msg( 'jsonforms-loading-placeholder' )->text()
 		);
 
@@ -124,7 +124,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 					'schema' => $jsonSchema,
 					'schemaName' => $schemaName
 				] ),
-				'class' => 'JsonFormsForm JsonFormsFormWrapper'
+				'class' => 'jsonforms-form jsonforms-form-wrapper'
 			], $loadingContainer . $loadingPlaceholder )
 		);
 	}

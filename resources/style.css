@@ -91,6 +91,51 @@
 	display: block;
 }
 
+.jsonforms-form .oo-ui-toolbar-bar {
+	display: flex;
+}
+
+.jsonforms-form .oo-ui-toolbar-actions {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.jsonforms-form .jsonforms-addproperty-button a {
+	border-radius: 32px;
+	margin: 2px;
+}
+
+.jsonforms-form .jsonforms-outlineitem-selected {
+	background-color: #f7f7f7;
+}
+
+.jsonforms-form .jsonforms-survey-table {
+	border-collapse: collapse;
+	width: 100%;
+	background-color: #f7f7f7;
+}
+
+.jsonforms-form .jsonforms-survey-header-cell {
+	border: 1px solid #ccc;
+	padding: 4px 8px;
+}
+
+.jsonforms-form .jsonforms-survey-header-cell-span {
+	padding: 6px;
+}
+
+.jsonforms-form .jsonforms-survey-row-header {
+	border: 1px solid #ccc;
+	padding: 6px;
+}
+
+.jsonforms-form .jsonforms-survey-leaf-cell {
+	border: 1px solid #ccc;
+	padding: 6px;
+}
+
 :root {
   --oo-outline-indent: 1em; /* base indentation per level */
   --oo-icon-extra: 2em;       /* extra padding for iconElement */

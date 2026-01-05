@@ -11,11 +11,11 @@
 		"headerTemplate": "{{i}} - {{self.name}} ddffd",
 		"oneOf": [
 			{
-				"$ref": "BasicPerson.json",
+				"$ref": "JsonSchema:BasicPerson",
 				"title": "Basic Person"
 			},
 			{
-				"$ref": "Person.json",
+				"$ref": "JsonSchema:Person",
 				"title": "Complex Person"
 			}
 		]

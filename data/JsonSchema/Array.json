@@ -7,7 +7,12 @@
 		"fruits": {
 			"type": "array",
 			"items": {
-				"type": "string"
+				"type": "string",
+				"options": {
+					"input": {
+						"name": "tagmultiselect"
+					}
+				}
 			}
 		},
 		"vegetables": {
@@ -37,3 +42,4 @@
 		}
 	}
 }
+

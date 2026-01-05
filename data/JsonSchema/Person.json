@@ -8,12 +8,7 @@
 	},
 	"required": [
 		"name",
-		"age",
-		"date",
-		"favorite_color",
-		"gender",
-		"location",
-		"pets"
+		"location"
 	],
 	"properties": {
 		"name": {
@@ -101,6 +96,9 @@
 					}
 				}
 			},
+			"required": [
+				"type"
+			],
 			"default": [
 				{
 					"type": "dog",

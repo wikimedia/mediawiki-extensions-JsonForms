@@ -65,23 +65,18 @@ JsonForms = function () {
 			// partialSchema: 'options',
 			// show_errors: 'change',
 			ajax: true,
-			/*
-			ajax: function (url, callback) {
-				fetch(url, {
-					cache: 'no-store',
-				})
-					.then(function (res) {
-						return res.text();
-					})
-					.then(function (text) {
-						const schemaObj = JSON.parse(text);
-						callback(schemaObj);
-					})
-					.catch(function (err) {
-						console.error('Failed to load schema:', err);
-					});
+			ajaxUrl: function (ref, fileBase) {
+				const mwBaseUrl = mw.config.get('wgServer') + mw.config.get('wgScript');
+
+				// console.log(' ajaxUrl fileBase', fileBase);
+				// console.log(' ajaxUrl mwBaseUrl', mwBaseUrl);
+
+				if (fileBase.indexOf(mwBaseUrl) === -1) {
+					return ref;
+				}
+
+				return `${mwBaseUrl}?title=${ref}&action=raw`;
 			},
-		*/
 		});
 
 		const textarea = $('<textarea>', {
@@ -221,23 +216,24 @@ JsonForms = function () {
 			let editor_ = editor.getEditor('root.schema.schema');
 			const schemaName = editor_.getValue();
 
+			// console.log('schemaName', schemaName);
+
+			if (!schemaName) {
+				console.log('no schemaName');
+				return;
+			}
+
 			const schemaEditor = editor.getEditor('root.schema.info');
+			// console.log('schemaEditor', schemaEditor);
 
 			editor_ = editor.getEditor('root.schema.uischema');
-			const uiSchemaName = editor_.getValue();
+			let uiSchemaName;
 
-			if (uiSchemaName) {
-				loadSchema(uiSchemaName).then((uiSchema) => {
-					loadSchema(schemaName).then((schema) => {
-						createEditor({
-							schemaName,
-							schema,
-							uiSchema,
-							el: schemaEditor.container,
-						});
-					});
-				});
-			} else {
+			if (editor_) {
+				uiSchemaName = editor_.getValue();
+			}
+
+			if (!editor_ || !uiSchemaName) {
 				loadSchema(schemaName).then((schema) => {
 					createEditor({
 						schemaName,
@@ -245,7 +241,20 @@ JsonForms = function () {
 						el: schemaEditor.container,
 					});
 				});
+
+				return;
 			}
+
+			loadSchema(uiSchemaName).then((uiSchema) => {
+				loadSchema(schemaName).then((schema) => {
+					createEditor({
+						schemaName,
+						schema,
+						uiSchema,
+						el: schemaEditor.container,
+					});
+				});
+			});
 		}
 
 		editor.on('ready', () => {

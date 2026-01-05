@@ -80,7 +80,9 @@
 			"type": "object",
 			"title": "Person",
 			"required": [
-				"_localId"
+				"_localId",
+				"Injury",
+				"vehicle"
 			],
 			"properties": {
 				"Age": {
@@ -92,7 +94,8 @@
 						"Male",
 						"Female"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Name": {
 					"type": "string",
@@ -105,7 +108,8 @@
 						"Minor",
 						"Not injured"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Address": {
 					"type": "string",
@@ -143,7 +147,8 @@
 						"Passenger",
 						"Driver"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Driver error": {
 					"enum": [
@@ -156,14 +161,16 @@
 						"Bad turning",
 						"Using cell phone"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Alcohol/drugs": {
 					"enum": [
 						"Alcohol suspected",
 						"Drugs suspected"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"License number": {
 					"type": "string",
@@ -175,7 +182,8 @@
 						"Not worn",
 						"Not worn correctly"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				}
 			},
 			"definitions": [],
@@ -186,7 +194,8 @@
 			"type": "object",
 			"title": "Vehicle",
 			"required": [
-				"_localId"
+				"_localId",
+				"Vehicle type"
 			],
 			"properties": {
 				"Make": {
@@ -207,7 +216,8 @@
 						"Roof",
 						"Multiple"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Defect": {
 					"enum": [
@@ -218,7 +228,8 @@
 						"Tires",
 						"Multiple"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Loading": {
 					"enum": [
@@ -226,7 +237,8 @@
 						"Over loaded",
 						"Unsafe load"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Maneuver": {
 					"enum": [
@@ -244,7 +256,8 @@
 						"Parked off road",
 						"Parked on road"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"_localId": {
 					"type": "string",
@@ -260,7 +273,8 @@
 						"East",
 						"West"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Plate number": {
 					"type": "string",
@@ -280,7 +294,8 @@
 						"Van",
 						"Animal"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Engine number": {
 					"type": "string",
@@ -304,7 +319,8 @@
 			"title": "Accident Details",
 			"details": true,
 			"required": [
-				"_localId"
+				"_localId",
+				"Severity"
 			],
 			"properties": {
 				"Severity": {
@@ -314,7 +330,8 @@
 						"Property"
 					],
 					"type": "string",
-					"isSearchable": true
+					"isSearchable": true,
+					"default": ""
 				},
 				"_localId": {
 					"type": "string",
@@ -330,7 +347,8 @@
 						"Human error"
 					],
 					"type": "string",
-					"isSearchable": true
+					"isSearchable": true,
+					"default": ""
 				},
 				"Description": {
 					"type": "string",
@@ -347,7 +365,8 @@
 						"Gravel",
 						"Earth"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Street lights": {
 					"enum": [
@@ -369,8 +388,9 @@
 						"Hit pedestrian",
 						"Hit animal"
 					],
-					"type": "string"
-					"isSearchable": true
+					"type": "string",
+					"isSearchable": true,
+					"default": ""
 				},
 				"Traffic control": {
 					"enum": [
@@ -383,7 +403,8 @@
 						"Stop sign",
 						"Give way"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Surface condition": {
 					"enum": [
@@ -392,7 +413,8 @@
 						"Muddy",
 						"Flooded"
 					],
-					"type": "string"
+					"type": "string",
+					"default": ""
 				},
 				"Num driver casualties": {
 					"type": "string",

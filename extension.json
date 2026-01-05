@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "0.51",
+	"version": "0.55",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",

@@ -1,7 +1,10 @@
 {
 	"root": true,
 	"extends": [
-		"wikimedia/client-es6",
+		"wikimedia/client",
 		"wikimedia/mediawiki"
-	]
+	],
+	"rules": {
+		"mediawiki/no-unlabeled-buttonwidget": "off"
+	}
 }

@@ -12,6 +12,13 @@
 			}
 		},
 		"category": {
+			"options": {
+				"control": {
+					"config": {
+						"align": "left"
+					}
+				}
+			},
 			"title": "Category",
 			"type": "string",
 			"enum": [
@@ -30,6 +37,11 @@
 				"Gianduja chocolate"
 			],
 			"options": {
+				"control": {
+					"config": {
+						"align": "left"
+					}
+				},
 				"dependencies": {
 					"category": "Chocolates"
 				},
@@ -49,6 +61,11 @@
 				"dependencies": {
 					"category": "Vegetables"
 				},
+				"control": {
+					"config": {
+						"align": "left"
+					}
+				},
 				"grid_columns": 12
 			}
 		},
@@ -61,6 +78,11 @@
 				"Ice milk"
 			],
 			"options": {
+				"control": {
+					"config": {
+						"align": "left"
+					}
+				},
 				"dependencies": {
 					"category": "Icecreams"
 				},

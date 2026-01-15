@@ -32,6 +32,21 @@
 	padding: 10px 0;
 }
 
+.jsonforms-formcontrol .jsonforms-field-container {
+	display: flex !important;
+	align-items: stretch;
+	gap: 2px;
+}
+
+.jsonforms-remove-object {
+	text-align: right;
+	display: block;
+}
+
+.jsonforms-header {
+	margin-top: 0.5em !important;
+}
+
 .jsonforms-switcher {
 	float: right;
 	width: auto;
@@ -134,6 +149,26 @@
 .jsonforms-form .jsonforms-survey-leaf-cell {
 	border: 1px solid #ccc;
 	padding: 6px;
+}
+
+.jsonforms-page-nav-footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 1em;
+	margin-top: 2em;
+	background: #f6f6f6;
+	padding: 12px;
+	border-top: 1px dashed #aaa;
+}
+
+.jsonforms-page-nav-left {
+	align-items: flex-start;
+	text-align: left;
+}
+
+.jsonforms-page-nav-right {
+	align-items: flex-end;
+	text-align: right;
 }
 
 :root {

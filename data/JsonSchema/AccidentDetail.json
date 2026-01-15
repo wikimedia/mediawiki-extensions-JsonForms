@@ -9,73 +9,34 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"properties": {
 		"accidentDetails": {
-			"$ref": "#/definitions/accidentDetails",
-			"options": {
-				"collapsed": true
-			}
+			"$ref": "#/definitions/accidentDetails"
 		},
 		"vehicle": {
+			"options": {
+				"layout": {
+					"name": "tabs"
+				}
+			},
+			"title": "vehicles",
 			"type": "array",
 			"items": {
 				"$ref": "#/definitions/vehicle"
-			},
-			"options": {
-				"collapsed": true
 			}
 		},
 		"person": {
+			"options": {
+				"layout": {
+					"name": "tabs"
+				}
+			},
 			"type": "array",
+			"title": "people",
 			"items": {
 				"$ref": "#/definitions/person"
-			},
-			"options": {
-				"collapsed": true
-			}
-		},
-		"photo": {
-			"type": "array",
-			"items": {
-				"$ref": "#/definitions/photo"
-			},
-			"options": {
-				"collapsed": true
 			}
 		}
 	},
 	"definitions": {
-		"photo": {
-			"type": "object",
-			"title": "Photo",
-			"required": [
-				"_localId",
-				"Picture"
-			],
-			"properties": {
-				"Picture": {
-					"type": "string",
-					"media": {
-						"type": "image/jpeg",
-						"binaryEncoding": "base64"
-					},
-					"fieldType": "image"
-				},
-				"_localId": {
-					"type": "string",
-					"options": {
-						"hidden": true
-					},
-					"pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-				},
-				"Description": {
-					"type": "string",
-					"format": "text",
-					"isSearchable": true
-				}
-			},
-			"definitions": [],
-			"description": "Pictures of the accident",
-			"plural_title": "Photos"
-		},
 		"person": {
 			"type": "object",
 			"title": "Person",
@@ -187,8 +148,7 @@
 				}
 			},
 			"definitions": [],
-			"description": "A person involved in the accident",
-			"plural_title": "People"
+			"description": "A person involved in the accident"
 		},
 		"vehicle": {
 			"type": "object",
@@ -311,8 +271,7 @@
 				}
 			},
 			"definitions": [],
-			"description": "A vehicle involved in the accident",
-			"plural_title": "Vehicles"
+			"description": "A vehicle involved in the accident"
 		},
 		"accidentDetails": {
 			"type": "object",
@@ -431,11 +390,9 @@
 				}
 			},
 			"definitions": [],
-			"description": "Details for Accident",
-			"plural_title": "Accident Details"
+			"description": "Details for Accident"
 		}
 	},
-	"description": "",
-	"plural_title": ""
+	"description": ""
 }
 

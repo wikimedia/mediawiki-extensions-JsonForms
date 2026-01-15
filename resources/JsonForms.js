@@ -16,11 +16,10 @@
  *
  * @file
  * @author thomas-topway-it <support@topway.it>
- * @copyright Copyright ©2025, https://wikisphere.org
+ * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
 
 JsonForms = function () {
-	let MetaSchema;
 
 	function buildFormSchema(targetSchema, descriptor) {
 		const result = structuredClone(targetSchema);
@@ -59,7 +58,6 @@ JsonForms = function () {
 		const editor = new JSONEditor(config.el, {
 			theme: 'oojs',
 			schema: config.schema,
-			metaSchema: MetaSchema,
 			schemaName: config.schemaName,
 			uiSchema: config.uiSchema,
 			// partialSchema: 'options',
@@ -121,11 +119,8 @@ JsonForms = function () {
 		});
 	}
 
-	function init(el, schemas, metaSchema) {
-		MetaSchema = metaSchema;
+	function init(el, schemas) {
 		const data = $(el).data();
-
-		// console.log('MetaSchema',MetaSchema)
 
 		$(el).html('');
 
@@ -154,11 +149,13 @@ JsonForms = function () {
 					properties: {
 						schema: {
 							type: 'string',
-							enum: ['', ...schemas],
+							enum: schemas,
+							default: ''
 						},
 						uischema: {
 							type: 'string',
-							enum: ['', ...schemas],
+							enum: schemas,
+							default: ''
 						},
 						info: {
 							type: 'info',
@@ -180,10 +177,10 @@ JsonForms = function () {
 								options: { input: { name: 'categorymultiselect' } },
 							},
 						},
-						wikitext: { type: 'string' },
+						wikitext: { type: 'string', format: 'textarea' },
 						slot: { type: 'string' },
 						content_model: { title: 'content model', type: 'string' },
-						summary: { type: 'string', format: 'textarea' },
+						summary: { type: 'string' },
 					},
 					required: ['title', 'slot', 'content_model'],
 				},
@@ -275,11 +272,9 @@ $(function () {
 	const schemas = mw.config.get('jsonforms-schemas');
 	// console.log('schemas', schemas);
 
-	const metaSchema = mw.config.get('jsonforms-metaschema');
-	// console.log('metaSchema', metaSchema);
-
 	$('.jsonforms-form-wrapper').each(function (index, el) {
 		const webPubCreatorJsonEditor = new JsonForms();
-		webPubCreatorJsonEditor.init(el, schemas, metaSchema);
+		webPubCreatorJsonEditor.init(el, schemas);
 	});
 });
+

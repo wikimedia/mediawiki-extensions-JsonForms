@@ -91,11 +91,8 @@ class SpecialJsonFormsDemo extends SpecialPage {
 			$schemas = array_map( static function ( $x ) { return $x->getText(); }, $schemas);
 		}
 
-		$metaSchema =  \JsonForms::getJsonSchema( 'JsonSchema:MetaSchema' );
-
 		$out->addJsConfigVars( [
-			'jsonforms-schemas' => $schemas,
-			'jsonforms-metaschema' => $metaSchema
+			'jsonforms-schemas' => $schemas
 		] );
 
 		// @see SpecialRecentChanges

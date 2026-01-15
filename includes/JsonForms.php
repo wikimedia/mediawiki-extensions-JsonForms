@@ -110,8 +110,6 @@ class JsonForms {
 				: 'page_name_title',
 		];
 
-
-
 		$res = $dbr->select(
 			'page',
 			[ 'page_namespace', 'page_title', 'page_id' ],
@@ -177,16 +175,16 @@ class JsonForms {
 	 * @return
 	 */
 	public static function traverseSchema( array $schema, callable $callback ): array {
-    	$it = new RecursiveIteratorIterator(
+		$it = new RecursiveIteratorIterator(
 			new RecursiveArrayIterator( $schema ),
 			RecursiveIteratorIterator::SELF_FIRST
 		);
 
 		foreach ( $it as $key => $value ) {
 			$parent =& $schema;
-            for ( $depth = 0; $depth < $it->getDepth(); $depth++ ) {
-                $parent =& $parent[ $it->getSubIterator( $depth )->key() ];
-            }
+			for ( $depth = 0; $depth < $it->getDepth(); $depth++ ) {
+				$parent =& $parent[ $it->getSubIterator( $depth )->key() ];
+			}
 
 			$callback( $parent, $key, $value );
 		}

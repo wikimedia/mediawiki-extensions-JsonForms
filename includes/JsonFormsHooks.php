@@ -21,9 +21,6 @@
  * @copyright Copyright ©2025, https://wikisphere.org
  */
 
-use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
-
-
 class JsonFormsHooks {
 
 	/**

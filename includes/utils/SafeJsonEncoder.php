@@ -21,7 +21,7 @@
  * @author thomas-topway-it <support@topway.it>
  * @copyright Copyright ©2025, https://wikisphere.org
  */
- 
+
 // *** this has been created by ChatGPT after a few brainstorming, with few edits
 
 namespace MediaWiki\Extension\JsonForms\Utils;

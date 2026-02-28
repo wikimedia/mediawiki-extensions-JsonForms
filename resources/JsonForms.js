@@ -21,41 +21,41 @@
 
 JsonForms = function () {
 
-	function buildFormSchema(targetSchema, descriptor) {
-		const result = structuredClone(targetSchema);
+	function buildFormSchema( targetSchema, descriptor ) {
+		const result = structuredClone( targetSchema );
 		result.properties.options.properties = {};
 
-		for (const [key, field] of Object.entries(
-			targetSchema.properties.options.properties,
-		)) {
+		for ( const [ key, field ] of Object.entries(
+			targetSchema.properties.options.properties
+		) ) {
 			const keyMap = {
 				categories: 'edit_categories',
 				wikitext: 'edit_wikitext',
 				slot: 'edit_slot',
-				content_model: 'edit_content_model',
+				content_model: 'edit_content_model'
 			};
 
-			if (keyMap[key] && !descriptor[keyMap[key]]) {
+			if ( keyMap[ key ] && !descriptor[ keyMap[ key ] ] ) {
 				result.properties.options.required =
-					result.properties.options.required.filter((k) => k !== key);
+					result.properties.options.required.filter( ( k ) => k !== key );
 				continue;
 			}
 
-			result.properties.options.properties[key] = field;
+			result.properties.options.properties[ key ] = field;
 		}
 
 		// remove schema select if schema is defined
-		if (descriptor.schema) {
+		if ( descriptor.schema ) {
 			delete result.properties.schema.properties.schema;
 		}
 
 		return result;
 	}
 
-	function createEditor(config) {
-		$(config.el).html('');
+	function createEditor( config ) {
+		$( config.el ).html( '' );
 
-		const editor = new JSONEditor(config.el, {
+		const editor = new JSONEditor( config.el, {
 			theme: 'oojs',
 			schema: config.schema,
 			schemaName: config.schemaName,
@@ -63,66 +63,68 @@ JsonForms = function () {
 			// partialSchema: 'options',
 			// show_errors: 'change',
 			ajax: true,
-			ajaxUrl: function (ref, fileBase) {
-				const mwBaseUrl = mw.config.get('wgServer') + mw.config.get('wgScript');
+			ajaxUrl: function ( ref, fileBase ) {
+				const mwBaseUrl = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
 
 				// console.log(' ajaxUrl fileBase', fileBase);
 				// console.log(' ajaxUrl mwBaseUrl', mwBaseUrl);
 
-				if (fileBase.indexOf(mwBaseUrl) === -1) {
+				if ( !fileBase.includes( mwBaseUrl ) ) {
 					return ref;
 				}
 
-				return `${mwBaseUrl}?title=${ref}&action=raw`;
-			},
-		});
+				return `${ mwBaseUrl }?title=${ ref }&action=raw`;
+			}
+		} );
 
-		const textarea = $('<textarea>', {
+		const textarea = $( '<textarea>', {
 			class: 'form-control',
 			id: 'value',
 			rows: 12,
-			style: 'font-size: 12px; font-family: monospace;',
-		});
+			style: 'font-size: 12px; font-family: monospace;'
+		} );
 
-		$(config.el).append(textarea);
+		$( config.el ).append( textarea );
 
-		editor.on('change', () => {
-			textarea.val(JSON.stringify(editor.getValue(), null, 2));
-		});
+		editor.on( 'change', () => {
+			textarea.val( JSON.stringify( editor.getValue(), null, 2 ) );
+		} );
 
-		editor.on('ready', () => {});
+		editor.on( 'ready', () => {} );
 
 		return editor;
 	}
 
-	function loadSchema(schemaName) {
-		if (!schemaName) return Promise.reject('No schema name provided');
+	function loadSchema( schemaName ) {
+		if ( !schemaName ) {
+			return Promise.reject( 'No schema name provided' );
+		}
 
-		return new Promise((resolve, reject) => {
-			fetch(mw.util.getUrl(`JsonSchema:${schemaName}`, { action: 'raw' }), {
-				cache: 'no-store',
-			})
-				.then((res) => res.text())
-				.then((text) => {
+		return new Promise( ( resolve, reject ) => {
+			fetch( mw.util.getUrl( `JsonSchema:${ schemaName }`, { action: 'raw' } ), {
+				cache: 'no-store'
+			} )
+				.then( ( res ) => res.text() )
+				.then( ( text ) => {
 					try {
-						const json = JSON.parse(text);
-						resolve(json);
-					} catch (error) {
-						console.error('Failed to parse schema JSON:', error);
-						reject(error);
+						const json = JSON.parse( text );
+						resolve( json );
+					} catch ( error ) {
+						console.error( 'Failed to parse schema JSON:', error );
+						reject( error );
 					}
-				})
-				.catch((fetchError) => {
-					console.error('Failed to fetch schema:', fetchError);
-					reject(fetchError);
-				});
-		});
+				} )
+				.catch( ( fetchError ) => {
+					console.error( 'Failed to fetch schema:', fetchError );
+					reject( fetchError );
+				} );
+		} );
 	}
 
-	function init(el, schemas) {
-		const data = $(el).data();
+	function init( el, schemas ) {
+		const data = $( el ).data();
 
-		$(el).html('');
+		$( el ).html( '' );
 
 		// console.log('data', data);
 		const formDescriptor = data.formData.formDescriptor;
@@ -140,8 +142,8 @@ JsonForms = function () {
 			type: 'object',
 			options: {
 				layout: {
-					name: 'booklet',
-				},
+					name: 'booklet'
+				}
 			},
 			properties: {
 				schema: {
@@ -158,123 +160,122 @@ JsonForms = function () {
 							default: ''
 						},
 						info: {
-							type: 'info',
-						},
+							type: 'info'
+						}
 					},
-					required: ['schema', 'info'],
+					required: [ 'schema', 'info' ]
 				},
 				options: {
 					type: 'object',
 					properties: {
 						title: {
 							type: 'string',
-							options: { input: { name: 'title' } },
+							options: { input: { name: 'title' } }
 						},
 						categories: {
 							type: 'array',
 							items: {
 								type: 'string',
-								options: { input: { name: 'categorymultiselect' } },
-							},
+								options: { input: { name: 'categorymultiselect' } }
+							}
 						},
 						wikitext: { type: 'string', format: 'textarea' },
 						slot: { type: 'string' },
 						content_model: { title: 'content model', type: 'string' },
-						summary: { type: 'string' },
+						summary: { type: 'string' }
 					},
-					required: ['title', 'slot', 'content_model'],
-				},
+					required: [ 'title', 'slot', 'content_model' ]
+				}
 			},
-			required: ['options', 'schema'],
+			required: [ 'options', 'schema' ]
 		};
 
 		// console.log('formDescriptor', formDescriptor);
 		// console.log('Outerschema', Outerschema);
 
-		const editor = createEditor({
+		const editor = createEditor( {
 			schemaName: 'Form',
 			el,
-			schema: buildFormSchema(Outerschema, formDescriptor),
-		});
+			schema: buildFormSchema( Outerschema, formDescriptor )
+		} );
 
-		if (schema && Object.keys(schema).length) {
-			editor.on('ready', () => {
-				editor_ = editor.getEditor('root.schema.info');
+		if ( schema && Object.keys( schema ).length ) {
+			editor.on( 'ready', () => {
+				editor_ = editor.getEditor( 'root.schema.info' );
 
-				if (editor_) {
-					createEditor({ schemaName, el: editor_.container, schema });
+				if ( editor_ ) {
+					createEditor( { schemaName, el: editor_.container, schema } );
 				}
-			});
+			} );
 
 			return;
 		}
 
 		function reloadSchema() {
-			let editor_ = editor.getEditor('root.schema.schema');
+			let editor_ = editor.getEditor( 'root.schema.schema' );
 			const schemaName = editor_.getValue();
 
 			// console.log('schemaName', schemaName);
 
-			if (!schemaName) {
-				console.log('no schemaName');
+			if ( !schemaName ) {
+				console.log( 'no schemaName' );
 				return;
 			}
 
-			const schemaEditor = editor.getEditor('root.schema.info');
+			const schemaEditor = editor.getEditor( 'root.schema.info' );
 			// console.log('schemaEditor', schemaEditor);
 
-			editor_ = editor.getEditor('root.schema.uischema');
+			editor_ = editor.getEditor( 'root.schema.uischema' );
 			let uiSchemaName;
 
-			if (editor_) {
+			if ( editor_ ) {
 				uiSchemaName = editor_.getValue();
 			}
 
-			if (!editor_ || !uiSchemaName) {
-				loadSchema(schemaName).then((schema) => {
-					createEditor({
+			if ( !editor_ || !uiSchemaName ) {
+				loadSchema( schemaName ).then( ( schema ) => {
+					createEditor( {
 						schemaName,
 						schema,
-						el: schemaEditor.container,
-					});
-				});
+						el: schemaEditor.container
+					} );
+				} );
 
 				return;
 			}
 
-			loadSchema(uiSchemaName).then((uiSchema) => {
-				loadSchema(schemaName).then((schema) => {
-					createEditor({
+			loadSchema( uiSchemaName ).then( ( uiSchema ) => {
+				loadSchema( schemaName ).then( ( schema ) => {
+					createEditor( {
 						schemaName,
 						schema,
 						uiSchema,
-						el: schemaEditor.container,
-					});
-				});
-			});
+						el: schemaEditor.container
+					} );
+				} );
+			} );
 		}
 
-		editor.on('ready', () => {
-			editor.watch('root.schema.schema', () => {
+		editor.on( 'ready', () => {
+			editor.watch( 'root.schema.schema', () => {
 				reloadSchema();
-			});
+			} );
 
-			editor.watch('root.schema.uischema', () => {
+			editor.watch( 'root.schema.uischema', () => {
 				reloadSchema();
-			});
-		});
+			} );
+		} );
 	}
 
 	return { init };
 };
 
-$(function () {
-	const schemas = mw.config.get('jsonforms-schemas');
+$( () => {
+	const schemas = mw.config.get( 'jsonforms-schemas' );
 	// console.log('schemas', schemas);
 
-	$('.jsonforms-form-wrapper').each(function (index, el) {
+	$( '.jsonforms-form-wrapper' ).each( ( index, el ) => {
 		const webPubCreatorJsonEditor = new JsonForms();
-		webPubCreatorJsonEditor.init(el, schemas);
-	});
-});
-
+		webPubCreatorJsonEditor.init( el, schemas );
+	} );
+} );

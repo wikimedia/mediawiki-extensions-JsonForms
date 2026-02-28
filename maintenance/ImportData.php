@@ -25,7 +25,6 @@
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\Extension\JsonForms\Utils\SafeJsonEncoder;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Revision\SlotRecord;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -129,7 +128,7 @@ class ImportData extends Maintenance {
 					$this->pageSlots[$pageName][] = $slotData;
 					echo "Found file: $filename -> Page: $pageName, Slot: " . $slotData['role'] . PHP_EOL;
 				} else {
-					echo "Skipping file: $filename (pageName: " . ($pageName ?: 'null') . ", slotData: " . ($slotData ? 'valid' : 'null') . ")" . PHP_EOL;
+					echo "Skipping file: $filename (pageName: " . ( $pageName ?: 'null' ) . ", slotData: " . ( $slotData ? 'valid' : 'null' ) . ")" . PHP_EOL;
 				}
 			}
 		}
@@ -140,8 +139,8 @@ class ImportData extends Maintenance {
 	 * @return string
 	 */
 	private function toCamelCase( $str ) {
-		$str = str_replace( ['-', '_' ], ' ', $str );
-		$str = str_replace(' ', '', ucwords ( $str )) ;
+		$str = str_replace( [ '-', '_' ], ' ', $str );
+		$str = str_replace( ' ', '', ucwords( $str ) );
 		return lcfirst( $str );
 	}
 
@@ -158,8 +157,8 @@ class ImportData extends Maintenance {
 		$namespace = array_shift( $parts );
 		$prefix = $parts ? array_shift( $parts ) : '';
 
-		$segments = array_merge( $parts, [$baseName]);
-		$namePart = ucfirst ( $this->toCamelCase( implode('-', $segments ) ) );
+		$segments = array_merge( $parts, [ $baseName ] );
+		$namePart = ucfirst( $this->toCamelCase( implode( '-', $segments ) ) );
 
 		$ret = $namespace . ':'
 			. ( $prefix ? "$prefix/" : '' )
@@ -187,15 +186,15 @@ class ImportData extends Maintenance {
 		}
 
 		$thisClass = $this;
-	 	$callback = static function ( &$parent, $key, $value ) use ( $thisClass ) {
-    		if ( $key !== '$ref' || !is_string( $value ) ) {
-    			return;
-    		}
-    		$value = str_replace( '../', '', $value );
+		$callback = static function ( &$parent, $key, $value ) use ( $thisClass ) {
+			if ( $key !== '$ref' || !is_string( $value ) ) {
+				return;
+			}
+			$value = str_replace( '../', '', $value );
 
-    		if ( !empty( $value ) &&
-    			array_key_exists( $value, $thisClass->filenameMap )
-    		) {
+			if ( !empty( $value ) &&
+				array_key_exists( $value, $thisClass->filenameMap )
+			) {
 				$parent[$key] = $thisClass->filenameMap[$value];
 			}
 		};
@@ -215,7 +214,7 @@ class ImportData extends Maintenance {
 			$this->errors[] = "error, json_encode failed: " . $e->getMessage();
 			return false;
 		}
-    }
+	}
 
 	/**
 	 * @param string $filename
@@ -234,7 +233,7 @@ class ImportData extends Maintenance {
 		$contentModel = $parts[2] ?? '';
 
 		if ( empty( $contentModel ) ) {
-			$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+			$ext = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
 			if ( in_array( $ext, $this->contentModels ) ) {
 				$contentModel = $ext;
 			}

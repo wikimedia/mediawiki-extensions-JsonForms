@@ -68,7 +68,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 			exit;
 		}
 
-		$formDescriptor = \JsonForms::getJsonSchema( 'JsonForm:' . $par  );
+		$formDescriptor = \JsonForms::getJsonSchema( 'JsonForm:' . $par );
 		if ( empty( $formDescriptor ) ) {
 			echo 'enter a valid form descriptor';
 			exit;
@@ -79,7 +79,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 		$schemaName = null;
 		if ( !empty( $formDescriptor['schema'] ) ) {
 			$schemaName = $formDescriptor['schema'];
-			$jsonSchema = \JsonForms::getJsonSchema( 'JsonSchema:' . $schemaName  );
+			$jsonSchema = \JsonForms::getJsonSchema( 'JsonSchema:' . $schemaName );
 
 			if ( empty( $formDescriptor ) ) {
 				echo 'invalid schema in form descriptor';
@@ -88,7 +88,8 @@ class SpecialJsonFormsDemo extends SpecialPage {
 
 		} else {
 			$schemas = \JsonForms::getPagesWithPrefix( null, NS_JSONSCHEMA );
-			$schemas = array_map( static function ( $x ) { return $x->getText(); }, $schemas);
+			$schemas = array_map( static function ( $x ) { return $x->getText();
+			}, $schemas );
 		}
 
 		$out->addJsConfigVars( [

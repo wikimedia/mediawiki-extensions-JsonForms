@@ -98,7 +98,7 @@ class JsonForms {
 			'page_is_redirect' => 0,
 		];
 
-		if ( !empty( $prefix )  ) {
+		if ( !empty( $prefix ) ) {
 			$conds[] = 'page_title ' . $dbr->buildLike( $prefix, $dbr->anyString() );
 		}
 
@@ -239,10 +239,10 @@ class JsonForms {
 				$modelId = $value['model'];
 
 			} elseif ( $slotRoleRegistry->getRoleHandler( $role ) ) {
-		 	   $modelId = $slotRoleRegistry->getRoleHandler( $role )->getDefaultModel( $title );
+				$modelId = $slotRoleRegistry->getRoleHandler( $role )->getDefaultModel( $title );
 
 			} elseif ( $oldRevisionRecord !== null && $oldRevisionRecord->hasSlot( $role ) ) {
-    			$modelId = $oldRevisionRecord->getSlot( $role )
+				$modelId = $oldRevisionRecord->getSlot( $role )
 					->getContent()
 					->getContentHandler()
 					->getModelID();

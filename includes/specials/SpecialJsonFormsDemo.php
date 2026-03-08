@@ -29,10 +29,7 @@ class SpecialJsonFormsDemo extends SpecialPage {
 
 	/** @inheritDoc */
 	public function __construct() {
-		$listed = true;
-
-		// https://www.mediawiki.org/wiki/Manual:Special_pages
-		parent::__construct( 'JsonFormsDemo', '', $listed );
+		parent::__construct( 'JsonFormsDemo' );
 	}
 
 	/** @inheritDoc */

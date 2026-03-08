@@ -61,11 +61,7 @@ class JsonForms {
 		if ( !$title || !$title->canExist() ) {
 			return null;
 		}
-		// MW 1.36+
-		if ( method_exists( MediaWikiServices::class, 'getWikiPageFactory' ) ) {
-			return MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
-		}
-		return WikiPage::factory( $title );
+		return MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
 	}
 
 	/**
@@ -105,9 +101,7 @@ class JsonForms {
 		$options = [
 			'LIMIT' => self::$queryLimit,
 			'ORDER BY' => 'page_title',
-			'USE INDEX' => version_compare( MW_VERSION, '1.36', '<' )
-				? 'name_title'
-				: 'page_name_title',
+			'USE INDEX' => 'page_name_title',
 		];
 
 		$res = $dbr->select(

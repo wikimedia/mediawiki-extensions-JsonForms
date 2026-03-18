@@ -41,7 +41,7 @@
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\JsonForms\\Aliases\\": "includes/aliases/",
-		"MediaWiki\\Extension\\JsonForms\\": "includes/classes/",
+		"MediaWiki\\Extension\\JsonForms\\": "includes/",
 		"MediaWiki\\Extension\\JsonForms\\Utils\\": "includes/utils/",
 		"MediaWiki\\Extension\\JsonForms\\Special\\": "includes/specials/"
 	},

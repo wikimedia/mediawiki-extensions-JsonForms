@@ -74,10 +74,10 @@ class JsonForms {
 			return null;
 		}
 		$content = $wikiPage->getContent( \MediaWiki\Revision\RevisionRecord::RAW );
-		if ( !$content ) {
+		if ( !$content instanceof TextContent ) {
 			return null;
 		}
-		return $content->getNativeData();
+		return $content->getText();
 	}
 
 	/**
@@ -156,10 +156,10 @@ class JsonForms {
 			return null;
 		}
 		$content = $wikiPage->getContent( \MediaWiki\Revision\RevisionRecord::RAW );
-		if ( !$content ) {
+		if ( !content instanceof TextContent ) {
 			return null;
 		}
-		return $content->getNativeData();
+		return $content->getText();
 	}
 
 	/**

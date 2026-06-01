@@ -186,7 +186,7 @@ class ImportData extends Maintenance {
 		}
 
 		$thisClass = $this;
-		$callback = static function ( &$parent, $key, $value ) use ( $thisClass ) {
+		$callback = static function ( &$parent, $key, $value, $pathArr ) use ( $thisClass ) {
 			if ( $key !== '$ref' || !is_string( $value ) ) {
 				return;
 			}
@@ -234,6 +234,9 @@ class ImportData extends Maintenance {
 
 		if ( empty( $contentModel ) ) {
 			$ext = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+			if ( $ext === 'js' ) {
+				$ext = 'javascript';
+			}
 			if ( in_array( $ext, $this->contentModels ) ) {
 				$contentModel = $ext;
 			}

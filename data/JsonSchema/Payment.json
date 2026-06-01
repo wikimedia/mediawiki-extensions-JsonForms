@@ -1,10 +1,6 @@
 {
 	"title": "Payment Method",
-	"options": {
-		"input": {
-			"name": "button-select"
-		}
-	},
+	"x-input": "OO.ui.ButtonSelectWidget",
 	"oneOf": [
 		{
 			"title": "None",
@@ -12,12 +8,10 @@
 			"properties": {
 				"method": {
 					"type": "string",
+					"x-hidden": true,
 					"enum": [
 						"none"
-					],
-					"options": {
-						"hidden": true
-					}
+					]
 				}
 			},
 			"required": [
@@ -30,20 +24,14 @@
 		{
 			"title": "Bank EFT",
 			"type": "object",
-			"options": {
-				"layout": {
-					"name": "horizontal"
-				}
-			},
+			"x-layout": "horizontal",
 			"properties": {
 				"method": {
 					"type": "string",
 					"enum": [
 						"eft"
 					],
-					"options": {
-						"hidden": true
-					}
+					"x-hidden": true
 				},
 				"bankName": {
 					"title": "Bank name",
@@ -71,20 +59,14 @@
 		{
 			"title": "Credit Card",
 			"type": "object",
-			"options": {
-				"layout": {
-					"name": "horizontal"
-				}
-			},
+			"x-layout": "horizontal",
 			"properties": {
 				"method": {
 					"type": "string",
+					"x-hidden": true,
 					"enum": [
 						"creditCard"
-					],
-					"options": {
-						"hidden": true
-					}
+					]
 				},
 				"cardType": {
 					"title": "Card type",
@@ -94,36 +76,24 @@
 						"Discover",
 						"MasterCard",
 						"Visa"
-					],
-					"options": {
-						"grid_columns": 3
-					}
+					]
 				},
 				"cardNumber": {
 					"title": "Card number",
 					"type": "string",
 					"minLength": 15,
-					"maxLength": 16,
-					"options": {
-						"grid_columns": 4
-					}
+					"maxLength": 16
 				},
 				"expiration": {
 					"title": "Expiration month",
 					"type": "string",
-					"format": "month",
-					"options": {
-						"grid_columns": 3
-					}
+					"x-format": "month"
 				},
 				"CCV": {
 					"type": "string",
 					"maxLength": 4,
 					"minLength": 3,
-					"pattern": "[0-9]*",
-					"options": {
-						"grid_columns": 2
-					}
+					"pattern": "[0-9]*"
 				}
 			},
 			"required": [
@@ -132,8 +102,7 @@
 				"cardNumber",
 				"expiration",
 				"CCV"
-			],
-			"additionalProperties": false
+			]
 		}
 	]
 }

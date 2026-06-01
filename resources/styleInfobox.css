@@ -1,0 +1,213 @@
+/**
+ * InfoboxRender - CSS Grid layout (no tables)
+ */
+
+.jsonforms-infobox .mw-collapsible-toggle {
+	padding: 0.5em 0.8em;
+}
+
+.jsonforms-infobox-right {
+	float: right;
+	width: 320px;
+}
+
+.jsonforms-infobox-left {
+	float: left;
+	width: 320px;
+}
+
+
+/* Array container */
+.infobox-array {
+    border: 1px solid #a2a9b1;
+    border-radius: 4px;
+    margin: 0.5em 0;
+    overflow: hidden;
+}
+
+.infobox-array-header {
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+}
+
+.infobox-array-content {
+    padding: 0.5em;
+    background-color: #ffffff;
+}
+
+/* Object container */
+.infobox-object {
+    border: 1px solid #a2a9b1;
+    border-radius: 4px;
+    margin: 0.5em 0;
+    overflow: hidden;
+}
+
+.infobox-object-header {
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+}
+
+.infobox-object-content {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+/* Row using CSS Grid */
+.infobox-row {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    border-bottom: 1px solid #eaecf0;
+}
+
+.infobox-row:last-child {
+    border-bottom: none;
+}
+
+/* Label cell */
+.infobox-label {
+    padding: 0.5em 0.8em;
+    font-weight: normal;
+}
+
+/* Key label with inline elements */
+.infobox-key-label {
+    color: #202122;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-weight: bold;
+    gap: 0.3em;
+}
+
+/* Type badge */
+.infobox-type-badge {
+    background-color: #eaecf0;
+    border-radius: 3px;
+    display: inline-block;
+    font-weight: normal;
+    padding: 0.15em 0.5em;
+    white-space: nowrap;
+}
+
+/* Value cell */
+.infobox-value {
+    padding: 0.5em 0.8em;
+    word-break: break-word;
+}
+
+/* Meta information */
+.infobox-meta {
+    color: #54595d;
+    font-weight: normal;
+    margin-left: 0.5em;
+}
+
+.infobox-type {
+    border-radius: 3px;
+    display: inline-block;
+    padding: 0.1em 0.4em;
+}
+
+.infobox-count {
+}
+
+.infobox-key {
+    color: #202122;
+    font-weight: bold;
+}
+
+/* Hints and indicators */
+.infobox-layout-hint,
+.infobox-unique-hint,
+.infobox-format-hint {
+    font-size: 0.8em;
+    margin-left: 0.2em;
+    opacity: 0.6;
+}
+
+.infobox-required {
+    color: #d33;
+    font-weight: bold;
+    margin-left: 0.2em;
+}
+
+/* Value type styles */
+.value-boolean {
+    border-radius: 3px;
+    display: inline-block;
+    font-family: monospace;
+    padding: 0.15em 0.5em;
+}
+
+.value-null {
+    color: #72777d;
+    font-style: italic;
+}
+
+.value-number {
+    color: #0a5;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.value-string {
+    color: #202122;
+    word-break: break-word;
+}
+
+.value-textarea {
+    white-space: pre-wrap;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+.value-html {
+    border-left: 3px solid #a2a9b1;
+    padding: 0.2em 0.5em;
+}
+
+.value-empty {
+    color: #999;
+    font-style: italic;
+}
+
+/* Nested containers */
+.infobox-array .infobox-array,
+.infobox-array .infobox-object,
+.infobox-object .infobox-array,
+.infobox-object .infobox-object {
+    margin: 0.5em;
+}
+
+/* Hover effect */
+.infobox-row:hover {
+}
+
+.infobox-row:hover .infobox-label {
+}
+
+/* Print styles */
+@media print {
+    .infobox-array,
+    .infobox-object {
+        break-inside: avoid;
+        border: 1px solid #aaa;
+    }
+    
+    .infobox-row {
+        break-inside: avoid;
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .infobox-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .infobox-label {
+        border-bottom: 1px solid #eaecf0;
+    }
+}

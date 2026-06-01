@@ -17,7 +17,25 @@ module.exports = function ( grunt ) {
 				'!vendor/**',
 				'!data/**',
 				'!resources/datatables/**',
-				'!resources/editor/**'
+				'!resources/editor/**',
+				'!resources/jsoneditor/**',
+				'!resources/libs/**',
+				'!resources/OOJSPlus/**'
+			]
+		},
+		stylelint: {
+			options: {
+				cache: true
+			},
+			all: [
+				'**/*.{css,less}',
+				'!node_modules/**',
+				'!vendor/**',
+				'!resources/datatables/**',
+				'!resources/editor/**',
+				'!resources/jsoneditor/**',
+				'!resources/libs/**',
+				'!resources/OOJSPlus/**'
 			]
 		}
 	} );

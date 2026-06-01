@@ -19,263 +19,257 @@
  * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
 
-JsonForms = function () {
+/* eslint-disable es-x/no-rest-spread-properties */
+/* eslint-disable camelcase */
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
 
-	function buildFormSchema( targetSchema, descriptor ) {
-		const result = structuredClone( targetSchema );
-		result.properties.options.properties = {};
+function JsonForms( el, data ) {
+	this.moduleCache = new Map();
+	this.el = el;
+	this.schema = data.schema;
+	this.schemaName = data.schemaName;
+	this.startval = data.startval;
+	this.editor = null;
 
-		for ( const [ key, field ] of Object.entries(
-			targetSchema.properties.options.properties
-		) ) {
-			const keyMap = {
-				categories: 'edit_categories',
-				wikitext: 'edit_wikitext',
-				slot: 'edit_slot',
-				content_model: 'edit_content_model'
-			};
+	this.data = data;
+	// @TODO add upload providers
+}
 
-			if ( keyMap[ key ] && !descriptor[ keyMap[ key ] ] ) {
-				result.properties.options.required =
-					result.properties.options.required.filter( ( k ) => k !== key );
-				continue;
-			}
+JsonForms.prototype.initialize = async function () {
+	// console.log('this.data.editorOptions',defaultOptions)
+	this.editorOptions = await this.getModule( this.data.editorOptions );
+	this.editorScript = await this.getModule( this.data.editorScript );
 
-			result.properties.options.properties[ key ] = field;
-		}
+	// console.log('this.editorOptions',this.editorOptions)
 
-		// remove schema select if schema is defined
-		if ( descriptor.schema ) {
-			delete result.properties.schema.properties.schema;
-		}
+	// this.enumProviders = this.formatProviders(JsonForms.enumProviders);
+	this.enumProviders = JsonForms.enumProviders;
 
-		return result;
-	}
+	// console.log('this.enumProviders',this.enumProviders)
 
-	function createEditor( config ) {
-		$( config.el ).html( '' );
+	this.autocompleteProviders = JsonForms.autocompleteProviders;
 
-		const editor = new JSONEditor( config.el, {
-			theme: 'oojs',
-			schema: config.schema,
-			schemaName: config.schemaName,
-			uiSchema: config.uiSchema,
-			// partialSchema: 'options',
-			// show_errors: 'change',
-			ajax: true,
-			ajaxUrl: function ( ref, fileBase ) {
-				const mwBaseUrl = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
+	const UISchemaConverters = new JsonForms.UISchemaConverters();
 
-				// console.log(' ajaxUrl fileBase', fileBase);
-				// console.log(' ajaxUrl mwBaseUrl', mwBaseUrl);
+	// console.log('defaultOptions',defaultOptions)
 
-				if ( !fileBase.includes( mwBaseUrl ) ) {
-					return ref;
-				}
+	const defaultOptions = this.editorOptions || {};
 
-				return `${ mwBaseUrl }?title=${ ref }&action=raw`;
-			}
-		} );
+	// const defaultOptions = JSON.parse(JSON.stringify(this.editorOptions));
 
-		const textarea = $( '<textarea>', {
-			class: 'form-control',
-			id: 'value',
-			rows: 12,
-			style: 'font-size: 12px; font-family: monospace;'
-		} );
+	// console.log('defaultOptions',defaultOptions)
 
-		$( config.el ).append( textarea );
+	defaultOptions.callbacks = defaultOptions.callbacks || {};
 
-		editor.on( 'change', () => {
-			textarea.val( JSON.stringify( editor.getValue(), null, 2 ) );
-		} );
+	defaultOptions.callbacks.enum_providers = {
+		...this.enumProviders,
+		...( ( defaultOptions.callbacks && defaultOptions.callbacks.enum_providers ) || {} )
+	};
 
-		editor.on( 'ready', () => {} );
+	defaultOptions.callbacks.autocomplete_providers = {
+		...this.autocompleteProviders,
+		...( ( defaultOptions.callbacks && defaultOptions.callbacks.autocomplete_providers ) || {} )
+	};
 
-		return editor;
-	}
+	defaultOptions.callbacks.ui_schema_converters = {
+		...UISchemaConverters.converters,
+		...( ( defaultOptions.callbacks && defaultOptions.callbacks.ui_schema_converters ) || {} )
+	};
 
-	function loadSchema( schemaName ) {
-		if ( !schemaName ) {
-			return Promise.reject( 'No schema name provided' );
-		}
-
-		return new Promise( ( resolve, reject ) => {
-			fetch( mw.util.getUrl( `JsonSchema:${ schemaName }`, { action: 'raw' } ), {
-				cache: 'no-store'
-			} )
-				.then( ( res ) => res.text() )
-				.then( ( text ) => {
-					try {
-						const json = JSON.parse( text );
-						resolve( json );
-					} catch ( error ) {
-						console.error( 'Failed to parse schema JSON:', error );
-						reject( error );
-					}
-				} )
-				.catch( ( fetchError ) => {
-					console.error( 'Failed to fetch schema:', fetchError );
-					reject( fetchError );
-				} );
-		} );
-	}
-
-	function init( el, schemas ) {
-		const data = $( el ).data();
-
-		$( el ).html( '' );
-
-		// console.log('data', data);
-		const formDescriptor = data.formData.formDescriptor;
-		const schema = data.formData.schema;
-		const schemaName = data.formData.schemaName;
-
-		// console.log('formDescriptor', formDescriptor);
-		// console.log('schema', schema);
-
-		// const optionsHolder = $(el).append('<div>');
-		// const schemaHolder = $(el).append('<div>');
-
-		const Outerschema = {
-			title: '',
-			type: 'object',
-			options: {
-				layout: {
-					name: 'booklet'
-				}
-			},
-			properties: {
-				schema: {
-					type: 'object',
-					properties: {
-						schema: {
-							type: 'string',
-							enum: schemas,
-							default: ''
-						},
-						uischema: {
-							type: 'string',
-							enum: schemas,
-							default: ''
-						},
-						info: {
-							type: 'info'
-						}
-					},
-					required: [ 'schema', 'info' ]
-				},
-				options: {
-					type: 'object',
-					properties: {
-						title: {
-							type: 'string',
-							options: { input: { name: 'title' } }
-						},
-						categories: {
-							type: 'array',
-							items: {
-								type: 'string',
-								options: { input: { name: 'categorymultiselect' } }
-							}
-						},
-						wikitext: { type: 'string', format: 'textarea' },
-						slot: { type: 'string' },
-						content_model: { title: 'content model', type: 'string' },
-						summary: { type: 'string' }
-					},
-					required: [ 'title', 'slot', 'content_model' ]
-				}
-			},
-			required: [ 'options', 'schema' ]
-		};
-
-		// console.log('formDescriptor', formDescriptor);
-		// console.log('Outerschema', Outerschema);
-
-		const editor = createEditor( {
-			schemaName: 'Form',
-			el,
-			schema: buildFormSchema( Outerschema, formDescriptor )
-		} );
-
-		if ( schema && Object.keys( schema ).length ) {
-			editor.on( 'ready', () => {
-				editor_ = editor.getEditor( 'root.schema.info' );
-
-				if ( editor_ ) {
-					createEditor( { schemaName, el: editor_.container, schema } );
-				}
-			} );
-
-			return;
-		}
-
-		function reloadSchema() {
-			let editor_ = editor.getEditor( 'root.schema.schema' );
-			const schemaName = editor_.getValue();
-
-			// console.log('schemaName', schemaName);
-
-			if ( !schemaName ) {
-				console.log( 'no schemaName' );
-				return;
-			}
-
-			const schemaEditor = editor.getEditor( 'root.schema.info' );
-			// console.log('schemaEditor', schemaEditor);
-
-			editor_ = editor.getEditor( 'root.schema.uischema' );
-			let uiSchemaName;
-
-			if ( editor_ ) {
-				uiSchemaName = editor_.getValue();
-			}
-
-			if ( !editor_ || !uiSchemaName ) {
-				loadSchema( schemaName ).then( ( schema ) => {
-					createEditor( {
-						schemaName,
-						schema,
-						el: schemaEditor.container
-					} );
-				} );
-
-				return;
-			}
-
-			loadSchema( uiSchemaName ).then( ( uiSchema ) => {
-				loadSchema( schemaName ).then( ( schema ) => {
-					createEditor( {
-						schemaName,
-						schema,
-						uiSchema,
-						el: schemaEditor.container
-					} );
-				} );
-			} );
-		}
-
-		editor.on( 'ready', () => {
-			editor.watch( 'root.schema.schema', () => {
-				reloadSchema();
-			} );
-
-			editor.watch( 'root.schema.uischema', () => {
-				reloadSchema();
-			} );
-		} );
-	}
-
-	return { init };
+	this.defaultOptions = defaultOptions;
 };
 
-$( () => {
-	const schemas = mw.config.get( 'jsonforms-schemas' );
-	// console.log('schemas', schemas);
-
-	$( '.jsonforms-form-wrapper' ).each( ( index, el ) => {
-		const webPubCreatorJsonEditor = new JsonForms();
-		webPubCreatorJsonEditor.init( el, schemas );
+JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
+	this.createEditor( this.el, {
+		jsonFormsInstance: this,
+		schema: this.schema,
+		schemaName: this.schemaName,
+		startval: this.startval,
+		...config
 	} );
-} );
+
+	return this.editor;
+};
+
+/*
+// @see KnowledgeGraph.js
+JsonForms.prototype.getModule = async function (str) {
+	if (this.moduleCache.has(str)) {
+		return this.moduleCache.get(str);
+	}
+
+	try {
+		const module = await import(`data:text/javascript;base64,${btoa(str)}`);
+		const result = module.default ?? null;
+		this.moduleCache.set(str, result);
+		return result;
+	} catch (err) {
+		console.error('Failed to load module:', err);
+		return null;
+	}
+}
+*/
+JsonForms.prototype.getModule = async function ( str ) {
+	const cacheKey = typeof str === 'string' ? str.slice( 0, 100 ) : str;
+
+	if ( this.moduleCache.has( cacheKey ) ) {
+		return this.moduleCache.get( cacheKey );
+	}
+
+	if ( typeof str !== 'string' ) {
+		return str;
+	}
+
+	let url = null;
+	try {
+		const blob = new Blob( [ str ], { type: 'application/javascript' } );
+		url = URL.createObjectURL( blob );
+
+		// eslint-disable-next-line es-x/no-dynamic-import
+		const module = await import( url );
+		const result = module.default || null;
+		this.moduleCache.set( cacheKey, result );
+		return result;
+	} catch ( err ) {
+		console.error( 'Failed to load module:', err );
+		return null;
+	} finally {
+		if ( url ) {
+			URL.revokeObjectURL( url );
+		}
+	}
+};
+
+JsonForms.prototype.MWSchemaUrl = function ( maybeUrl ) {
+	const mwBaseUrl = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
+	return `${ mwBaseUrl }?title=${ maybeUrl }&action=raw`;
+};
+
+JsonForms.prototype.isMWSchema = function ( maybeUrl, fileBase ) {
+	console.log( 'isMWSchema config', mw.config );
+
+	if ( JsonForms.Utilities.hasProtocol( maybeUrl ) ) {
+		return false;
+	}
+	if ( !fileBase ) {
+		return true;
+	}
+
+	return true;
+	// const mwBaseUrl = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
+	// return (
+	// fileBase.includes( mwBaseUrl ) || mwBaseUrl.includes( fileBase )
+	// );
+};
+
+JsonForms.prototype.fetchSchema = function ( schema ) {
+	//  console.log('fetchSchema',schema)
+	const payload = {
+		action: 'jsonforms-fetch-schema',
+		format: 'json',
+		schema
+	};
+
+	// console.log('payload',payload)
+	return new Promise( ( resolve, reject ) => {
+		new mw.Api().get( payload ).done( ( thisRes ) => {
+			// console.log('thisRes', thisRes);
+			let result = thisRes[ payload.action ].result;
+			result = JSON.parse( result );
+			// console.log('result', result);
+			resolve( result );
+		} );
+	} ).catch( ( err ) => {
+		console.error( 'API call failed:', err );
+		throw err;
+	} );
+};
+
+JsonForms.prototype.getEditor = function () {
+	return this.editor;
+};
+
+JsonForms.prototype.createEditor = function ( el, config ) {
+	// eslint-disable-next-line no-undef
+	JFEditor.defaults.options = this.defaultOptions;
+
+	// eslint-disable-next-line no-undef
+	this.editor = new JFEditor( el, {
+		schemaSelector: null,
+		...config,
+		ajax: true,
+		jsonFormsInstance: this
+	} );
+
+	if ( typeof this.editorScript === 'function' ) {
+		const updateEditorCallBack = ( thisConfig ) => {
+			this.createEditor( this.el, { ...config, ...thisConfig } );
+		};
+		this.editorScript( this.editor, this.config, updateEditorCallBack );
+	}
+
+	return this.editor;
+};
+
+JsonForms.prototype.processTemplate = function ( str, vars, options = {} ) {
+	// Match patterns like <user.name> or <count>
+	const regex = /<([^>]+)>/g;
+
+	return str.replace( regex, ( match, path ) => {
+		const trimmedPath = path.trim();
+		return vars[ trimmedPath ] !== undefined ? vars[ trimmedPath ] : '';
+	} );
+};
+
+/*
+JsonForms.prototype.processTemplate = function (str, vars, options = {}) {
+	if ( options.replaceAngularBrackets ) {
+		str = str.replace('<', '{{').replace('>', '}}');
+	}
+
+	const template = this.editor.compileTemplate( str );
+	return this.editor.getTemplateResult(
+		template,
+		vars,
+	);
+};
+*/
+
+window.JsonForms = JsonForms;
+
+( function ( $ ) {
+	$( () => {
+		function resizeTreeSidePanel() {
+		// const actualHeight = secondColumnContent.scrollHeight;
+
+			const leftSelector =
+			'.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu';
+			const rightSelector =
+			'.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content';
+
+			const $left = $( leftSelector );
+			const $right = $( rightSelector );
+
+			if ( !$left[ 0 ] || !$right[ 0 ] ) {
+				return;
+			}
+
+			const leftRect = $left[ 0 ].getBoundingClientRect();
+			const containerRect = $right[ 0 ].getBoundingClientRect();
+
+			const viewportHeight = $( window ).height();
+			const toViewport = viewportHeight - leftRect.top;
+			const toContainer = containerRect.bottom - leftRect.top;
+			let available = Math.min( toViewport, toContainer );
+			available = Math.max( 0, available );
+
+			$left.css( 'max-height', available + 'px' );
+		}
+
+		$( window ).on( 'scroll resize', resizeTreeSidePanel );
+		resizeTreeSidePanel();
+	} );
+
+// eslint-disable-next-line no-undef
+}( jQuery ) );

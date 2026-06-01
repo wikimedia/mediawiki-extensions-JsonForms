@@ -5,20 +5,10 @@
 		"_text1": {
 			"title": "Dependencies Example",
 			"type": "string",
-			"format": "hidden",
-			"description": "\u003Cp\u003EThis example shows the use of the \u003Cstrong\u003Edependencies\u003C/strong\u003E option, where you can have a field depend on the value of another field.\u003C/p\u003E\u003Cp\u003EThis works by creating all dependant element and then hide/show the selected one. So this feature works best if fields are placed vertically.\u003C/p\u003E",
-			"options": {
-				"grid_columns": 12
-			}
+			"x-format": "hidden",
+			"description": "\u003Cp\u003EThis example shows the use of the \u003Cstrong\u003Edependencies\u003C/strong\u003E option, where you can have a field depend on the value of another field.\u003C/p\u003E\u003Cp\u003EThis works by creating all dependant element and then hide/show the selected one. So this feature works best if fields are placed vertically.\u003C/p\u003E"
 		},
 		"category": {
-			"options": {
-				"control": {
-					"config": {
-						"align": "left"
-					}
-				}
-			},
 			"title": "Category",
 			"type": "string",
 			"enum": [
@@ -36,16 +26,8 @@
 				"White chocolate",
 				"Gianduja chocolate"
 			],
-			"options": {
-				"control": {
-					"config": {
-						"align": "left"
-					}
-				},
-				"dependencies": {
-					"category": "Chocolates"
-				},
-				"grid_columns": 12
+			"x-dependency": {
+				"category": "Chocolates"
 			}
 		},
 		"subcategory2": {
@@ -57,16 +39,8 @@
 				"Carrot",
 				"Tomato"
 			],
-			"options": {
-				"dependencies": {
-					"category": "Vegetables"
-				},
-				"control": {
-					"config": {
-						"align": "left"
-					}
-				},
-				"grid_columns": 12
+			"x-dependency": {
+				"category": "Vegetables"
 			}
 		},
 		"subcategory3": {
@@ -77,44 +51,21 @@
 				"Booza",
 				"Ice milk"
 			],
-			"options": {
-				"control": {
-					"config": {
-						"align": "left"
-					}
-				},
-				"dependencies": {
-					"category": "Icecreams"
-				},
-				"grid_columns": 12
-			}
-		},
-		"_text2": {
-			"title": "Using Checkbox",
-			"type": "string",
-			"format": "hidden",
-			"description": "\u003Cp\u003EYou can also use boolean checkbox with dependencies.\u003C/p\u003E",
-			"options": {
-				"grid_columns": 12
+			"x-dependency": {
+				"category": "Icecreams"
 			}
 		},
 		"billing": {
 			"title": "Billing address same as shipping address",
 			"type": "boolean",
-			"format": "checkbox",
-			"default": false,
-			"options": {
-				"grid_columns": 12
-			}
+			"x-input": "OO.ui.CheckboxInputWidget",
+			"default": false
 		},
 		"billingaddress": {
 			"title": "Billing address",
 			"type": "string",
-			"options": {
-				"dependencies": {
-					"billing": false
-				},
-				"grid_columns": 12
+			"x-dependency": {
+				"billing": false
 			}
 		}
 	}

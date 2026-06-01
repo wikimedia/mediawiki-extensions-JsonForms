@@ -4,23 +4,15 @@
 	"title": "People Statistics Table",
 	"description": "Data schema with districts as top-level rows, gender as row subgroups, and education × employment as columns",
 	"type": "object",
-	"options": {
-		"layout": {
-			"name": "survey"
-		}
-	},
+	"x-layout": "survey",
 	"definitions": {
 		"input": {
 			"type": "number",
-			"options": {
-				"input": {
-					"config": {
-						"labelPosition": "before",
-						"label": "%",
-						"step": "0.1",
-						"showButtons": false
-					}
-				}
+			"x-input-config": {
+				"labelPosition": "before",
+				"label": "%",
+				"step": "0.1",
+				"showButtons": false
 			}
 		},
 		"columnGroup": {
@@ -28,10 +20,12 @@
 			"layout": "column",
 			"properties": {
 				"employed": {
-					"$ref": "#/definitions/input"
+					"$ref": "#/definitions/input",
+					"type": "object"
 				},
 				"unemployed": {
-					"$ref": "#/definitions/input"
+					"$ref": "#/definitions/input",
+					"type": "object"
 				}
 			},
 			"required": []
@@ -41,13 +35,16 @@
 			"layout": "row",
 			"properties": {
 				"male": {
-					"$ref": "#/definitions/rowSubgroup"
+					"$ref": "#/definitions/rowSubgroup",
+					"type": "object"
 				},
 				"female": {
-					"$ref": "#/definitions/rowSubgroup"
+					"$ref": "#/definitions/rowSubgroup",
+					"type": "object"
 				},
 				"diverse": {
-					"$ref": "#/definitions/rowSubgroup"
+					"$ref": "#/definitions/rowSubgroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -61,10 +58,12 @@
 			"layout": "row",
 			"properties": {
 				"with university degree": {
-					"$ref": "#/definitions/columnGroup"
+					"$ref": "#/definitions/columnGroup",
+					"type": "object"
 				},
 				"without university degree": {
-					"$ref": "#/definitions/columnGroup"
+					"$ref": "#/definitions/columnGroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -75,10 +74,12 @@
 	},
 	"properties": {
 		"District 1": {
-			"$ref": "#/definitions/rowGroup"
+			"$ref": "#/definitions/rowGroup",
+					"type": "object"
 		},
 		"District 2": {
-			"$ref": "#/definitions/rowGroup"
+			"$ref": "#/definitions/rowGroup",
+					"type": "object"
 		}
 	},
 	"required": [

@@ -1,11 +1,7 @@
 {
-	"options": {
-		"layout": {
-			"name": "paged"
-		}
-	},
 	"$ref": "JsonSchema:BasicPerson",
-	"additionalProperties": true,
+	"type": "object",
+	"x-layout": "booklet",
 	"properties": {
 		"location": {
 			"type": "object",
@@ -20,21 +16,17 @@
 				"citystate": {
 					"type": "string",
 					"description": "This is generated automatically from the previous two fields",
-					"template": "{{city}}, {{state}}",
-					"watch": {
-						"city": "person.location.city",
-						"state": "person.location.state"
-					}
+					"x-template": "{{city}}, {{state}}",
+					"x-watch": [
+						"city",
+						"state"
+					]
 				}
 			}
 		},
 		"pets": {
 			"type": "array",
-			"options": {
-				"layout": {
-					"name": "table"
-				}
-			},
+			"x-layout": "table",
 			"title": "Pets",
 			"uniqueItems": true,
 			"items": {
@@ -57,28 +49,24 @@
 					"fixed": {
 						"type": "boolean",
 						"title": "spayed / neutered",
-						"options": {
-							"input": {
-								"name": "checkbox"
-							}
-						}
+						"x-input": "OO.ui.CheckboxInputWidget"
 					}
 				}
 			}
 		},
 		"cars": {
 			"type": "array",
-			"options": {
-				"layout": {
-					"name": "tabs"
-				}
-			},
+			"x-layout": "tabs",
 			"title": "Cars",
 			"uniqueItems": false,
 			"items": {
 				"type": "object",
 				"title": "Car",
 				"additionalProperties": true,
+				"x-additional-properties-ui": {
+					"label": "New property",
+					"schema": "JsonSchema:MetaSchema/NewProperty"
+				},
 				"properties": {
 					"manufacturer": {
 						"type": "string"

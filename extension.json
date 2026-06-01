@@ -1,28 +1,49 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "0.6",
+	"version": "1.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
 		"MediaWiki": ">= 1.39.13",
-		"extensions": {
-		}
+		"extensions": {}
 	},
 	"MessagesDirs": {
-		"JsonForms": [
-			"i18n"
-		]
+		"JsonForms": [ "i18n" ]
 	},
 	"callback": "JsonFormsHooks::initExtension",
+	"Actions": {
+		"slotedit": "JsonFormsActionSlotManager",
+		"jsonedit": "JsonFormsActionJsonEdit"
+	},
 	"AutoloadClasses": {
+		"SpecialJsonForms": "includes/specials/SpecialJsonForms.php",
+		"JsonFormsActionSlotManager": "includes/JsonFormsActionSlotManager.php",
+		"JsonFormsActionJsonEdit": "includes/JsonFormsActionJsonEdit.php",
 		"SpecialJsonFormsDemo": "includes/specials/SpecialJsonFormsDemo.php",
+		"SpecialJsonFormsCreate": "includes/specials/SpecialJsonFormsCreate.php",
+		"SpecialJsonFormsEdit": "includes/specials/SpecialJsonFormsEdit.php",
+		"SpecialJsonFormsManage": "includes/specials/SpecialJsonFormsManage.php",
+		"SpecialJsonFormsSlotManager": "includes/specials/SpecialJsonFormsSlotManager.php",
 		"JsonForms": "includes/JsonForms.php",
-		"JsonFormsHooks": "includes/JsonFormsHooks.php"
+		"JsonFormsHooks": "includes/JsonFormsHooks.php",
+		"JsonFormsApiFetchSchema": "includes/api/JsonFormsApiFetchSchema.php",
+		"JsonFormsApiSubmitForm": "includes/api/JsonFormsApiSubmitForm.php",
+		"JsonFormsApiGroupNames": "includes/api/JsonFormsApiGroupNames.php"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\JsonForms\\": "includes/classes/",
+		"MediaWiki\\Extension\\JsonForms\\Aliases\\": "includes/aliases/",
+		"MediaWiki\\Extension\\JsonForms\\Utils\\": "includes/utils/",
+		"MediaWiki\\Extension\\JsonForms\\Specials\\": "includes/specials/",
+		"MediaWiki\\Extension\\JsonForms\\SubmitProcessors\\": "includes/classes/SubmitProcessors/"
 	},
 	"APIModules": {
+		"jsonforms-fetch-schema": "JsonFormsApiFetchSchema",
+		"jsonforms-submit-form": "JsonFormsApiSubmitForm",
+		"jsonforms-groupnames": "JsonFormsApiGroupNames"
 	},
 	"ExtensionMessagesFiles": {
 		"JsonFormsAlias": "JsonForms.alias.php",
@@ -30,38 +51,72 @@
 	},
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "JsonFormsHooks::onLoadExtensionSchemaUpdates",
+		"MediaWikiServices": "JsonFormsHooks::onMediaWikiServices",
+		"ContentAlterParserOutput": "JsonFormsHooks::onContentAlterParserOutput",
 		"BeforeInitialize": "JsonFormsHooks::onBeforeInitialize",
 		"ParserFirstCallInit": "JsonFormsHooks::onParserFirstCallInit",
 		"BeforePageDisplay": "JsonFormsHooks::onBeforePageDisplay",
+		"SkinTemplateNavigation::Universal": "JsonFormsHooks::onSkinTemplateNavigation",
 		"SkinBuildSidebar": "JsonFormsHooks::onSkinBuildSidebar",
-		"ResourceLoaderGetConfigVars": "JsonFormsHooks::onResourceLoaderGetConfigVars"
+		"ResourceLoaderGetConfigVars": "JsonFormsHooks::onResourceLoaderGetConfigVars",
+		"OutputPageParserOutput": "JsonFormsHooks::onOutputPageParserOutput",
+		"JsonForms::FormSubmitBeforeProcess": "JsonFormsHooks::onFormSubmitBeforeProcess",
+		"JsonForms::FormSubmitBeforeSave": "JsonFormsHooks::onFormSubmitBeforeSave",
+		"JsonForms::FormSubmitSuccess": "JsonFormsHooks::onJsonFormsFormSubmitSuccess"
 	},
 	"SpecialPages": {
-		"JsonFormsDemo": "SpecialJsonFormsDemo"
-	},
-	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\JsonForms\\Aliases\\": "includes/aliases/",
-		"MediaWiki\\Extension\\JsonForms\\": "includes/",
-		"MediaWiki\\Extension\\JsonForms\\Utils\\": "includes/utils/",
-		"MediaWiki\\Extension\\JsonForms\\Special\\": "includes/specials/"
+		"JsonForms": "SpecialJsonForms",
+		"JsonFormsCreate": "SpecialJsonFormsCreate",
+		"JsonFormsEdit": "SpecialJsonFormsEdit",
+		"JsonFormsDemo": "SpecialJsonFormsDemo",
+		"JsonFormsManage": "SpecialJsonFormsManage",
+		"JsonFormsSlotManager": "SpecialJsonFormsSlotManager",
+		"JsonFormsManageForms": "MediaWiki\\Extension\\JsonForms\\Specials\\ManageForms",
+		"JsonFormsManageSchemas": "MediaWiki\\Extension\\JsonForms\\Specials\\ManageSchemas"
 	},
 	"GroupPermissions": {
 		"sysop": {
+			"jsonforms-caneditdata": true,
+			"jsonforms-canmanageschemas": true,
+			"jsonforms-canmanageforms": true
 		},
 		"bureaucrat": {
+			"jsonforms-caneditdata": true,
+			"jsonforms-canmanageschemas": true,
+			"jsonforms-canmanageforms": true
+		},
+		"jsonforms-editor": {
+			"jsonforms-caneditdata": true,
+			"jsonforms-canmanageschemas": true,
+			"jsonforms-canmanageforms": true
 		},
 		"jsonforms-admin": {
+			"jsonforms-caneditdata": true,
+			"jsonforms-canmanageschemas": true,
+			"jsonforms-canmanageforms": true
+		},
+		"*": {
+			"jsonforms-caneditdata": true,
+			"jsonforms-canmanageschemas": false,
+			"jsonforms-canmanageforms": false
 		}
 	},
 	"AddGroups": {
 		"jsonforms-admin": [
+			"jsonforms-admin",
+			"jsonforms-editor"
 		]
 	},
 	"RemoveGroups": {
 		"jsonforms-admin": [
+			"jsonforms-admin",
+			"jsonforms-editor"
 		]
 	},
 	"AvailableRights": [
+		"jsonforms-caneditdata",
+		"jsonforms-canmanageschemas",
+		"jsonforms-canmanageforms"
 	],
 	"namespaces": [
 		{
@@ -98,36 +153,46 @@
 			"name": "JsonFormTalk"
 		}
 	],
-	"JobClasses": {
-	},
+	"JobClasses": {},
 	"ResourceModules": {
-		"ext.JsonForms": {
-			"position": "top",
-			"localBasePath": "resources",
-			"remoteExtPath": "JsonForms/resources",
-			"scripts": [
-			],
-			"styles": [
-				"style.css"
-			],
-			"dependencies": [
-			],
-			"messages": [
-			]
-		},
-		"ext.JsonForms.editor": {
+		"ext.JsonForms.base": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
 			"styles": [
 				"datatables/datatables.min.css",
 				"datatables/style.css",
-				"style.css"
+				"libs/autocomplete.min.css",
+				"style.css",
+				"libs/intl-tel-input/css/intlTelInput.min.css",
+				"OOJSPlus/widgets/ColorPicker.css",
+				"OOJSPlus/widgets/ExpandablePanel.css"
 			],
 			"scripts": [
 				"datatables/object_hash.js",
 				"datatables/datatables.min.js",
+				"libs/autocomplete.min.js",
+				"libs/handlebars.min.js",
+				"libs/split.min.js",
+				"libs/intl-tel-input/js/intlTelInput.js",
 				"editor/jsonforms-editor.js",
-				"JsonForms.js"
+				"JsonForms.js",
+				"Utilities.js",
+				"EnumProviders.js",
+				"AutocompleteProviders.js",
+				"UISchemaConverters.js",
+				"schema-converters/NewProperty.js",
+				"schema-converters/NewSchema.js",
+				"schema-converters/NewSlot.js",
+				"schema-converters/Survey.js",
+				"schema-converters/Field.js",
+				"schema-converters/Geolocation.js",
+				"schema-converters/Subitem.js",
+				"OOUIElements.js",
+				"OOJSPlus/widgets/ColorPickerEmbeddable.js",
+				"OOJSPlus/widgets/ColorPickerPopup.js",
+				"OOJSPlus/widgets/ColorPicker.js",
+				"OOJSPlus/widgets/ExpandablePanel.js",
+				"OOJSPlus/widgets/RangeWidget.js"
 			],
 			"dependencies": [
 				"mediawiki.rcfilters.filters.base.styles",
@@ -141,6 +206,7 @@
 				"oojs-ui.styles.icons-alerts",
 				"oojs-ui.styles.icons-interactions",
 				"oojs-ui.styles.icons-editing-core",
+				"oojs-ui.styles.icons-editing-functions",
 				"oojs-ui.styles.icons-layout",
 				"oojs-ui.styles.icons-movement",
 				"oojs-ui.styles.icons-moderation",
@@ -156,10 +222,123 @@
 				"mediawiki.widgets.UsersMultiselectWidget",
 				"mediawiki.Upload"
 			],
+			"messages": [ "jsonforms-jsmodule-return-errors" ],
 			"position": "top"
+		},
+		"ext.JsonForms.infobox": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+				"styleInfobox.css"
+			],
+			"scripts": [
+			],
+			"dependencies": [
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.newArticle": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsNewArticle.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.editSchema": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsEditSchema.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.slotManager": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsSlotManager.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.demo": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsDemo.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.ManageSchemas": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsManageSchemas.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.pageForms": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsPageForms.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
+		"ext.JsonForms.jsoneditor": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [ "jsoneditor/jsoneditor.min.css" ],
+			"scripts": [ "jsoneditor/ace.js", "jsoneditor/jsoneditor.min.js" ]
 		}
 	},
 	"config": {
+		"JsonFormsDoPurge": {
+			"value": false
+		},
+		"JsonFormsReCaptchaSiteKey": {
+			"value": ""
+		},
+		"JsonFormsReCaptchaSecretKey": {
+			"value": ""
+		}
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

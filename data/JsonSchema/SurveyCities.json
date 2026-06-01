@@ -4,22 +4,15 @@
 	"title": "European Countries Statistics Data",
 	"description": "Nested statistical data per country, main city, and employment status",
 	"type": "object",
-	"options": {
-		"layout": {
-			"name": "survey"
-		}
-	},
+	"x-layout": "survey",
 	"definitions": {
 		"inputOptions": {
-			"options": {
-				"input": {
-					"config": {
-						"labelPosition": "before",
-						"label": "%",
-						"step": "0.1",
-						"showButtons": false
-					}
-				}
+			"type": "number",
+			"x-input-config": {
+				"labelPosition": "before",
+				"label": "%",
+				"step": "0.1",
+				"showButtons": false
 			}
 		},
 		"leaf": {
@@ -50,10 +43,12 @@
 			"layout": "row",
 			"properties": {
 				"employed": {
-					"$ref": "#/definitions/leaf"
+					"$ref": "#/definitions/leaf",
+					"type": "object"
 				},
 				"unemployed": {
-					"$ref": "#/definitions/leaf"
+					"$ref": "#/definitions/leaf",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -73,13 +68,16 @@
 			"$ref": "#/definitions/countryRow",
 			"properties": {
 				"London": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Manchester": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Edinburgh": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -92,13 +90,16 @@
 			"$ref": "#/definitions/countryRow",
 			"properties": {
 				"Rome": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Milan": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Naples": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -111,13 +112,16 @@
 			"$ref": "#/definitions/countryRow",
 			"properties": {
 				"Vienna": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Graz": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Salzburg": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -130,13 +134,16 @@
 			"$ref": "#/definitions/countryRow",
 			"properties": {
 				"Berlin": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Munich": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				},
 				"Hamburg": {
-					"$ref": "#/definitions/employmentGroup"
+					"$ref": "#/definitions/employmentGroup",
+					"type": "object"
 				}
 			},
 			"required": [
@@ -153,4 +160,3 @@
 		"Germany"
 	]
 }
-

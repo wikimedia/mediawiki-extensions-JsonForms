@@ -19,25 +19,31 @@
  * @file
  * @ingroup extensions
  * @author thomas-topway-it <support@topway.it>
- * @copyright Copyright ©2021-2024, https://wikisphere.org
+ * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
-
-use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
-use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 
 class SpecialJsonFormsDemo extends SpecialPage {
 
-	/** @inheritDoc */
+	/**
+	 * @inheritDoc
+	 */
 	public function __construct() {
-		parent::__construct( 'JsonFormsDemo' );
+		$listed = true;
+
+		// https://www.mediawiki.org/wiki/Manual:Special_pages
+		parent::__construct( 'JsonFormsDemo', '', $listed );
 	}
 
-	/** @inheritDoc */
+	/**
+	 * @inheritDoc
+	 */
 	public function execute( $par ) {
 		$out = $this->getOutput();
 		$out->setArticleRelated( false );
 		$out->setRobotPolicy( $this->getRobotPolicy() );
 
+		$this->setHeaders();
+		$this->outputHeader();
 		$user = $this->getUser();
 
 		$securityLevel = $this->getLoginSecurityLevel();
@@ -48,80 +54,32 @@ class SpecialJsonFormsDemo extends SpecialPage {
 		}
 
 		$this->addHelpLink( 'Extension:JsonForms' );
+		$out->addModules( 'ext.JsonForms.demo' );
 
-		$out->addModules( 'ext.JsonForms.editor' );
-		$context = RequestContext::getMain();
+		$jsonForm = \JsonForms::getSourceSchema( 'DemoForm', 'JsonSchema/Core' );
+		// $jsonForm = \JsonForms::processSchema( $out, $jsonForm );
 
-		// form descriptor
-		// if ( !$par ) {
-		// 	exit;
-		// }
+		$formData = (object)[
+			'schema' => $jsonForm,
+			'editorOptions' => 'MediaWiki:DefaultEditorOptions',
+			'editorScript' => 'MediaWiki:DefaultEditorScript',
+		];
 
-		$par = 'CreateArticle';
-		$title_ = TitleClass::newFromText( 'JsonForm:' . $par );
+		$formData = \JsonForms::prepareFormData( $out, $formData );
 
-		if ( !$title_ || !$title_->isKnown() ) {
-			echo 'enter a valid form descriptor';
-			exit;
-		}
-
-		$formDescriptor = \JsonForms::getJsonSchema( 'JsonForm:' . $par );
-		if ( empty( $formDescriptor ) ) {
-			echo 'enter a valid form descriptor';
-			exit;
-		}
-
-		$schemas = [];
-		$jsonSchema = [];
-		$schemaName = null;
-		if ( !empty( $formDescriptor['schema'] ) ) {
-			$schemaName = $formDescriptor['schema'];
-			$jsonSchema = \JsonForms::getJsonSchema( 'JsonSchema:' . $schemaName );
-
-			if ( empty( $formDescriptor ) ) {
-				echo 'invalid schema in form descriptor';
-				exit;
-			}
-
-		} else {
-			$schemas = \JsonForms::getPagesWithPrefix( null, NS_JSONSCHEMA );
-			$schemas = array_map( static function ( $x ) { return $x->getText();
-			}, $schemas );
-		}
-
-		$out->addJsConfigVars( [
-			'jsonforms-schemas' => $schemas
+		$res_ = \JsonForms::getJsonFormHtml( $formData, [
+			'width' => '800px'
 		] );
 
-		// @see SpecialRecentChanges
-		$loadingContainer = HtmlClass::rawElement(
-			'div',
-			[ 'class' => 'rcfilters-head mw-rcfilters-head', 'id' => 'mw-rcfilters-spinner-wrapper', 'style' => 'position: relative' ],
-			HtmlClass::rawElement(
-				'div',
-				[ 'class' => 'initb mw-rcfilters-spinner', 'style' => 'margin-top: auto; top: 25%' ],
-				HtmlClass::element(
-					'div',
-					[ 'class' => 'inita mw-rcfilters-spinner-bounce' ],
-				)
-			)
-		);
+		if ( !$res_->ok ) {
+			return $this->printError( $out, $res_->error );
+		}
 
-		$loadingPlaceholder = HtmlClass::rawElement(
-			'div',
-			[ 'class' => 'jsonforms-form-placeholder' ],
-			$this->msg( 'jsonforms-loading-placeholder' )->text()
-		);
+		$html = $res_->value;
 
-		$out->addHTML( HtmlClass::rawElement( 'div', [
-				'data-form-data' => json_encode( [
-					'formDescriptor' => $formDescriptor,
-					'schema' => $jsonSchema,
-					'schemaName' => $schemaName
-				] ),
-				'class' => 'jsonforms-form jsonforms-form-wrapper'
-			], $loadingContainer . $loadingPlaceholder )
-		);
+		\JsonForms::addJsConfigVars( $out );
+
+		$out->addHTML( $html );
 	}
 
 	/**

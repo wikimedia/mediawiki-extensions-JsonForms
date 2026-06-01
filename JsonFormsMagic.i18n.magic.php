@@ -27,4 +27,8 @@ $magicWords = [];
 // https://www.mediawiki.org/wiki/Manual:Magic_words
 // '0' stands for 'case insensitive'
 
-$magicWords['en'] = [];
+$magicWords['en'] = [
+	'jsonforms' => [ 0, 'jsonform', 'jsonforms' ],
+	'jsonformsrender' => [ 0, 'jsonformsrender', 'jsonformrender' ],
+	'jsonformsquerylink' => [ 0, 'jsonformsquerylink', 'querylink' ],
+];

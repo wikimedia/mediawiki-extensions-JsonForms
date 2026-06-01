@@ -4,7 +4,17 @@
 		"wikimedia/client",
 		"wikimedia/mediawiki"
 	],
+	"parserOptions": {
+		"ecmaVersion": 2018,
+		"sourceType": "module"
+	},
+	"env": {
+		"browser": true,
+		"es2018": true
+	},
 	"rules": {
+		"import/no-dynamic-require": "off",
+		"import/dynamic-import-chunkname": "off",
 		"mediawiki/no-unlabeled-buttonwidget": "off",
 		"compat/compat": "warn",
 		"camelcase": "warn",

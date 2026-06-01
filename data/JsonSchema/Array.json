@@ -8,17 +8,14 @@
 			"type": "array",
 			"items": {
 				"type": "string",
-				"options": {
-					"input": {
-						"name": "tagmultiselect"
-					}
-				}
+				"x-input": "OO.ui.TagMultiselectWidget"
 			}
 		},
 		"vegetables": {
 			"type": "array",
 			"items": {
-				"$ref": "#/definitions/veggie"
+				"$ref": "#/definitions/veggie",
+				"type": "object"
 			}
 		}
 	},

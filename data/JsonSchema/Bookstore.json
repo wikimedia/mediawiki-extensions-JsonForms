@@ -2,11 +2,6 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"type": "object",
 	"title": "Bookstore",
-	"options": {
-		"layout": {
-			"name": "paged"
-		}
-	},
 	"definitions": {
 		"newPropertySchema": {
 			"title": "New property",
@@ -43,27 +38,23 @@
 						"url",
 						"json"
 					],
-					"options": {
-						"input": {
-							"name": "RadioSelectInputWidget"
-						},
-						"enum_titles": [
-							"Text",
-							"Number",
-							"Integer",
-							"Date",
-							"Datetime-local",
-							"Time",
-							"Boolean",
-							"Textarea",
-							"Email",
-							"Color",
-							"Range",
-							"Tel",
-							"Url",
-							"Json"
-						]
-					}
+					"x-input": "OO.ui.RadioSelectInputWidget",
+					"x-enum-titles": [
+						"Text",
+						"Number",
+						"Integer",
+						"Date",
+						"Datetime-local",
+						"Time",
+						"Boolean",
+						"Textarea",
+						"Email",
+						"Color",
+						"Range",
+						"Tel",
+						"Url",
+						"Json"
+					]
 				},
 				"multiple": {
 					"title": "multiple",
@@ -77,33 +68,27 @@
 		"Book": {
 			"title": "books",
 			"type": "array",
+			"x-layout": "tabs",
 			"items": {
 				"type": "object",
 				"title": "book",
 				"additionalProperties": true,
-				"options": {
-					"additionalProperties": {
-						"UISchema": {
-							"$ref": "#/definitions/newPropertySchema"
-						}
-					}
+				"x-additional-properties-ui": {
+					"schema": {
+						"$ref": "#/definitions/newPropertySchema"
+					},
+					"name": "NewProperty",
+					"label": "New property"
 				},
 				"properties": {
 					"Title": {
 						"type": "string"
 					},
-					"Price": {
-						"type": "number"
-					},
-					"ISBN": {
-						"type": "string"
-					},
-					"Genre": {
-						"type": "string"
-					},
 					"Author": {
 						"type": "array",
-						"title": "authors",
+						"title": "",
+						"x-layout": "booklet",
+						"x-collapsible": true,
 						"items": {
 							"type": "object",
 							"title": "author",
@@ -116,6 +101,15 @@
 								}
 							}
 						}
+					},
+					"Price": {
+						"type": "number"
+					},
+					"ISBN": {
+						"type": "string"
+					},
+					"Genre": {
+						"type": "string"
 					}
 				}
 			}

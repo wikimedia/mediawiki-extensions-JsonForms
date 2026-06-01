@@ -1,23 +1,22 @@
 {
 	"$ref": "#/definitions/person",
-	"options": {
-		"layout": {
-			"name": "paged"
-		}
-	},
+	"type": "object",
+	"title": "Person",
+	"x-layout": "paged",
 	"definitions": {
 		"person": {
-			"title": "Person",
 			"type": "object",
 			"id": "person",
-			"defaultProperties": [
+			"x-default-properties": [
 				"fname",
 				"lname",
 				"coworkers"
 			],
 			"patternProperties": {
 				"^cousin_[0-9]+$": {
-					"$ref": "#/definitions/person"
+					"title": "Cousin",
+					"$ref": "#/definitions/person",
+					"type": "object"
 				}
 			},
 			"properties": {
@@ -31,11 +30,7 @@
 				},
 				"bestFriend": {
 					"title": "best friend",
-					"options": {
-						"input": {
-							"name": "button-select"
-						}
-					},
+					"x-input": "OO.ui.ButtonSelectWidget",
 					"oneOf": [
 						{
 							"title": "none",
@@ -43,7 +38,8 @@
 						},
 						{
 							"title": "person",
-							"$ref": "#/definitions/person"
+							"$ref": "#/definitions/person",
+							"type": "object"
 						}
 					]
 				},
@@ -51,12 +47,14 @@
 					"type": "array",
 					"items": {
 						"title": "Coworker",
-						"$ref": "#/definitions/person"
+						"$ref": "#/definitions/person",
+						"type": "object"
 					}
 				},
 				"mother": {
 					"title": "mother",
-					"$ref": "#/definitions/person"
+					"$ref": "#/definitions/person",
+					"type": "object"
 				}
 			}
 		},

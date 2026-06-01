@@ -498,6 +498,18 @@ metadata can be stored:
 			];
 		}
 
+		// keep existing slots - $previousMetadata is an object
+		$previousMetadata = \JsonForms::getMetadata( $wikiPage );
+
+		$previousMetadataSlots = null;
+		if (
+			$previousMetadata &&
+			isset( $previousMetadata->slots ) &&
+			is_object( $previousMetadata->slots )
+		) {
+			$previousMetadataSlots = $previousMetadata->slots;
+		}
+
 		// Initialize metadata as object
 		$metadata = new \stdClass();
 		$metadata->slots = new \stdClass();
@@ -515,8 +527,20 @@ metadata can be stored:
 			$metadata->slots->{$targetSlot} = new \stdClass();
 			$metadata->slots->{$targetSlot}->editor = "JsonEditor";
 			$metadata->slots->{$targetSlot}->model = "json";
-			$metadata->slots->{$targetSlot}->schema =
-				$data->formDescriptor->schema;
+
+			if ( empty( $data->formDescriptor->edit_path ) ) {
+				$metadata->slots->{$targetSlot}->schema =
+					$data->formDescriptor->schema;
+
+			} else {
+				if (
+					$previousMetadataSlots &&
+					$previousMetadataSlots->{$targetSlot} &&
+					$previousMetadataSlots->{$targetSlot}->schema
+				 ) {
+					$metadata->slots->{$targetSlot}->schema = $previousMetadataSlots->{$targetSlot}->schema;
+				}
+			}
 		}
 
 		if (
@@ -531,17 +555,11 @@ metadata can be stored:
 			"content" => json_encode( $metadata ),
 		];
 
-		// keep existing slots - $previousMetadata is an object
-		$previousMetadata = \JsonForms::getMetadata( $wikiPage );
-		if (
-			$previousMetadata &&
-			isset( $previousMetadata->slots ) &&
-			is_object( $previousMetadata->slots )
-		) {
+		if ( $previousMetadataSlots ) {
 			// Convert object slots to array for merging
 			$previousSlotsArray = [];
 			foreach (
-				get_object_vars( $previousMetadata->slots )
+				get_object_vars( $previousMetadataSlots )
 				as $role => $slotData
 			) {
 				$previousSlotsArray[$role] = $slotData;

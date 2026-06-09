@@ -1,4 +1,5 @@
 {
+	"$id": "Recursive",
 	"$ref": "#/definitions/person",
 	"type": "object",
 	"title": "Person",

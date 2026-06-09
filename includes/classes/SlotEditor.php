@@ -400,10 +400,7 @@ class SlotEditor {
 
 	private function maybePurge( PageUpdater $pageUpdater ): void {
 		if (
-			!$pageUpdater->isUnchanged() &&
-			MediaWikiServices::getInstance()
-				->getMainConfig()
-				->get( "JsonFormsDoPurge" )
+			!$pageUpdater->isUnchanged() && \JsonForms::getConfigValue( 'JsonFormsDoPurge' )
 		) {
 			$comment = CommentStoreComment::newUnsavedComment( "" );
 			$updater = $this->wikiPage->newPageUpdater( $this->user );

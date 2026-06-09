@@ -1,4 +1,5 @@
 {
+	"$id": "Person",
 	"type": "object",
 	"properties": {
 		"has_pet": {

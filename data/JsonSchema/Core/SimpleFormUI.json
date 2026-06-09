@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "SimpleFormUI",
+	"$id": "Core/SimpleFormUI",
 	"@type": "JsonForms default schema",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",

@@ -298,7 +298,9 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 			// etc. since it's not synchronous !!
 			const editor = this.createEditor( el, {
 				...config,
-				// / startval: hasData ? this.startval.form.editor : undefined,
+				// startval: hasData ? this.startval.form.editor : undefined,
+				// used by this.theme $overlay
+				dialog,
 				startval: this.startval,
 				display_path: 'form.editor'
 			} );
@@ -555,8 +557,9 @@ JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
 
 JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor ) {
 	// console.log('innerEditor', innerEditor);
-
 	const vars = {};
+
+	// @TODO rename to getPrimitiveValues
 	const structuredValue = innerEditor.getStructuredValue();
 	// console.log('structuredValue', structuredValue);
 
@@ -583,6 +586,8 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 		}
 	}
 
+	const processedSchema = innerEditor.getProcessedSchema();
+
 	if ( !formDescriptor.return ) {
 		if ( formDescriptor.return_url ) {
 			formDescriptor.return = 'url';
@@ -601,6 +606,7 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 			...optionsEditor.getValue(),
 			captcha: this.editor.getEditor( 'root.form.captcha' )
 		},
+		processedSchema,
 		structuredValue,
 		formDescriptor,
 		config: mw.config.get( 'jsonforms' ),

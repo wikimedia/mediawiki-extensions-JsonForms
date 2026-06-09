@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "DemoForm",
+	"$id": "Core/DemoForm",
 	"title": "Demo",
 	"x-watch" : "schema",
 	"x-message": {
@@ -15,7 +15,7 @@
 		},
 		"editor": {
 			"x-message": {
-				"x-label-template": "This form is based on the schema <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}<a/"
+				"x-label-template": "This form is based on the schema <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}<a/>"
 			},
 			"x-compact": "true",
 			"x-watch" : "schema",

@@ -1,4 +1,5 @@
 {
+	"$id": "Delivery",
 	"type": "object",
 	"properties": {
 		"has_delivery": {

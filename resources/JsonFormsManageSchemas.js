@@ -161,6 +161,8 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 		formDescriptor,
 		config: mw.config.get( 'jsonforms' ),
 
+		// used to redirect to the current schema or form
+		schemaId: innerEditor.schema.$id,
 		// submit processor
 		processor: 'ManageSchemas'
 	};
@@ -217,8 +219,6 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 };
 
 $( () => {
-	// console.log(' mw.config', mw.config);
-
 	$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 		this.el = el;
 		const data = $( el ).data().formData;
@@ -229,30 +229,5 @@ $( () => {
 		await jsonForms.initialize();
 
 		const editor = await jsonForms.createDefaultEditor( editorConfig );
-
-		editor.on( 'ready', async ( editor_ ) => {
-			// console.log('editor_', editor_);
-
-			const formEditor = editor.getEditor( 'root.editor' );
-			// *** do something with the child editor if needed
-			const innerEditor = await formEditor.input.getEditor();
-
-			innerEditor.on( 'ready', () => {} );
-
-			/*
-			innerEditor.on('change', () => {
-				textarea.val(JSON.stringify(innerEditor.getValue(), null, 2));
-				textareaB.val(
-					JSON.stringify(Object.keys(innerEditor.editors), null, 2),
-				);
-			});
-			innerEditor.on('ready', () => {
-				textarea.val(JSON.stringify(innerEditor.getValue(), null, 2));
-				textareaB.val(
-					JSON.stringify(Object.keys(innerEditor.editors), null, 2),
-				);
-			});
-*/
-		} );
 	} );
 } );

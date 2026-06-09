@@ -1,4 +1,5 @@
 {
+	"$id": "Ajax",
 	"type": "array",
 	"title": "People",
 	"x-layout": "tabs",

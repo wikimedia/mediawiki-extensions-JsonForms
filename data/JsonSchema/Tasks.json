@@ -1,4 +1,5 @@
 {
+	"$id": "Tasks",
 	"required": [
 		"title",
 		"priority",

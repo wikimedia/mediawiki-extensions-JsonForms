@@ -1,5 +1,26 @@
 <?php
 
+/**
+ * This file is part of the MediaWiki extension JsonForms.
+ *
+ * JsonForms is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JsonForms is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JsonForms.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @file
+ * @author thomas-topway-it <support@topway.it>
+ * @copyright Copyright ©2026, https://wikisphere.org
+ */
+
 namespace MediaWiki\Extension\JsonForms;
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
@@ -8,9 +29,15 @@ use MediaWiki\Parser\Parser;
 
 class TemplateRender {
 	private Parser $parser;
+	private array $parameters;
 
-	public function __construct( Parser $parser ) {
+	/**
+	 * @param Parser $parser
+	 * @param array $parameters
+	 */
+	public function __construct( Parser $parser, $parameters ) {
 		$this->parser = $parser;
+		$this->parameters = $parameters;
 	}
 
 	/**
@@ -18,7 +45,8 @@ class TemplateRender {
 	 * @param string $templatePrefix
 	 * @return string
 	 */
-	public function render( $data, $templatePrefix ) {
+	public function render( $data ) {
+		$templatePrefix = 'Template:' . $this->parameters['schema'];
 		$childrenHtml = $this->renderNode( $data, [], [], $templatePrefix );
 
 		// root container
@@ -73,7 +101,7 @@ class TemplateRender {
 			if ( !is_numeric( $key ) && is_string( $key ) ) {
 				$newPathNoIndex[] = $key;
 			} else {
-				$newPathNoIndex[] = "Item";
+				$newPathNoIndex[] = 'Item';
 			}
 
 			$pathStr = implode( ".", $newPath );
@@ -100,8 +128,7 @@ class TemplateRender {
 						: count( (array)$value ),
 					"hasChildren" => true,
 					"path" => $pathStr,
-					'templateName' => $templateName,
-					// 'value' => $value
+					'templateName' => $templateName
 				];
 
 				$dataArray = is_array( $value ) ? $value : (array)$value;
@@ -125,9 +152,6 @@ class TemplateRender {
 						) .
 						"</pre>";
 
-				// var_dump($templateName);
-				//  print_r( $params);
-
 				$ret .= $this->processTemplate( $templateName, $params );
 
 			// Leaf
@@ -147,13 +171,15 @@ class TemplateRender {
 					NS_TEMPLATE,
 				);
 
-				if ( $titleTemplate && $titleTemplate->isKnown() ) {
+				if ( !$this->parameters['print_scalar'] ) {
 					$ret .= $this->processTemplate( $templateName, $params );
+
+				} elseif ( $titleTemplate && $titleTemplate->isKnown() ) {
+					$ret .= $this->processTemplate( $templateName, $params );
+
 				} else {
 					$ret .= $value;
 				}
-
-				// var_dump($templateName);
 			}
 		}
 

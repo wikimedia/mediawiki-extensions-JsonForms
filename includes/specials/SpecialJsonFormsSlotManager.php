@@ -50,7 +50,7 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 
 		$user = $this->getUser();
 
-		$groups = [ "sysop", "bureaucrat", "jsonforms-admin" ];
+		$groups = \JsonForms::slotManagerGroups();
 		if (
 			!count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) )
 		) {

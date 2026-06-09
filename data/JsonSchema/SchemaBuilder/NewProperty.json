@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "NewProperty",
+	"$id": "SchemaBuilder/NewProperty",
     "title": "New property",
     "type": "object",
     "required": [

@@ -23,6 +23,7 @@
  */
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+use MediaWiki\Extension\JsonForms\SchemaUtils;
 use MediaWiki\Extension\JsonForms\Utils\SafeJsonEncoder;
 use MediaWiki\MediaWikiServices;
 
@@ -178,7 +179,7 @@ class ImportData extends Maintenance {
 	 * @return array
 	 */
 	private function updateRefs( $filename, $text ) {
-		$schema = json_decode( $text, true );
+		$schema = json_decode( $text, false );
 
 		if ( $schema === false ) {
 			$this->errors[] = "cannot decode '$filename'";
@@ -199,7 +200,7 @@ class ImportData extends Maintenance {
 			}
 		};
 
-		$obj = \JsonForms::traverseSchema( $schema, $callback );
+		$obj = SchemaUtils::traverseSchema( $schema, $callback );
 
 		$showMsg = static function ( $msg ) {
 			echo '(SafeJsonEncoder) ' . $msg . PHP_EOL;

@@ -1,5 +1,5 @@
 {	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "InputOptions",
+	"$id": "SchemaBuilder/InputOptions",
 	"title": "Input config",
 	"type": "object",
 	"definitions": {
@@ -148,7 +148,8 @@
 				},
 				"validate": {
 					"type": "string",
-					"description": "A regular expression that must match the value for it to be considered valid. See \u003Ca target=\"_blank\" href=\"https://json-schema.org/understanding-json-schema/reference/regular_expressions\"\u003ERegular Expressions\u003C/a\u003E"
+					"description": "A regular expression that must match the value for it to be considered valid. See \u003Ca target=\"_blank\" href=\"https://json-schema.org/understanding-json-schema/reference/regular_expressions\"\u003ERegular Expressions\u003C/a\u003E",
+					"x-description-format": "html"
 				}
 			}
 		},

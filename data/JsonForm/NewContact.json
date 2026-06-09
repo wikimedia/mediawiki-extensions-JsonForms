@@ -1,4 +1,5 @@
 {
+	"$id": "NewContact",
 	"name": "New contact",
 	"schema": "Contact",
 	"action": "create",

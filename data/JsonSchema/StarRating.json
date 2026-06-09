@@ -1,4 +1,5 @@
 {
+	"$id": "StarRating",
 	"title": "starrating example",
 	"type": "object",
 	"properties": {

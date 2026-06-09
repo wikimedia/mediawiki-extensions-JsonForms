@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.0",
+	"version": "1.1.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -30,6 +30,7 @@
 		"JsonForms": "includes/JsonForms.php",
 		"JsonFormsHooks": "includes/JsonFormsHooks.php",
 		"JsonFormsApiFetchSchema": "includes/api/JsonFormsApiFetchSchema.php",
+		"JsonFormsApiProcessSchema": "includes/api/JsonFormsApiProcessSchema.php",
 		"JsonFormsApiSubmitForm": "includes/api/JsonFormsApiSubmitForm.php",
 		"JsonFormsApiGroupNames": "includes/api/JsonFormsApiGroupNames.php"
 	},
@@ -42,6 +43,7 @@
 	},
 	"APIModules": {
 		"jsonforms-fetch-schema": "JsonFormsApiFetchSchema",
+		"jsonforms-process-schema": "JsonFormsApiProcessSchema",
 		"jsonforms-submit-form": "JsonFormsApiSubmitForm",
 		"jsonforms-groupnames": "JsonFormsApiGroupNames"
 	},
@@ -234,6 +236,7 @@
 			"scripts": [
 			],
 			"dependencies": [
+				"oojs-ui.styles.icons-editing-core"
 			],
 			"messages": [],
 			"position": "top"
@@ -330,6 +333,23 @@
 		}
 	},
 	"config": {
+		"JsonFormsDisableSidebarLink": {
+			"value": false
+		},
+		"JsonFormsDisableVersionCheck": {
+			"value": false
+		},
+		"JsonFormsEditSchemaNamespaces": {
+			"value": [ 0, 4 ],
+			"merge_strategy": "provide_default"
+		},
+		"JsonFormsEditSlotsNamespaces": {
+			"value": [ 0, 4 ],
+			"merge_strategy": "provide_default"
+		},
+		"JsonFormsDataMaptilerApiKey": {
+			"value": null
+		},
 		"JsonFormsDoPurge": {
 			"value": false
 		},

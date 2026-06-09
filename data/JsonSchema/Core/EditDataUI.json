@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "EditDataUI",
+	"$id": "Core/EditDataUI",
 	"@type": "JsonForms default schema",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
@@ -53,6 +53,9 @@
 								"x-format": "hidden"
 							},
 							"editor": {
+								"x-message": {
+									"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}<a/>"
+								},
 								"x-watch": "schemaName",
 								"links": [
 									{
@@ -126,7 +129,7 @@
 					"type": "boolean",
 					"title": "",
 					"description": "",
-					"x-description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
+					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
 					"x-control-config": {

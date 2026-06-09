@@ -1,6 +1,6 @@
 {
+	"$id": "SurveyPeople",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/people-statistics-table.schema.json",
 	"title": "People Statistics Table",
 	"description": "Data schema with districts as top-level rows, gender as row subgroups, and education × employment as columns",
 	"type": "object",

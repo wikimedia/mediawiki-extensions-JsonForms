@@ -1,4 +1,5 @@
 {
+	"$id": "SchoolManager",
 	"title": "SchoolManager",
 	"type": "array",
 	"x-layout": "tabs",

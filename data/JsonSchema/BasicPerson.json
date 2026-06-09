@@ -1,7 +1,7 @@
 {
+	"$id": "BasicPerson",
 	"title": "Person",
 	"type": "object",
-	"id": "person",
 	"properties": {
 		"name": {
 			"type": "string",

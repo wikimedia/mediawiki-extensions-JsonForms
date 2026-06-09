@@ -30,6 +30,7 @@ use MediaWiki\Extension\JsonForms\SlotHelper;
 use MediaWiki\Extension\JsonForms\SubmitForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use stdClass;
 
 class SlotManager extends SubmitForm {
 	/**
@@ -303,9 +304,9 @@ class SlotManager extends SubmitForm {
 		}
 
 		// this should be always set
-		$contentModel = $data->value->content_model;
+		$mainSlotcontentModel = $data->value->content_model;
 
-		$main_slot_content = $data->value->content ?? null;
+		$mainSlotContent = $data->value->content ?? null;
 		if ( $targetTitle->isKnown() ) {
 			if ( empty( $data->options->edit ) ) {
 				return ResultWrapper::failure(
@@ -337,22 +338,22 @@ class SlotManager extends SubmitForm {
 
 		$slots = [
 			SlotRecord::MAIN => [
-				"model" => $contentModel,
-				"content" => $main_slot_content,
+				"model" => $mainSlotcontentModel,
+				"content" => $mainSlotContent,
 			],
 		];
 
 		$metadataPrevious = \JsonForms::getMetadata( $wikiPage );
 
 		// Initialize metadata as object
-		$metadata = new \stdClass();
-		$metadata->slots = new \stdClass();
-		$metadata->slots->{SlotRecord::MAIN} = new \stdClass();
-		$metadata->slots->{SlotRecord::MAIN}->model = $contentModel;
+		$metadata = new stdClass();
+		$metadata->slots = new stdClass();
+		$metadata->slots->{SlotRecord::MAIN} = new stdClass();
+		$metadata->slots->{SlotRecord::MAIN}->model = $mainSlotcontentModel;
 		$metadata->slots->{SlotRecord::MAIN}->editor = $data->value->editor;
 
 		if (
-			$contentModel === "json" &&
+			$mainSlotcontentModel === "json" &&
 			isset( $metadataPrevious->slots->{SlotRecord::MAIN}->schema ) &&
 			!empty( $metadataPrevious->slots->{SlotRecord::MAIN}->schema )
 		) {
@@ -367,49 +368,53 @@ class SlotManager extends SubmitForm {
 			$metadata->categories = $data->value->categories;
 		}
 
-		$roles = SlotHelper::getSlotRoles();
+		$roleNames = SlotHelper::getSlotRoles();
 		foreach ( get_object_vars( $data->value ) as $key => $value ) {
-			if ( in_array( $key, $roles ) ) {
-				// ignore metadata slot
-				if ( $key === SLOT_ROLE_JSONFORMS_METADATA ) {
+
+			// valid slot name
+			if ( !in_array( $key, $roleNames ) ) {
 					continue;
-				}
-
-				$metadata->slots->{$key} = new \stdClass();
-				$metadata->slots->{$key}->model = $value->content_model;
-				$metadata->slots->{$key}->editor = $value->editor;
-
-				if ( $key === SLOT_ROLE_JSONFORMS_DATA ) {
-					if (
-						isset( $metadataPrevious->slots->{$key}->schema ) &&
-						!empty( $metadataPrevious->slots->{$key}->schema )
-					) {
-						$metadata->slots->{$key}->schema =
-							$metadataPrevious->slots->{$key}->schema;
-					}
-
-					$metadataKeys = [
-						"show_infobox" => "showInfobox",
-						"infobox_position" => "infoboxPosition",
-						"infobox_template" => "infoboxTemplate",
-					];
-
-					foreach ( $metadataKeys as $k => $v ) {
-						if (
-							isset( $metadataPrevious->slots->{$key}->{$k} ) &&
-							!empty( $metadataPrevious->slots->{$key}->{$k} )
-						) {
-							$metadata->slots->{$key}->{$v} =
-								$metadataPrevious->slots->{$key}->{$k};
-						}
-					}
-				}
-
-				$slots[$key] = [
-					"model" => $value->content_model,
-					"content" => $value->content,
-				];
 			}
+
+			// ignore metadata slot
+			if ( $key === SLOT_ROLE_JSONFORMS_METADATA ) {
+				continue;
+			}
+
+			$metadata->slots->{$key} = new stdClass();
+			$metadata->slots->{$key}->model = $value->content_model;
+			$metadata->slots->{$key}->editor = $value->editor;
+
+			if ( $key === SLOT_ROLE_JSONFORMS_DATA ) {
+				if (
+					isset( $metadataPrevious->slots->{$key}->schema ) &&
+					!empty( $metadataPrevious->slots->{$key}->schema )
+				) {
+					$metadata->slots->{$key}->schema =
+						$metadataPrevious->slots->{$key}->schema;
+				}
+
+				$metadataKeys = [
+					"show_infobox" => "showInfobox",
+					"infobox_position" => "infoboxPosition",
+					"infobox_template" => "infoboxTemplate",
+				];
+
+				foreach ( $metadataKeys as $k => $v ) {
+					if (
+						isset( $metadataPrevious->slots->{$key}->{$v} ) &&
+						property_exists( $metadataPrevious->slots->{$key}, $v )
+					) {
+						$metadata->slots->{$key}->{$v} =
+							$metadataPrevious->slots->{$key}->{$v};
+					}
+				}
+			}
+
+			$slots[$key] = [
+				"model" => $value->content_model,
+				"content" => $value->content,
+			];
 		}
 
 		$slots[SLOT_ROLE_JSONFORMS_METADATA] = [

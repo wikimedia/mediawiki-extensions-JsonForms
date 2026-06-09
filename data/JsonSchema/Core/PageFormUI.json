@@ -1,6 +1,6 @@
 {
 	"@type": "JsonForms default schema",
-	"$id": "PageFormUI",
+	"$id": "Core/PageFormUI",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
 	"type": "object",

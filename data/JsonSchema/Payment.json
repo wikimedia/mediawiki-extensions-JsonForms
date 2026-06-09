@@ -1,4 +1,5 @@
 {
+	"$id": "Payment",
 	"title": "Payment Method",
 	"x-input": "OO.ui.ButtonSelectWidget",
 	"oneOf": [

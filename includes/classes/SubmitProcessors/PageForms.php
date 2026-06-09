@@ -26,9 +26,11 @@ namespace MediaWiki\Extension\JsonForms\SubmitProcessors;
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\Extension\JsonForms\ResultWrapper;
+use MediaWiki\Extension\JsonForms\SchemaUtils;
 use MediaWiki\Extension\JsonForms\SubmitForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use stdClass;
 
 class PageForms extends SubmitForm {
 
@@ -207,7 +209,7 @@ metadata can be stored:
 		$output = $this->output;
 
 		if ( !isset( $data->options ) ) {
-			$data->options = new \stdClass();
+			$data->options = new stdClass();
 		}
 
 		if ( !empty( $data->options->captcha ) ) {
@@ -457,7 +459,7 @@ metadata can be stored:
 				$targetSlot,
 			);
 			$wholeData = json_decode( $wholeDataStr, false );
-			\JsonForms::setValueByPath(
+			SchemaUtils::setValueByPath(
 				$wholeData,
 				$data->formDescriptor->edit_path,
 				$dataToSave,
@@ -511,35 +513,54 @@ metadata can be stored:
 		}
 
 		// Initialize metadata as object
-		$metadata = new \stdClass();
-		$metadata->slots = new \stdClass();
+		$metadata = new stdClass();
+		$metadata->slots = new stdClass();
 
-		$metadata->slots->{SlotRecord::MAIN} = new \stdClass();
+		$metadata->slots->{SlotRecord::MAIN} = new stdClass();
 		$metadata->slots->{SlotRecord::MAIN}->model = $contentModelMainSlot;
-		$metadata->slots->{SlotRecord::MAIN}->editor =
-			$contentModel === "wikitext"
-				? "WikiEditor"
-				: ( $contentModelMainSlot === "json"
-					? "JsonEditor"
-					: "source" );
+
+		if ( $contentModelMainSlot === "wikitext" ) {
+			$metadata->slots->{SlotRecord::MAIN}->editor = "WikiEditor";
+
+		} elseif ( $contentModelMainSlot === "json" ) {
+			$metadata->slots->{SlotRecord::MAIN}->editor = "JsonEditor";
+
+		} else {
+			$metadata->slots->{SlotRecord::MAIN}->editor = "source";
+		}
 
 		if ( $targetSlot !== "main" ) {
-			$metadata->slots->{$targetSlot} = new \stdClass();
+			$metadata->slots->{$targetSlot} = new stdClass();
 			$metadata->slots->{$targetSlot}->editor = "JsonEditor";
 			$metadata->slots->{$targetSlot}->model = "json";
+			$metadata->slots->{$targetSlot}->schema = $data->formDescriptor->schema;
 
-			if ( empty( $data->formDescriptor->edit_path ) ) {
-				$metadata->slots->{$targetSlot}->schema =
-					$data->formDescriptor->schema;
+			$metadataKeys = [
+				"show_infobox" => "showInfobox",
+				"infobox_position" => "infoboxPosition",
+				"infobox_template" => "infoboxTemplate",
+			];
 
-			} else {
-				if (
-					$previousMetadataSlots &&
-					$previousMetadataSlots->{$targetSlot} &&
-					$previousMetadataSlots->{$targetSlot}->schema
-				 ) {
-					$metadata->slots->{$targetSlot}->schema = $previousMetadataSlots->{$targetSlot}->schema;
+			foreach ( $metadataKeys as $key => $value ) {
+				if ( property_exists( $data->formDescriptor, $key ) ) {
+					$metadata->slots->{$targetSlot}->{$value} =
+						$data->formDescriptor->$key;
+
+				} else {
+					unset( $metadata->slots->{$targetSlot}->$value );
 				}
+			}
+
+			if ( isset( $metadata->slots->{$targetSlot}->processedSchema ) ) {
+				$metadata->slots->{$targetSlot}->processedSchema = $data->processedSchema;
+			}
+
+		} else {
+			$metadata->slots->{$targetSlot}->schema = $data->formDescriptor->schema;
+
+			// processedSchema is not defined from JsonFormsManageSchemas
+			if ( isset( $metadata->slots->{$targetSlot}->processedSchema ) ) {
+				$metadata->slots->{$targetSlot}->processedSchema = $data->processedSchema;
 			}
 		}
 
@@ -572,7 +593,7 @@ metadata can be stored:
 			"targetTitle" => $targetTitle,
 			"targetSlot" => $targetSlot,
 			"isNewPage" => $isNewPage,
-			"contentModel" => $contentModel,
+			"contentModel" => $contentModelMainSlot,
 			"main_slot_content" => $main_slot_content,
 			"metadata" => $metadata,
 			"movePage" => $movePage,

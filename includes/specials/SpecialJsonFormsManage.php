@@ -137,7 +137,17 @@ class SpecialJsonFormsManage extends SpecialPage {
 		$formDescriptor->return_url = $this->localTitle->getLocalURL();
 
 		$schemaName = "";
-		$pageid = $this->getRequest()->getVal( "pageid" );
+		$pagename = $this->getRequest()->getVal( "pagename" );
+
+		if ( $pagename ) {
+			$title_ = TitleClass::newFromText( $pagename );
+			if ( $title_ ) {
+				$pageid = $title_->getArticleID();
+			}
+
+		} else {
+			$pageid = $this->getRequest()->getVal( "pageid" );
+		}
 
 		if ( $pageid ) {
 			$title = TitleClass::newFromID( $pageid );
@@ -237,7 +247,7 @@ class SpecialJsonFormsManage extends SpecialPage {
 				$formData = new stdClass();
 				$formData->schema = $jsonForm;
 				$formData->schemaName =
-					$this->par === "forms" ? "CreatePageForm" : "MetaSchema";
+					$this->par === "forms" ? "Core/CreatePageForm" : "SchemaBuilder/MetaSchema";
 				$formData->editorOptions = "MediaWiki:DefaultEditorOptions";
 				$formData->editorScript = "MediaWiki:DefaultEditorScript";
 				$formData->formDescriptor = $formDescriptor;

@@ -29,6 +29,7 @@ use MediaWiki\Extension\JsonForms\ResultWrapper;
 use MediaWiki\Extension\JsonForms\SubmitForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use stdClass;
 
 class NewArticle extends SubmitForm {
 	/**
@@ -190,11 +191,11 @@ class NewArticle extends SubmitForm {
 		];
 
 		// Initialize metadata as object
-		$metadata = new \stdClass();
+		$metadata = new stdClass();
 
 		if ( $isDataOnly ) {
-			$metadata->slots = new \stdClass();
-			$metadata->slots->{SlotRecord::MAIN} = new \stdClass();
+			$metadata->slots = new stdClass();
+			$metadata->slots->{SlotRecord::MAIN} = new stdClass();
 			$metadata->slots->{SlotRecord::MAIN}->schema =
 				$data->metadata->schemaName;
 		}
@@ -213,9 +214,9 @@ class NewArticle extends SubmitForm {
 			];
 
 			if ( !isset( $metadata->slots ) ) {
-				$metadata->slots = new \stdClass();
+				$metadata->slots = new stdClass();
 			}
-			$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA} = new \stdClass();
+			$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA} = new stdClass();
 			$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->model = "json";
 			$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->schema =
 				$data->metadata->schemaName;
@@ -227,9 +228,12 @@ class NewArticle extends SubmitForm {
 			];
 
 			foreach ( $metadataKeys as $key => $val ) {
-				if ( !empty( $data->metadata->$key ) ) {
-					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->{$val} =
+				if ( property_exists( $data->metadata, $key ) ) {
+					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$val =
 						$data->metadata->$key;
+
+				} else {
+					unset( $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$val );
 				}
 			}
 		}

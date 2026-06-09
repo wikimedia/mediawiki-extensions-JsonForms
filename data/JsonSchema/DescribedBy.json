@@ -1,4 +1,5 @@
 {
+	"$id": "DescribedBy",
 	"type": "object",
 	"title": "DescribedBy",
 	"properties": {

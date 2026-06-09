@@ -91,10 +91,9 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 		metadata = {};
 
 	const editorValue = this.editor.getValue();
+	const articleID = this.data.schema.$id.split( '/' ).slice( -1 )[ 0 ];
 
-	console.log( 'editorValue', editorValue );
-
-	switch ( this.data.schema.$id ) {
+	switch ( articleID ) {
 		case 'NewArticleCombined':
 			{
 				const mainEditor = this.editor.getEditor( 'root.form.main' );
@@ -108,14 +107,14 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 				metadata = { ...( editorValue.form.options || {} ) };
 
 				const schemaEditor = this.editor.getEditor(
-					'root.form.schema.selectedSchema.editor'
+					'root.form.schema.editor'
 				);
 				if ( schemaEditor ) {
 					value = schemaEditor.getValue();
 				}
 
 				const schemaNameEditor = this.editor.getEditor(
-					'root.form.schema.selectedSchema.schemaName'
+					'root.form.schema.schemaName'
 				);
 
 				if ( schemaNameEditor ) {
@@ -136,16 +135,17 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 					...formEditor.getValue()
 				};
 				delete options.schema;
+				delete options.editor;
 
 				const schemaEditor = this.editor.getEditor(
-					'root.form.schema.selectedSchema.editor'
+					'root.form.editor'
 				);
 				if ( schemaEditor ) {
 					value = schemaEditor.getValue();
 				}
 
 				const schemaNameEditor = this.editor.getEditor(
-					'root.form.schema.selectedSchema.schemaName'
+					'root.form.schema'
 				);
 
 				if ( schemaNameEditor ) {
@@ -185,8 +185,6 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 	};
 
 	console.log( 'data', data );
-
-	// return;
 
 	const payload = {
 		data: JSON.stringify( data ),
@@ -241,8 +239,6 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 			await jsonForms.initialize();
 
 			const editor = jsonForms.createDefaultEditor();
-
-			editor.on( 'ready', jsonForms.initButtons );
 
 		} );
 	} );

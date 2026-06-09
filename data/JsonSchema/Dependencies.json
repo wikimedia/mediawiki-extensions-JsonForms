@@ -1,4 +1,5 @@
 {
+	"$id": "Dependencies",
 	"title": "Dependencies",
 	"type": "object",
 	"properties": {

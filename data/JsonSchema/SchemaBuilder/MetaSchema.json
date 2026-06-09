@@ -1,6 +1,6 @@
 {
 	"title": "JSON Schema builder",
-	"$id": "MetaSchema",
+	"$id": "SchemaBuilder/MetaSchema",
 	"description": "Meta-schema for defining editable JSON schemas with UI layout controls, custom input widgets, and conditional display logic. Extends standard JSON Schema with MediaWiki-specific widget configurations and layout options.",
 	"x-layout": "paged",
 	"x-layout-config": {
@@ -173,7 +173,7 @@
 				"$ref": {
 					"x-message": {
 						"label": "Reference to another schema (eg. #definitions/subschema, or JsonSchema:SubSchema, or JsonSchema:SubSchema#definitions/sub-subschema)",
-						"x-label-tempate": "label template (overrides label, usually used in conjunction with x-watch)",
+						"x-label-template": "label template (overrides label, usually used in conjunction with x-watch)",
 						"type": "warning"
 					},
 					"format": "uri-reference",
@@ -378,6 +378,15 @@
 						"type": "string",
 						"x-input": "OO.ui.TagMultiselectWidget"
 					}
+				},
+				"x-enum-titles-format": {
+					"type": "string",
+					"description": "description format",
+					"enum": [
+						"text",
+						"html",
+						"wikitext"
+					]
 				},
 				"x-enum-template": {
 					"$ref": "JsonSchema:SchemaBuilder/EnumTemplate",

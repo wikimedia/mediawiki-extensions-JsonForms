@@ -70,6 +70,8 @@ class SpecialJsonForms extends QueryPage {
 		// $out->addHTML( '<br />' );
 
 		$formDescriptor = \JsonForms::getSourceSchema( $par, 'JsonForm' );
+		$formDescriptor->view = 'inline';
+
 		$html = \JsonForms::getPageForm( $out, $formDescriptor );
 
 		$out->addModules( 'ext.JsonForms.pageForms' );

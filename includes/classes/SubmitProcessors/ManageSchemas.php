@@ -24,6 +24,9 @@
 
 namespace MediaWiki\Extension\JsonForms\SubmitProcessors;
 
+use MediaWiki\Extension\JsonForms\ResultWrapper;
+use SpecialPage;
+
 class ManageSchemas extends PageForms {
 
 	/**
@@ -34,8 +37,34 @@ class ManageSchemas extends PageForms {
 		// adjust processData as needed
 
 		// parent::processData is from extended class PageForms
-		$returnData = parent::processData( $data );
-		return $returnData;
-	}
+		$res_ = parent::processData( $data );
 
+		if ( !$res_->ok ) {
+			return $res_;
+		}
+
+		[ $processedData, $returnData ] = $res_->value;
+
+		switch ( $data->schemaId ) {
+			case "SchemaBuilder/MetaSchema":
+				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Schemas" );
+
+				$title = $processedData['targetTitle'];
+				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $title->getFullText() ] );
+
+				$returnData["returnUrl"] = $url;
+				break;
+
+			case "Core/CreatePageForm":
+				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Forms" );
+
+				$title = $processedData['targetTitle'];
+				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $title->getFullText() ] );
+
+				$returnData["returnUrl"] = $url;
+				break;
+		}
+
+		return ResultWrapper::success( [ $processedData, $returnData ] );
+	}
 }

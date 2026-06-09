@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "SelectSchema",
+	"$id": "Core/SelectSchema",
 	"x-watch" : "schema",
 	"title": "Edit schema",
 	"x-collapsible": true,

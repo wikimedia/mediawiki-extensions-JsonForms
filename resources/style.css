@@ -33,7 +33,7 @@
 }
 
 /* special pages, etc. */
-.jsonforms-form:not(.jsonforms-form-inline) {
+.jsonforms-form:not(.jsonforms-form-inline):not(.jsonforms-form-popup) {
 	border: 1px solid #ccc;
 }
 
@@ -485,6 +485,10 @@
 :root {
 	--oo-outline-indent: 1em; /* base indentation per level */
 	--oo-icon-extra: 2em; /* extra padding for iconElement */
+}
+
+.mw-widget-dateInputWidget-calendar {
+	z-index: 99;
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-0 {

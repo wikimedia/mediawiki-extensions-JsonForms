@@ -1,69 +1,10 @@
 {
 	"type": "object",
-	"$id": "NewArticleDataOnly",
+	"$id": "Core/NewArticleDataOnly",
 	"@type": "JsonForms default schema",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
 	"required": [],
-	"definitions": {
-		"editor_wikieditor": {
-			"type": "string",
-			"x-compact": true,
-			"x-format": "textarea",
-			"x-input": "wikieditor"
-		},
-		"editor_visualeditor": {
-			"type": "string",
-			"x-compact": true,
-			"x-format": "textarea",
-			"x-input": "visualeditor"
-		},
-		"editor_jsoneditor": {
-			"type": "string",
-			"x-compact": true,
-			"x-format": "textarea",
-			"x-input": "jsoneditor"
-		},
-		"editor_source": {
-			"type": "string",
-			"x-compact": true,
-			"x-format": "textarea",
-			"x-input-config": {
-				"autosize": true,
-				"rows": 6
-			}
-		},
-		"newSchema": {
-			"type": "object",
-			"$id": "SelectSchema",
-			"x-watch": "schema",
-			"title": "Edit schema",
-			"properties": {
-				"schema": {
-					"type": "string",
-					"title": "JSON Schema",
-					"description": "Manage schemas [[Special:JsonFormsManage/Schemas|here]]",
-					"x-description-format": "wikitext",
-					"default": "",
-					"x-format": "text",
-					"x-input": "OO.ui.DropdownInputWidget",
-					"x-enum-provider": "jsonSchemas"
-				},
-				"preview": {
-					"x-css-class": "jsonforms-editdata-preview",
-					"x-compact": "true",
-					"x-watch": "schema",
-					"links": [
-						{
-							"rel": "describedBy",
-							"href": "JsonSchema:{{schema}}",
-							"x-destroy-values-on-switch": true
-						}
-					]
-				}
-			}
-		}
-	},
 	"properties": {
 		"form": {
 			"title": "",
@@ -75,34 +16,32 @@
 					"x-input": "mw.widgets.TitleInputWidget"
 				},
 				"schema": {
-					"type": "object",
-					"x-compact": true,
-					"additionalProperties": {
-						"type": "object",
-						"x-compact": true,
-						"properties": {
-							"schemaName": {
-								"type": "string",
-								"x-format": "hidden"
-							},
-							"editor": {
-								"x-watch": "schemaName",
-								"links": [
-									{
-										"rel": "describedBy",
-										"href": "JsonSchema:{{schemaName}}"
-									}
-								]
-							}
-						}
+					"type": "string",
+					"title": "JSON Schema",
+					"description": "",
+					"default": "",
+					"minLength": 1,
+					"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
+					"x-description-format": "wikitext",
+					"x-enum-provider": "jsonSchemas"
+				},
+				"editor": {
+					"x-dependency": {
+						"path": "schema",
+						"op": "!=",
+						"value": ""
 					},
-					"maxProperties": 1,
-					"x-ui-schema": {
-						"label": "New schema",
-						"schema": "#/definitions/newSchema",
-						"name": "newSchema",
-						"popup_size": "large"
-					}
+					"x-watch": "schema",
+					"x-message": {
+						"x-label-template": "Using schema href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}<a/>"
+					},
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:{{schema}}",
+							"x-destroy-values-on-switch": true
+						}
+					]
 				},
 				"categories": {
 					"type": "array",
@@ -113,7 +52,7 @@
 					}
 				}
 			},
-			"required": [ "schema", "title" ]
+			"required": ["schema", "title"]
 		},
 		"footer": {
 			"x-compact": true,

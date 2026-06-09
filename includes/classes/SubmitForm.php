@@ -234,7 +234,7 @@ class SubmitForm {
 			}
 		};
 
-		return \JsonForms::traverseSchema( $json, $callback );
+		return SchemaUtils::traverseSchema( $json, $callback );
 	}
 
 	/**
@@ -282,7 +282,7 @@ class SubmitForm {
 		[ $processedData, $returnData ] = $res_->value;
 
 		// move page
-		if ( $processedData["movePage"] ) {
+		if ( !empty( $processedData["movePage"] ) ) {
 			[ $oldTitle, $newTitle ] = $processedData["movePage"];
 			$reason = "JsonForms move";
 			$createRedirect = false;
@@ -309,7 +309,7 @@ class SubmitForm {
 			}
 		}
 
-		$services
+		$hookResult = $services
 			->getHookContainer()
 			->run( "JsonForms::FormSubmitBeforeSave", [
 				$this->user,
@@ -322,6 +322,10 @@ class SubmitForm {
 			return [
 				"errors" => $errors,
 			];
+		}
+
+		if ( $hookResult === false ) {
+			return $returnData;
 		}
 
 		$slotEditor = new SlotEditor();
@@ -373,6 +377,7 @@ class SubmitForm {
 				$this->user,
 				$data,
 				$processedData,
+				&$returnData,
 				&$errors,
 			] );
 

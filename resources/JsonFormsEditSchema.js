@@ -110,7 +110,7 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 	let value;
 	const metadata = { ...editorValue.form.options };
 
-	if ( editorValue.form.schema.selectedSchema ) {
+	if ( editorValue.form.schema && editorValue.form.schema.selectedSchema ) {
 		value = editorValue.form.schema.selectedSchema.editor;
 		metadata.schemaName = editorValue.form.schema.selectedSchema.schemaName;
 	}

@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "NewArticleCombined",
+	"$id": "Core/NewArticleCombined",
 	"@type": "JsonForms default schema",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
@@ -72,7 +72,7 @@
 					}
 				}
 			},
-			"required": [ "title" ]
+			"required": ["title"]
 		},
 		"newSchema": {
 			"type": "object",
@@ -119,31 +119,35 @@
 				"schema": {
 					"type": "object",
 					"x-compact": true,
-					"additionalProperties": {
-						"type": "object",
-						"x-compact": true,
-						"properties": {
-							"schemaName": {
-								"type": "string",
-								"x-format": "hidden"
+					"properties": {
+						"schemaName": {
+							"type": "string",
+							"title": "JSON Schema",
+							"description": "",
+							"default": "",
+							"minLength": 1,
+							"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
+							"x-description-format": "wikitext",
+							"x-enum-provider": "jsonSchemas"
+						},
+						"editor": {
+							"x-dependency": {
+								"path": "schemaName",
+								"op": "!=",
+								"value": ""
 							},
-							"editor": {
-								"x-watch": "schemaName",
-								"links": [
-									{
-										"rel": "describedBy",
-										"href": "JsonSchema:{{schemaName}}"
-									}
-								]
-							}
+							"x-watch": "schemaName",
+							"x-message": {
+								"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}<a/>"
+							},
+							"links": [
+								{
+									"rel": "describedBy",
+									"href": "JsonSchema:{{schemaName}}",
+									"x-destroy-values-on-switch": true
+								}
+							]
 						}
-					},
-					"maxProperties": 1,
-					"x-ui-schema": {
-						"label": "New schema",
-						"schema": "#/definitions/newSchema",
-						"name": "newSchema",
-						"popup_size": "large"
 					}
 				},
 				"options": {
@@ -158,12 +162,7 @@
 						"infobox_position": {
 							"type": "string",
 							"title": "Infobox position",
-							"enum": [
-								"right",
-								"left",
-								"top",
-								"bottom"
-							],
+							"enum": ["right", "left", "top", "bottom"],
 							"default": "right",
 							"x-dependency": {
 								"path": "show_infobox",

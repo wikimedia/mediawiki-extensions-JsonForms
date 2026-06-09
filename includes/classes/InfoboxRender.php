@@ -1,14 +1,50 @@
 <?php
 
+/**
+ * This file is part of the MediaWiki extension JsonForms.
+ *
+ * JsonForms is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JsonForms is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JsonForms.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @file
+ * @author thomas-topway-it <support@topway.it>
+ * @copyright Copyright ©2026, https://wikisphere.org
+ */
+
 namespace MediaWiki\Extension\JsonForms;
 
+use MediaWiki\Extension\JsonForms\Aliases\Linker as LinkerClass;
+use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+use User;
+
 class InfoboxRender {
+	private string $schemaName;
+	private User $user;
+
+	/** @var Title|TitleClass */
+	private $title;
+
 	private array $schemaMap = [];
 
 	/**
+	 * param string $schemaName
 	 * param stdClass $processedSchema null
 	 */
-	public function __construct( $processedSchema = null ) {
+	public function __construct( $user, $title, $schemaName, $processedSchema = null ) {
+		$this->user = $user;
+		$this->title = $title;
+		$this->schemaName = $schemaName;
+
 		if ( $processedSchema ) {
 			$this->buildSchemaMap( $processedSchema );
 		}
@@ -131,8 +167,8 @@ class InfoboxRender {
 		}
 
 		return [
-			"title" => $key,
-			"description" => "",
+			"title" => '',
+			"description" => '',
 			"format" => "",
 			"layout" => "",
 			"uniqueItems" => false,
@@ -276,7 +312,79 @@ class InfoboxRender {
 	public function render( $processedData ) {
 		// Extract actual data from processed schema
 		$actualData = $this->extractData( $processedData );
-		return $this->renderNode( $actualData, [], [], 0 );
+		$childrenHtml = $this->renderNode( $actualData, [], [], 0 );
+		return $this->rootContainer( $actualData, $childrenHtml );
+	}
+
+	/**
+	 * @param stdClass $value
+	 * @param string $childrenHtml
+	 * @return string
+	 */
+	private function rootContainer( $value, $childrenHtml ) {
+		$type = gettype( $value );
+		$isArray = $type === "array";
+		$schema = \JsonForms::getSourceSchema( $this->schemaName, 'JsonSchema' );
+		$count = is_array( $value ) ? count( $value ) : null;
+
+		$countDisplay = "";
+		if ( $count !== null ) {
+			$countDisplay = '<span class="infobox-count">(' . $count . ")</span>";
+		}
+
+		if ( $this->user->isAllowed( 'jsonforms-caneditdata' ) ) {
+			$editUrl = $this->title->getLocalURL( "action=jsonedit" );
+			$edit = new \OOUI\ButtonWidget( [
+				"icon" => "edit",
+				'flags' => [ 'progressive' ],
+				'framed' => false,
+				"href" => $editUrl
+			] );
+		}
+
+		$title = TitleClass::newFromText( 'JsonSchema:' . $this->schemaName );
+		$link = LinkerClass::link( $title, $schema->title ?? $this->schemaName );
+
+		if ( $isArray ) {
+			$ret =
+			'<div class="toccolours infobox-array">
+<div class="infobox-array-header infobox-root"><span class="infobox-header-left">' .
+'<span class="infobox-key">' .
+				$link .
+			'</span>' .
+			'<span class="infobox-meta"><span class="infobox-type">array</span>' .
+				$countDisplay .
+			'</span></span><span class="infobox-header-right"><span class="infobox-edit">' .
+				$edit .
+			'</span>
+</span>
+</div>
+<div class="infobox-array-content">' .
+				$childrenHtml .
+			'</div>
+		</div>';
+
+		} else {
+			$ret =
+			'<div class="toccolours infobox-object">
+<div class="infobox-object-header infobox-root"><span class="infobox-header-left">' .
+	'<span class="infobox-key">' .
+					$link .
+				'</span>' .
+			'<span class="infobox-meta"><span class="infobox-type">object</span>' .
+				$countDisplay .
+			'</span></span><span class="infobox-header-right"><span class="infobox-edit">' .
+				$edit .
+			'</span>
+</span>
+</div>
+<div class="infobox-object-content">' .
+				$childrenHtml .
+			'</div>
+		</div>';
+		}
+
+		return $ret;
 	}
 
 	/**
@@ -310,7 +418,6 @@ class InfoboxRender {
 			'<span class="infobox-unique-hint" title="Unique values only">🔒</span>';
 		}
 
-		// Build count display only if count is not null
 		$countDisplay = "";
 		if ( $count !== null ) {
 			$countDisplay =
@@ -331,38 +438,37 @@ class InfoboxRender {
 		if ( $isArray ) {
 			$ret =
 			'<div class="toccolours infobox-array ' . $collapsibleClass . '">
-            <div class="infobox-array-header">
-                ' . $toggleHtml . '<span class="infobox-key">' .
-			$escapedKey .
-			'</span>' .
-			$layoutHint .
-			$uniqueHint .
-			'<span class="infobox-meta">
-                    <span class="infobox-type">array</span>' .
-			$countDisplay .
-			'</span>
-            </div>
-            <div class="infobox-array-content ' . $collapsibleContentClass . '">' .
-			$childrenHtml .
+<div class="infobox-array-header">' . $toggleHtml .
+	'<span class="infobox-key">' .
+					$escapedKey .
+				'</span>' .
+				$layoutHint .
+				$uniqueHint .
+				'<span class="infobox-meta"><span class="infobox-type">array</span>' .
+					$countDisplay .
+				'</span>
+</div>
+<div class="infobox-array-content ' . $collapsibleContentClass . '">' .
+				$childrenHtml .
 			'</div>
-        </div>';
+		</div>';
+
 		} else {
 			$ret =
 			'<div class="toccolours infobox-object ' . $collapsibleClass . '">
-            <div class="infobox-object-header">' . $toggleHtml . '
-                <span class="infobox-key">' .
-			$escapedKey .
-			'</span>' .
-			$layoutHint .
-			'<span class="infobox-meta">
-                    <span class="infobox-type">object</span>' .
-			$countDisplay .
-			'</span>
-            </div>
-            <div class="infobox-object-content ' . $collapsibleContentClass . '">' .
-			$childrenHtml .
+<div class="infobox-object-header">' . $toggleHtml .
+	'<span class="infobox-key">' .
+					$escapedKey .
+				'</span>' .
+				$layoutHint .
+				'<span class="infobox-meta"><span class="infobox-type">object</span>' .
+					$countDisplay .
+				'</span>
+</div>
+<div class="infobox-object-content ' . $collapsibleContentClass . '">' .
+				$childrenHtml .
 			'</div>
-        </div>';
+		</div>';
 		}
 
 		return $ret;
@@ -405,25 +511,21 @@ class InfoboxRender {
 		return '<div class="infobox-row"' .
 			$descriptionAttr .
 			'>
-            <div class="infobox-label">
-                <span class="infobox-key-label">' .
+<div class="infobox-label">
+<span class="infobox-key-label">' .
 			$escapedKey .
-			'</span>
-                ' .
+			'</span>' .
 			$requiredMark .
-			'
-                ' .
 			$formatHint .
 			'<sup><span class="infobox-type-badge">' .
 			$escapedType .
 			'</span></sup>
-            </div>
-            <div class="infobox-value">
-                ' .
+</div>
+<div class="infobox-value">' .
 			$displayValue .
 			'
-            </div>
-        </div>';
+</div>
+</div>';
 	}
 
 	/**

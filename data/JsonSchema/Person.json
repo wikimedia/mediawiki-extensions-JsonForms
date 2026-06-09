@@ -1,4 +1,5 @@
 {
+	"$id": "Person",
 	"$ref": "JsonSchema:BasicPerson",
 	"type": "object",
 	"x-layout": "booklet",

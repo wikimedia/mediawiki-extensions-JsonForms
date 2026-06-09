@@ -23,6 +23,7 @@
  */
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+use MediaWiki\Revision\SlotRecord;
 
 class SpecialJsonFormsEdit extends SpecialPage {
 
@@ -76,42 +77,61 @@ class SpecialJsonFormsEdit extends SpecialPage {
 		$startVal->form->schema->selectedSchema = new stdClass();
 
 		$wikiPage = \JsonForms::getWikiPage( $editTitle );
-
 		$metadata = \JsonForms::getMetadata( $wikiPage );
 
-		// Check if metadata exists and has slots property (as object)
 		if (
 			$metadata &&
 			isset( $metadata->slots ) &&
 			is_object( $metadata->slots )
 		) {
-			// can be either SLOT_ROLE_JSONFORMS_DATA or main
-			foreach ( $metadata->slots as $role => $value ) {
-				if ( isset( $value->schema ) ) {
-					$content = \JsonForms::getSlotContent( $wikiPage, $role );
-					$startVal->form->schema->selectedSchema->schemaName =
-						$value->schema;
-					$startVal->form->schema->selectedSchema->editor = json_decode(
-						$content,
-						false,
-					);
+			$metadataSlots = $metadata->slots;
 
-					$metadataKeys = [
-						"show_infobox" => "showInfobox",
-						"infobox_template" => "infoboxTemplate",
-					];
+			if ( property_exists( $metadataSlots, SLOT_ROLE_JSONFORMS_DATA ) ) {
+				$targetSlot = SLOT_ROLE_JSONFORMS_DATA;
 
-					foreach ( $metadataKeys as $key => $val ) {
-						if ( !empty( $value->{$val} ) ) {
-							if ( !isset( $startVal->form->options ) ) {
-								$startVal->form->options = new stdClass();
-							}
-							$startVal->form->options->{$key} = $value->{$val};
-						}
+			} elseif (
+				property_exists( $metadataSlots, SlotRecord::MAIN ) &&
+				( $metadataSlots->{SlotRecord::MAIN}->schema ?? null ) !== null
+			) {
+				$targetSlot = SlotRecord::MAIN;
+
+			} else {
+				$targetSlot = null;
+			}
+
+			if ( $targetSlot ) {
+				$slot = $metadataSlots->$targetSlot;
+				$content = \JsonForms::getSlotContent( $wikiPage, $targetSlot );
+
+				if ( isset( $slot->schema ) ) {
+					$startVal->form->schema->selectedSchema->schemaName = $slot->schema;
+
+					if ( $content ) {
+						$startVal->form->schema->selectedSchema->editor = json_decode(
+							$content,
+							false,
+						);
 					}
-					break;
+				}
+
+				$metadataKeys = [
+					"show_infobox" => "showInfobox",
+					"infobox_template" => "infoboxTemplate",
+				];
+
+				foreach ( $metadataKeys as $k => $v ) {
+					if ( property_exists( $slot, $v ) ) {
+						if ( !isset( $startVal->form->options ) ) {
+							$startVal->form->options = new stdClass();
+						}
+						$startVal->form->options->$k = $slot->$v;
+					}
 				}
 			}
+		}
+
+		if ( empty( (array)$startVal->form->schema->selectedSchema ) ) {
+			unset( $startVal->form->schema->selectedSchema );
 		}
 
 		$formData = new stdClass();

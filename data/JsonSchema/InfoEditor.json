@@ -1,4 +1,5 @@
 {
+	"$id": "InfoEditor",
 	"type": "object",
 	"title": "Info Test Case",
 	"properties": {

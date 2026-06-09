@@ -1,6 +1,6 @@
 {
+	"$id": "SurveyCities",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/european-statistics-data.schema.json",
 	"title": "European Countries Statistics Data",
 	"description": "Nested statistical data per country, main city, and employment status",
 	"type": "object",

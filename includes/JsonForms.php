@@ -29,6 +29,7 @@ use MediaWiki\Extension\JsonForms\FormParameters;
 use MediaWiki\Extension\JsonForms\InfoboxRender;
 use MediaWiki\Extension\JsonForms\QueryLinkParameters;
 use MediaWiki\Extension\JsonForms\ResultWrapper;
+use MediaWiki\Extension\JsonForms\SchemaUtils;
 use MediaWiki\Extension\JsonForms\SlotEditor;
 use MediaWiki\Extension\JsonForms\SlotHelper;
 use MediaWiki\Extension\JsonForms\TemplateRender;
@@ -72,6 +73,11 @@ class JsonForms {
 				],
 				"slot" => (object)[
 					"type" => "string",
+					"default" => SLOT_ROLE_JSONFORMS_DATA,
+				],
+				"print_scalar" => (object)[
+					"type" => "bool",
+					"default" => true,
 				],
 			],
 		];
@@ -86,14 +92,12 @@ class JsonForms {
 
 		$wikiPage = self::getWikiPage( $title );
 
-		$content = self::getSlotContent( $wikiPage, $named["slot"] );
+		$content = self::getSlotContent( $wikiPage, $named['slot'] );
 
 		$obj = $content ? json_decode( $content, false ) : [];
 
-		$templateRender = new TemplateRender( $parser );
-
-		$templatePrefix = "Template:" . $named["schema"];
-		$ret = $templateRender->render( $obj, $templatePrefix );
+		$templateRender = new TemplateRender( $parser, $named );
+		$ret = $templateRender->render( $obj );
 
 		// echo $ret;
 		// exit;
@@ -168,13 +172,25 @@ class JsonForms {
 			}
 		}
 
-		// Handle css_class - ensure it exists first
-		$currentCssClass = property_exists( $formDescriptor, "css_class" )
-			? $formDescriptor->css_class
-			: "";
-		$formDescriptor->css_class =
-			( !empty( $currentCssClass ) ? $currentCssClass . " " : "" ) .
-			"jsonforms-form-inline";
+		// Handle css_class
+		$css_classes = [];
+		if (
+			property_exists( $formDescriptor, "css_class" ) &&
+			!empty( $formDescriptor->css_class )
+		) {
+			$css_classes[] = $formDescriptor->css_class;
+		}
+
+		if (
+			!property_exists( $formDescriptor, "view" ) ||
+			$formDescriptor->view !== 'popup'
+		) {
+			$css_classes[] = "jsonforms-form-inline";
+		} else {
+			$css_classes[] = "jsonforms-form-popup";
+		}
+
+		$formDescriptor->css_class = implode( ' ', $css_classes );
 
 		$result = self::getPageForm( $output, $formDescriptor );
 
@@ -227,46 +243,45 @@ class JsonForms {
 
 				if ( !empty( $formDescriptor->schema ) ) {
 					$metadata = self::getMetadata( $wikiPage );
+
 					if (
 						$metadata &&
 						isset( $metadata->slots ) &&
-						is_object( $metadata->slots )
+						is_object( $metadata->slots ) &&
+						property_exists( $metadata->slots, $formDescriptor->slot )
 					) {
-						foreach ( $metadata->slots as $role => $slotData ) {
-							if ( $role === $formDescriptor->slot ) {
-								$content = self::getSlotContent(
-									$wikiPage,
-									$role,
-								);
-								if ( $content ) {
-									$startVal->form = new stdClass();
+						$role = $formDescriptor->slot;
+						$slotData = $metadata->slots->$role;
 
-									if ( empty( $formDescriptor->edit_path ) ) {
-										$startVal->form->editor = $content;
-									} else {
-										[
-											$shouldAppend,
-											$_,
-										] = self::parseAppendPath(
-											$formDescriptor->edit_path,
+						$content = self::getSlotContent(
+							$wikiPage,
+							$role,
+						);
+
+						if ( $content ) {
+							$startVal->form = new stdClass();
+
+							if ( empty( $formDescriptor->edit_path ) ) {
+								$startVal->form->editor = $content;
+
+							} else {
+								[
+									$shouldAppend,
+									$_,
+								] = SchemaUtils::parseAppendPath( $formDescriptor->edit_path );
+
+								if ( !$shouldAppend ) {
+									$json = SlotEditor::parseMaybeJSON( $content );
+									$json = SchemaUtils::getValueByPath(
+										$json,
+										$formDescriptor->edit_path,
+									);
+									if ( !empty( $json ) ) {
+										$startVal->form->editor = SlotEditor::stringifyMaybeJSON(
+											$json,
 										);
-										if ( !$shouldAppend ) {
-											$json = SlotEditor::parseMaybeJSON(
-												$content,
-											);
-											$json = self::getValueByPath(
-												$json,
-												$formDescriptor->edit_path,
-											);
-											if ( !empty( $json ) ) {
-												$startVal->form->editor = SlotEditor::stringifyMaybeJSON(
-													$json,
-												);
-											}
-										}
 									}
 								}
-								break;
 							}
 						}
 					}
@@ -303,7 +318,7 @@ class JsonForms {
 		$schema = [];
 		if ( !empty( $formDescriptor->schema ) ) {
 			$schema = self::getSourceSchema(
-				$formDescriptor->schema,
+				!empty( $formDescriptor->edit_schema ) ? $formDescriptor->edit_schema : $formDescriptor->schema,
 				"JsonSchema",
 			);
 			$schemaName = $formDescriptor->schema;
@@ -336,9 +351,6 @@ class JsonForms {
 					$jsonForm->properties->form->properties->editor->{'x-input-config'} = new stdClass();
 				}
 			}
-
-			$jsonForm->properties->form->properties->editor->{'x-input-config'}->schema =
-				"JsonSchema:" . $schemaName;
 
 			$schema = self::processSchema( $output, $schema );
 			$jsonForm->properties->form->properties->editor->{'x-input-config'}->schema = json_encode(
@@ -628,7 +640,7 @@ class JsonForms {
 
 	/**
 	 * @param Output $output
-	 * @param array $schema
+	 * @param StdClass $schema
 	 * @return array
 	 */
 	public static function processSchema( $output, $schema ) {
@@ -640,6 +652,7 @@ class JsonForms {
 			"x-title-format" => "title",
 			"x-description-format" => "description",
 			"x-label-format" => "label",
+			"x-enum-titles-format" => "x-enum-titles",
 		];
 
 		$callback = static function ( &$parent, $key, &$value, $pathArr ) use (
@@ -673,12 +686,14 @@ class JsonForms {
 				if ( $isObject ) {
 					if ( property_exists( $value, $k ) ) {
 						$format = $value->$k;
+
 					} else {
 						$value->$k = "text";
 					}
 				} else {
 					if ( isset( $value[$k] ) ) {
 						$format = $value[$k];
+
 					} else {
 						$value[$k] = "text";
 					}
@@ -690,9 +705,19 @@ class JsonForms {
 						break;
 
 					case "wikitext":
-						$parsed = self::parseWikitext( $output, $fieldValue );
+						if ( !is_array( $fieldValue ) ) {
+							$parsed = self::parseWikitext( $output, $fieldValue );
+
+						} else {
+							$parsed = [];
+							foreach ( $fieldValue as $k_ => $v_ ) {
+								$parsed[] = self::parseWikitext( $output, $v_ );
+							}
+						}
+
 						if ( $isObject ) {
 							$value->$v = $parsed;
+
 						} else {
 							$value[$v] = $parsed;
 						}
@@ -700,9 +725,19 @@ class JsonForms {
 
 					case "text":
 					default:
-						$escaped = htmlspecialchars( $fieldValue );
+						if ( !is_array( $fieldValue ) ) {
+							$escaped = htmlspecialchars( $fieldValue );
+
+						} else {
+							$escaped = [];
+							foreach ( $fieldValue as $k_ => $v_ ) {
+								$escaped[] = htmlspecialchars( $v_ );
+							}
+						}
+
 						if ( $isObject ) {
 							$value->$v = $escaped;
+
 						} else {
 							$value[$v] = $escaped;
 						}
@@ -711,8 +746,7 @@ class JsonForms {
 			}
 		};
 
-		// Assuming traverseSchema now accepts objects
-		return self::traverseSchema( $schema, $callback );
+		return SchemaUtils::traverseSchema( $schema, $callback );
 	}
 
 	/**
@@ -868,7 +902,64 @@ class JsonForms {
 	 */
 	public static function appendContent( $outputPage ) {
 		$wikiPage = $outputPage->getWikiPage();
+
 		if ( !$wikiPage ) {
+			return;
+		}
+
+		$title = $outputPage->getTitle();
+		$ns = $title->getNamespace();
+		$user = $outputPage->getUser();
+
+		if ( $ns === NS_JSONSCHEMA && $user->isAllowed( "jsonforms-canmanageschemas" ) ) {
+			$outputPage->enableOOUI();
+			$outputPage->addModules( "ext.JsonForms.infobox" );
+
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Schemas" );
+			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
+
+			$html = new \OOUI\MessageWidget( [
+				// success
+				"type" => "info",
+				"icon" => "edit",
+				"label" => new \OOUI\HtmlSnippet(
+					wfMessage(
+						"jsonforms-jsonschema-namespace-schema-message",
+						$url
+					)->text(),
+				),
+			] ) . HtmlClass::rawElement( 'p' );
+
+			$outputPage->prependHTML( $html );
+
+			return;
+		}
+
+		if ( $ns === NS_JSONFORM && $user->isAllowed( "jsonforms-canmanageforms" ) ) {
+			$outputPage->enableOOUI();
+			$outputPage->addModules( "ext.JsonForms.infobox" );
+
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Forms" );
+			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
+
+			$html = new \OOUI\MessageWidget( [
+				// success
+				"type" => "info",
+				"icon" => "edit",
+				"label" => new \OOUI\HtmlSnippet(
+					wfMessage(
+						"jsonforms-jsonschema-namespace-form-message",
+						$url
+					)->text(),
+				),
+			] ) . HtmlClass::rawElement( 'p' );
+
+			$outputPage->prependHTML( $html );
+
+			return;
+		}
+
+		if ( !in_array( $ns, self::getConfigValue( 'JsonFormsEditSchemaNamespaces' ) ) ) {
 			return;
 		}
 
@@ -900,16 +991,19 @@ class JsonForms {
 		}
 
 		$obj = json_decode( $text, false );
-		$position = $data->infoboxPosition ?? "top";
+		$position = $data->infoboxPosition ?? 'right';
 
+		$outputPage->enableOOUI();
+
+		// custom template
 		if ( !empty( $data->infoboxTemplate ) ) {
 			// @see ApiExpandTemplates
 			$parser = MediaWikiServices::getInstance()
 				->getParserFactory()
 				->create();
 			$context = $outputPage->getContext();
-			$title = $outputPage->getTitle();
 			$parserOptions = ParserOptions::newFromContext( $context );
+
 			$parser->startExternalParse(
 				$title,
 				$parserOptions,
@@ -919,6 +1013,8 @@ class JsonForms {
 			$templateRender = new TemplateRender( $parser );
 			$templatePrefix = "Template:" . $data->infoboxTemplate;
 			$ret = $templateRender->render( $obj, $templatePrefix );
+
+		// automatic template
 		} else {
 			$processedSchema = new stdClass();
 			if (
@@ -933,7 +1029,9 @@ class JsonForms {
 						->processedSchema;
 			}
 
-			$infoboxRender = new InfoboxRender( $processedSchema );
+			$schema = $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->schema;
+
+			$infoboxRender = new InfoboxRender( $user, $title, $schema, $processedSchema );
 			$ret = $infoboxRender->render( $obj );
 		}
 
@@ -1062,7 +1160,7 @@ class JsonForms {
 		$user = $output->getUser();
 		$context = $output->getContext();
 
-		$schemaUrl = self::getFullUrlOfNamespace( NS_JSONSCHEMA );
+		$schemaPath = self::getFullUrlOfNamespace( NS_JSONSCHEMA );
 		$VEForAll = false;
 		if (
 			ExtensionRegistry::getInstance()->isLoaded( "VEForAll" ) &&
@@ -1082,7 +1180,7 @@ class JsonForms {
 
 		$config = array_merge(
 			[
-				"schemaUrl" => $schemaUrl,
+				"schemaPath" => $schemaPath,
 				// 'actionUrl' => SpecialPage::getTitleFor( 'VisualDataSubmit', $title->getPrefixedDBkey() )->getLocalURL(),
 				"isNewPage" =>
 					$title->getArticleID() === 0 || !$title->isKnown(),
@@ -1593,313 +1691,6 @@ class JsonForms {
 	}
 
 	/**
-	 * Get value from an array by dot notation path
-	 *
-	 * @param array|null $obj Source array
-	 * @param string|null $path Dot notation path (e.g., "a.b.1.c")
-	 * @param mixed $default Default value to return if path not found
-	 * @return mixed Value at path or default
-	 */
-	public static function getValueByPath( $obj, $path, $default = null ) {
-		if ( $obj === null ) {
-			return $default;
-		}
-
-		// Handle both arrays and objects
-		if ( !is_array( $obj ) && !is_object( $obj ) ) {
-			return empty( $path ) ? $obj : $default;
-		}
-
-		if ( empty( $path ) ) {
-			return $obj;
-		}
-
-		// Convert bracket notation to dot notation: a[1].b -> a.1.b
-		$normalizedPath = preg_replace( "/\[(\d+)\]/", '.$1', $path );
-		$keys = explode( ".", $normalizedPath );
-		$current = $obj;
-
-		foreach ( $keys as $key ) {
-			if ( $current === null ) {
-				return $default;
-			}
-
-			// array
-			if ( is_array( $current ) ) {
-				if ( !array_key_exists( $key, $current ) ) {
-					return $default;
-				}
-				$current = $current[$key];
-
-			// object
-			} elseif ( is_object( $current ) ) {
-				if ( !property_exists( $current, $key ) ) {
-					return $default;
-				}
-				$current = $current->$key;
-			} else {
-				return $default;
-			}
-		}
-
-		return $current !== null ? $current : $default;
-	}
-
-	/**
-	 * Check if path ends with an append symbol
-	 *
-	 * @param string $path The original path
-	 * @param array $appendSymbols Array of symbols to check for
-	 * @return array [shouldAppend, cleanedPath]
-	 */
-	private static function parseAppendPath(
-		$path,
-		$appendSymbols = [ ".[]", ".", "[]" ],
-	) {
-		foreach ( $appendSymbols as $symbol ) {
-			$symbolLen = strlen( $symbol );
-			if ( substr( $path, -$symbolLen ) === $symbol ) {
-				return [ true, substr( $path, 0, -$symbolLen ) ];
-			}
-		}
-		return [ false, $path ];
-	}
-
-	/**
-	 * Set a value in an array by dot notation path
-	 *
-	 * @param StdClass|null &$obj Source array (passed by reference)
-	 * @param string $path Dot notation path (e.g., "a.b.1.c")
-	 * @param mixed $value Value to set
-	 * @param bool $createMissing Whether to create missing intermediate arrays
-	 * @return bool True if value was set, false otherwise
-	 */
-	public static function setValueByPath(
-	&$obj,
-	$path,
-	$value,
-	$createMissing = true,
-	) {
-		if ( $obj === null ) {
-			$obj = new stdClass();
-		}
-
-		if ( !is_object( $obj ) && !is_array( $obj ) ) {
-			return false;
-		}
-
-		if ( empty( $path ) ) {
-			$obj = $value;
-			return true;
-		}
-
-		[ $shouldAppend, $cleanPath ] = self::parseAppendPath( $path );
-
-		// Handle root-level append (e.g., "[]" or ".[]")
-		if ( $shouldAppend && empty( $cleanPath ) ) {
-			if ( !is_array( $obj ) ) {
-				$obj = [];
-			}
-			$obj[] = $value;
-			return true;
-		}
-
-		$pathToUse = $cleanPath ?: $path;
-
-		// Convert bracket notation to dot notation
-		$normalizedPath = preg_replace( "/\[(\d+)\]/", '.$1', $pathToUse );
-		$keys = explode( ".", $normalizedPath );
-		$current = &$obj;
-
-		foreach ( $keys as $i => $key ) {
-			$isLastKey = $i === count( $keys ) - 1;
-
-			if ( $isLastKey ) {
-				if ( $shouldAppend ) {
-					// Get or create the container for append operation
-					if ( is_array( $current ) ) {
-						if ( !isset( $current[$key] ) ) {
-							if ( !$createMissing ) {
-								return false;
-							}
-							$current[$key] = [];
-						}
-						if ( !is_array( $current[$key] ) ) {
-							if ( !$createMissing ) {
-								return false;
-							}
-							$current[$key] = [];
-						}
-						$current[$key][] = $value;
-					} else {
-						if ( !property_exists( $current, $key ) ) {
-							if ( !$createMissing ) {
-								return false;
-							}
-							$current->$key = [];
-						}
-						if ( !is_array( $current->$key ) ) {
-							if ( !$createMissing ) {
-								return false;
-							}
-							$current->$key = [];
-						}
-						$current->$key[] = $value;
-					}
-				} else {
-					// Set value
-					if ( is_array( $current ) ) {
-						$current[$key] = $value;
-					} else {
-						$current->$key = $value;
-					}
-				}
-				return true;
-			}
-
-			// Navigate to next level
-			$isNextNumeric = isset( $keys[$i + 1] ) && is_numeric( $keys[$i + 1] );
-
-			if ( is_array( $current ) ) {
-				// Current is array
-				if ( !isset( $current[$key] ) ) {
-					if ( !$createMissing ) {
-						return false;
-					}
-					// Create array or object
-					$current[$key] = $isNextNumeric ? [] : new stdClass();
-				}
-				$current = &$current[$key];
-			} else {
-				// object
-				if ( !property_exists( $current, $key ) ) {
-					if ( !$createMissing ) {
-						return false;
-					}
-					// Create array or object
-					$current->$key = $isNextNumeric ? [] : new stdClass();
-				}
-				$current = &$current->$key;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param StdClass $schema
-	 * @param callable $callback
-	 * @return StdClass
-	 */
-	public static function traverseSchema(
-		$schema,
-		callable $callback,
-		$path = [],
-		&$parent = null,
-		$parentKey = null,
-	) {
-		if ( $parent === null ) {
-			// Root call
-			$emptyParent = is_object( $schema ) ? new stdClass() : [];
-			$callback( $emptyParent, "", $schema, [] );
-
-			if ( is_object( $schema ) ) {
-				foreach ( get_object_vars( $schema ) as $key => $value ) {
-					self::traverseSchema(
-						$value,
-						$callback,
-						[ $key ],
-						$schema,
-						$key,
-					);
-				}
-			} elseif ( is_array( $schema ) ) {
-				foreach ( $schema as $key => $value ) {
-					self::traverseSchema(
-						$value,
-						$callback,
-						[ $key ],
-						$schema,
-						$key,
-					);
-				}
-			}
-
-			return $schema;
-		}
-
-		// Process current node
-		$callback( $parent, $parentKey, $schema, $path );
-
-		// Recurse into children
-		if ( is_object( $schema ) ) {
-			foreach ( get_object_vars( $schema ) as $key => $value ) {
-				$newPath = $path;
-				$newPath[] = $key;
-				self::traverseSchema(
-					$value,
-					$callback,
-					$newPath,
-					$schema,
-					$key,
-				);
-			}
-		} elseif ( is_array( $schema ) ) {
-			foreach ( $schema as $key => $value ) {
-				$newPath = $path;
-				$newPath[] = $key;
-				self::traverseSchema(
-					$value,
-					$callback,
-					$newPath,
-					$schema,
-					$key,
-				);
-			}
-		}
-
-		return $schema;
-	}
-
-	/**
-	 * @param Title $title
-	 * @param array slots
-	 * @param array &$errors []
-	 * @return
-	 */
-	/*
-	public static function traverseSchema( array $schema, callable $callback ): array {
-		// Process root
-		$rootRef = &$schema;
-		$emptyParent = [];
-		$callback( $emptyParent, '', $rootRef, [] );
-
-		$it = new RecursiveIteratorIterator(
-			new RecursiveArrayIterator( $schema ),
-			RecursiveIteratorIterator::SELF_FIRST
-		);
-
-		foreach ( $it as $key => $value ) {
-			$path = [];
-			for ( $depth = 0; $depth <= $it->getDepth(); $depth++ ) {
-				$path[] = $it->getSubIterator( $depth )->key();
-			}
-
-			$parent =& $schema;
-			for ( $depth = 0; $depth < $it->getDepth(); $depth++ ) {
-				$parent =& $parent[ $it->getSubIterator( $depth )->key() ];
-			}
-
-			$valueRef =& $parent[$key];
-
-			$callback( $parent, $key, $valueRef, $path );
-		}
-
-		return $schema;
-	}
-*/
-
-	/**
 	 * @return MediaWiki\User\UserGroupManager|null
 	 */
 	public static function getUserGroupManager() {
@@ -1949,6 +1740,23 @@ class JsonForms {
 	}
 
 	/**
+	 * @param string $key
+	 * @return mixed
+	 */
+	public static function getConfigValue( $key ) {
+		return MediaWikiServices::getInstance()
+			->getMainConfig()
+			->get( $key );
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function slotManagerGroups() {
+		return [ 'sysop', 'bureaucrat', 'jsonforms-admin', 'jsonforms-editor' ];
+	}
+
+	/**
 	 * @see PageOwnership -> SpecialPageOwnershipPermissions
 	 * @param Context context
 	 * @return bool
@@ -1981,8 +1789,7 @@ class JsonForms {
 			: null;
 
 		foreach ( $allGroups as $groupname ) {
-			$permissions = $groupPermissions[$group] ?? [];
-
+			// $permissions = $groupPermissions[$groupname] ?? [];
 			// Replace * with a more descriptive groupname
 
 			$groupnameLocalized =

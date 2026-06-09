@@ -29,6 +29,7 @@ use MediaWiki\Extension\JsonForms\ResultWrapper;
 use MediaWiki\Extension\JsonForms\SubmitForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use stdClass;
 
 class EditSchema extends SubmitForm {
 	/**
@@ -39,76 +40,6 @@ class EditSchema extends SubmitForm {
 		$services = MediaWikiServices::getInstance();
 
 		$errors = [];
-
-		/*
-{
-  "options": {
-	"title": "",
-	"content_model": "wikitext",
-	"editor": "wikieditor",
-	"content": "",
-	"categories": [],
-	"summary": "",
-	"minor": false,
-	"buttons": {
-	  "submit": null
-	}
-  },
-  "config": {
-	"schemaUrl": "http://127.0.0.1/mediawiki-1.44.0/index.php/JsonSchema:",
-	"isNewPage": true,
-	"caneditdata": true,
-	"canmanageschemas": true,
-	"canmanageforms": true,
-	"contentModels": {
-	  "css": "CSS",
-	  "GadgetDefinition": "GadgetDefinition",
-	  "json": "JSON",
-	  "javascript": "JavaScript",
-	  "sanitized-css": "Sanitized CSS",
-	  "Scribunto": "Scribunto module",
-	  "text": "plain text",
-	  "twig": "twig",
-	  "wikitext": "wikitext"
-	},
-	"roleContentModelMap": {
-	  "main": "wikitext",
-	  "jsonforms-data": "json",
-	  "jsonforms-metadata": "json",
-	  "jsonschema": "json",
-	  "jsondata": "json",
-	  "header": "wikitext",
-	  "footer": "wikitext"
-	},
-	"contentModel": "wikitext",
-	"VEForAll": true,
-	"captchaSiteKey": "6Ld4DYUsAAAAAB7ypPb84qYAXjGBSd9oSjQGK3jB",
-	"jsonSlots": [
-	  "jsonforms-data",
-	  "jsonforms-metadata",
-	  "jsonschema",
-	  "jsondata"
-	],
-	"slotRoles": [
-	  "main",
-	  "jsonforms-data",
-	  "jsonforms-metadata",
-	  "jsonschema",
-	  "jsondata",
-	  "header",
-	  "footer"
-	],
-	"jsonContentModels": [
-	  "json",
-	  "json",
-	  "json",
-	  "json"
-	],
-	"jsonforms-show-notice-outdated-version": true
-  },
-  "processor": "NewArticle"
-}
-*/
 
 		// Convert array access ($data['key']) to object access ($data->key)
 
@@ -159,25 +90,24 @@ class EditSchema extends SubmitForm {
 		$metadataPrevious = \JsonForms::getMetadata( $wikiPage );
 		$targetSlot = null;
 
-		if ( $metadataPrevious && is_object( $metadataPrevious->slots ) ) {
-			// Prefer SLOT_ROLE_JSONFORMS_DATA over main
-			if (
-				property_exists(
-					$metadataPrevious->slots,
-					SLOT_ROLE_JSONFORMS_DATA,
-				) &&
-				( $metadataPrevious->slots->{SLOT_ROLE_JSONFORMS_DATA}->schema ??
-					null ) !==
-					null
-			) {
+		if (
+			$metadataPrevious &&
+			isset( $metadataPrevious->slots ) &&
+			is_object( $metadataPrevious->slots )
+		) {
+			$metadataPreviousSlots = $metadataPrevious->slots;
+
+			if ( property_exists( $metadataPreviousSlots, SLOT_ROLE_JSONFORMS_DATA ) ) {
 				$targetSlot = SLOT_ROLE_JSONFORMS_DATA;
+
 			} elseif (
-				property_exists( $metadataPrevious->slots, SlotRecord::MAIN ) &&
-				( $metadataPrevious->slots->{SlotRecord::MAIN}->schema ??
-					null ) !==
-					null
+				property_exists( $metadataPreviousSlots, SlotRecord::MAIN ) &&
+				( $metadataPreviousSlots->{SlotRecord::MAIN}->schema ?? null ) !== null
 			) {
 				$targetSlot = SlotRecord::MAIN;
+
+			} else {
+				$targetSlot = null;
 			}
 		}
 
@@ -243,8 +173,7 @@ class EditSchema extends SubmitForm {
 				$metadata->slots->{$targetSlot} = new stdClass();
 			}
 			$metadata->slots->{$targetSlot}->model = "json";
-			$metadata->slots->{$targetSlot}->schema =
-				$data->metadata->schemaName;
+			$metadata->slots->{$targetSlot}->schema = $data->metadata->schemaName;
 		}
 
 		if (
@@ -267,9 +196,11 @@ class EditSchema extends SubmitForm {
 			];
 
 			foreach ( $metadataKeys as $key => $value ) {
-				if ( !empty( $data->metadata->$key ) ) {
-					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->{$value} =
+				if ( property_exists( $data->metadata, $key ) ) {
+					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$value =
 						$data->metadata->$key;
+				} else {
+					unset( $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$value );
 				}
 			}
 
@@ -277,10 +208,16 @@ class EditSchema extends SubmitForm {
 				$data->processedSchema;
 		}
 
-		$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
-			"model" => "json",
-			"content" => json_encode( $metadata ),
-		];
+		if ( empty( (array)$metadata->slots ) ) {
+			unset( $metadata->slots );
+		}
+
+		if ( !empty( (array)$metadata ) ) {
+			$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
+				"model" => "json",
+				"content" => json_encode( $metadata ),
+			];
+		}
 
 		$processedData = [
 			"slots" => $slots,

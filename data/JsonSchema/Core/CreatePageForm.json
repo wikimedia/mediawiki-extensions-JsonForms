@@ -1,6 +1,6 @@
 {
 	"$schema": "https:\/\/json-schema.org\/draft\/2020-12\/schema",
-	"$id": "CreatePageForm",
+	"$id": "Core/CreatePageForm",
 	"@type": "JsonForms default schema",
 	"type": "object",
 	"title": "Create\/edit form",
@@ -148,6 +148,22 @@
 				"value": "main"
 			}
 		},
+		"infobox_position": {
+			"type": "string",
+			"title": "Infobox position",
+			"enum": [
+				"right",
+				"left",
+				"top",
+				"bottom"
+			],
+			"default": "right",
+			"x-dependency": {
+				"path": "show_infobox",
+				"op": "==",
+				"value": true
+			}
+		},
 		"infobox_template": {
 			"type": "string",
 			"title": "Infobox template",
@@ -283,8 +299,23 @@
 			"type": "string",
 			"format": "text",
 			"title": "Edit path",
-			"description": "Target path for form data (dot separated)",
+			"description": "Target path for form data (dot separated &ndash; array items can be added with &lt;path&gt;.[])",
+			"x-description-format": "html",
 			"default": ""
+		},
+		"edit_schema": {
+			"type": "string",
+			"title": "Edit schema",
+			"format": "text",
+			"description": "Partial schema for editing 'edit_path'",
+			"default": "",
+			"x-enum-provider": "jsonSchemas",
+			"default": "",
+			"x-dependency": {
+				"path": "edit_path",
+				"op": "!=",
+				"value": ""
+			}
 		},
 		"display_path": {
 			"type": "string",

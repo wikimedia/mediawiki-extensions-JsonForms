@@ -1,5 +1,6 @@
 {
 	"@type": "JsonForms default schema",
+	"$id": "Default",
 	"name": "Default",
 	"schema": "",
 	"action": "",
@@ -9,6 +10,7 @@
 	"edit_freetext": false,
 	"edit": "",
 	"edit_path": "",
+	"edit_schema": "",
 	"display_path": "",
 	"pagename_formula": "",
 	"create_only_fields": [],

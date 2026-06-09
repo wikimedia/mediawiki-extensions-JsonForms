@@ -19,12 +19,15 @@
 	"action-jsonforms-canmanageforms": "manage forms",
 
 	"apihelp-jsonforms-fetch-schema-summary": "fetch schema",
+	"apihelp-jsonforms-process-schema-summary": "process schema",
 	"apihelp-jsonforms-submit-form-summary": "submit form",
 	"apihelp-jsonforms-groupnames-summary": "groupnames",
 	"apihelp-jsonforms-fetch-schema-param-schema": "schema",
+	"apihelp-jsonforms-process-schema-param-schema": "schema",
 	"apihelp-jsonforms-submit-form-param-data": "data",
 
 	"apihelp-jsonforms-fetch-schema-example-1": "fetch schema example",
+	"apihelp-jsonforms-process-schema-example-1": "process schema example",
 	"apihelp-jsonforms-submit-form-example-1": "submit form example",
 	"apihelp-jsonforms-groupnames-example-1": "groupnames example",
 
@@ -52,6 +55,9 @@
 	"jsonformsbrowseforms": "Manage forms",
 	"jsonformsbrowseschemas": "Manage schemas",
 	"jsonformsbrowsedata-topnav": "'''navigation'''",
+
+	"jsonforms-jsonschema-namespace-schema-message": "Edit this schema using <a href=\"$1\">JsonForms's SchemaBuilder</a>",
+	"jsonforms-jsonschema-namespace-form-message": "Edit this schema using <a href=\"$1\">JsonForms's FormBuilder</a>",
 
 	"visualdata-slot-label-jsonforms-metadata": "metadata (JsonForms)",
 	"visualdata-slot-label-jsonforms-data": "data (JsonForms)",

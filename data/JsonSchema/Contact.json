@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "https://example.com/contact.schema.json",
+	"$id": "Contact",
 	"title": "Contact",
 	"description": "A contact person or entity",
 	"type": "object",
@@ -26,7 +26,7 @@
 					"fullname": {
 						"type": "string",
 						"title": "Full Name",
-						"description": "Computed full name from name object",
+						"description": "Computed full name",
 						"x-watch": [
 							"name.salutation",
 							"name.first_name",
@@ -43,7 +43,7 @@
 					"fullname": {
 						"type": "string",
 						"title": "Full Name",
-						"description": "Computed full name from simple name string",
+						"description": "Computed full name",
 						"x-watch": [
 							"name"
 						],
@@ -57,7 +57,7 @@
 		"fullname": {
 			"type": "string",
 			"title": "Full Name",
-			"description": "Computed full name (auto-generated based on name format)"
+			"description": "Computed full name"
 		},
 		"name": {
 			"oneOf": [

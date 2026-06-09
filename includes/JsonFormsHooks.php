@@ -18,7 +18,7 @@
  *
  * @file
  * @author thomas-topway-it <support@topway.it>
- * @copyright Copyright ©2025, https://wikisphere.org
+ * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
 
 define( "SLOT_ROLE_JSONFORMS_DATA", "jsonforms-data" );
@@ -133,6 +133,7 @@ class JsonFormsHooks {
 		User $user,
 		stdClass $submittedData,
 		array $processedData,
+		array &$returnData,
 		&$errors = [],
 	) {
 	}
@@ -233,11 +234,13 @@ class JsonFormsHooks {
 			\JsonForms::checkWritePermissions( $user, $title, $errors ) &&
 			!$title->isSpecialPage()
 		) {
-			$groups = [ "sysop", "bureaucrat", "jsonforms-admin" ];
+			$ns = $title->getNamespace();
+
+			// edit slots
+			$groups = \JsonForms::slotManagerGroups();
 			if (
-				count(
-					array_intersect( $groups, \JsonForms::getUserGroups( $user ) ),
-				)
+				count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) ) &&
+				in_array( $ns, JsonForms::getConfigValue( 'JsonFormsEditSlotsNamespaces' ) )
 			) {
 				$link = [
 					"class" =>
@@ -262,27 +265,31 @@ class JsonFormsHooks {
 						array_flip( array_slice( $keys, $pos + 1 ) ),
 					);
 			}
-			$keys = array_keys( $links["views"] );
-			$pos = array_search( "edit", $keys );
 
-			$link = [
-				"class" =>
-					$skinTemplate->getRequest()->getVal( "action" ) === "jsonedit"
-						? "selected"
-						: "",
-				"text" => wfMessage( "jsonforms-jsonedit-label" )->text(),
-				"href" => $title->getLocalURL( "action=jsonedit" ),
-			];
+			// edit schema
+			if ( in_array( $ns, JsonForms::getConfigValue( 'JsonFormsEditSchemaNamespaces' ) ) ) {
+				$keys = array_keys( $links["views"] );
+				$pos = array_search( "edit", $keys );
 
-			$links["views"] =
-				array_intersect_key(
-					$links["views"],
-					array_flip( array_slice( $keys, 0, $pos + 1 ) ),
-				) + [ "jsonedit" => $link ] +
-				array_intersect_key(
-					$links["views"],
-					array_flip( array_slice( $keys, $pos + 1 ) ),
-				);
+				$link = [
+					"class" =>
+						$skinTemplate->getRequest()->getVal( "action" ) === "jsonedit"
+							? "selected"
+							: "",
+					"text" => wfMessage( "jsonforms-jsonedit-label" )->text(),
+					"href" => $title->getLocalURL( "action=jsonedit" ),
+				];
+
+				$links["views"] =
+					array_intersect_key(
+						$links["views"],
+						array_flip( array_slice( $keys, 0, $pos + 1 ) ),
+					) + [ "jsonedit" => $link ] +
+					array_intersect_key(
+						$links["views"],
+						array_flip( array_slice( $keys, $pos + 1 ) ),
+					);
+			}
 		}
 	}
 
@@ -340,21 +347,19 @@ class JsonFormsHooks {
 		$user = $skin->getUser();
 		$title = $skin->getTitle();
 
-		if ( $user->isAllowed( "edit" ) ) {
-			$specialpage_title = SpecialPage::getTitleFor( "JsonForms" );
-			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-				"text" => wfMessage( "jsonforms-forms" )->text(),
-				"class" => "jsonforms-forms",
-				"href" => $specialpage_title->getLocalURL(),
-			];
+		$specialpage_title = SpecialPage::getTitleFor( "JsonForms" );
+		$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
+			"text" => wfMessage( "jsonforms-forms" )->text(),
+			"class" => "jsonforms-forms",
+			"href" => $specialpage_title->getLocalURL(),
+		];
 
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsCreate" );
-			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-				"text" => wfMessage( "jsonforms-new-article" )->text(),
-				"class" => "jsonforms-new-article",
-				"href" => $specialpage_title->getLocalURL(),
-			];
-		}
+		$specialpage_title = SpecialPage::getTitleFor( "JsonFormsCreate" );
+		$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
+			"text" => wfMessage( "jsonforms-new-article" )->text(),
+			"class" => "jsonforms-new-article",
+			"href" => $specialpage_title->getLocalURL(),
+		];
 
 		if ( $user->isAllowed( "jsonforms-canmanageforms" ) ) {
 			$specialpage_title = SpecialPage::getTitleFor(
@@ -380,7 +385,7 @@ class JsonFormsHooks {
 			];
 		}
 
-		$groups = [ "sysop", "bureaucrat", "jsonforms-admin" ];
+		$groups = \JsonForms::slotManagerGroups();
 		if ( count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) ) ) {
 			$specialpage_title = SpecialPage::getTitleFor(
 				"JsonFormsSlotManager",

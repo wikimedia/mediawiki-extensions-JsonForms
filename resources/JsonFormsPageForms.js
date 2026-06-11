@@ -602,10 +602,7 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 	// SubmitProcessor
 	const data = {
 		value: innerEditor.getValue(),
-		options: {
-			...optionsEditor.getValue(),
-			captcha: this.editor.getEditor( 'root.form.captcha' )
-		},
+		options: optionsEditor.getValue(),
 		processedSchema,
 		structuredValue,
 		formDescriptor,
@@ -614,6 +611,11 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 		// submit processor
 		processor: 'PageForms'
 	};
+
+	const captchaEditor = this.editor.getEditor( 'root.captcha' );
+	if ( captchaEditor) {
+		data.options.captcha = captchaEditor.getValue();
+	}
 
 	console.log( 'data', data );
 

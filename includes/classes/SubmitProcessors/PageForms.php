@@ -212,7 +212,7 @@ metadata can be stored:
 			$data->options = new stdClass();
 		}
 
-		if ( !empty( $data->options->captcha ) ) {
+		if ( property_exists( $data->options, 'captcha' ) ) {
 			$recaptchaSecret = $GLOBALS["wgJsonFormsReCaptchaSecretKey"];
 			$recaptchaResponse = $data->options->captcha;
 

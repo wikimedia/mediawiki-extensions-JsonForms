@@ -60,6 +60,56 @@ class SchemaUtils {
 	}
 
 	/**
+	 * Recursively merges source into target. Target values always take precedence.
+	 *
+	 * Arrays keep target length and merge child elements. Objects merge properties.
+	 * When types differ, target prevails without merging.
+	 *
+	 * @param stdClass|array|null $target
+	 * @param stdClass|array|null $source
+	 * @return stdClass|array|null
+	 */
+	public static function mergeObjectsRecursive( $target, $source ) {
+		if ( $source === null ) {
+			return $target;
+		}
+		if ( $target === null ) {
+			return $source;
+		}
+
+		// Arrays
+		if ( is_array( $target ) && is_array( $source ) ) {
+			$result = $target;
+			for ( $i = 0; $i < count( $target ); $i++ ) {
+				$sourceItem = isset( $source[$i] ) ? $source[$i] : null;
+				$result[$i] = self::mergeObjectsRecursive( $target[$i], $sourceItem );
+			}
+			return $result;
+		}
+
+		// Objects
+		if ( is_object( $target ) && is_object( $source ) ) {
+			$result = clone $target;
+			foreach ( get_object_vars( $source ) as $property => $value ) {
+				if ( property_exists( $result, $property ) ) {
+					if (
+						( is_array( $result->$property ) && is_array( $value ) ) ||
+						( is_object( $result->$property ) && is_object( $value ) )
+					) {
+						$result->$property = self::mergeObjectsRecursive( $result->$property, $value );
+					}
+				// Preserve target
+				} else {
+					$result->$property = $value;
+				}
+			}
+			return $result;
+		}
+
+		return $target;
+	}
+
+	/**
 	 * Check if path ends with an append symbol
 	 *
 	 * @param string $path The original path
@@ -82,7 +132,7 @@ class SchemaUtils {
 	/**
 	 * Set a value in an array by dot notation path
 	 *
-	 * @param StdClass|null &$obj Source array (passed by reference)
+	 * @param stdClass|null &$obj Source array (passed by reference)
 	 * @param string $path Dot notation path (e.g., "a.b.1.c")
 	 * @param mixed $value Value to set
 	 * @param bool $createMissing Whether to create missing intermediate arrays
@@ -201,9 +251,9 @@ class SchemaUtils {
 	}
 
 	/**
-	 * @param StdClass|array $schema
+	 * @param stdClass|array $schema
 	 * @param callable $callback
-	 * @return StdClass
+	 * @return stdClass
 	 */
 	public static function traverseSchema(
 		$schema,

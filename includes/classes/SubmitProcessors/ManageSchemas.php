@@ -47,7 +47,7 @@ class ManageSchemas extends PageForms {
 
 		switch ( $data->schemaId ) {
 			case "SchemaBuilder/MetaSchema":
-				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Schemas" );
+				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Schemas" );
 
 				$title = $processedData['targetTitle'];
 				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $title->getFullText() ] );
@@ -56,7 +56,7 @@ class ManageSchemas extends PageForms {
 				break;
 
 			case "Core/CreatePageForm":
-				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Forms" );
+				$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Forms" );
 
 				$title = $processedData['targetTitle'];
 				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $title->getFullText() ] );

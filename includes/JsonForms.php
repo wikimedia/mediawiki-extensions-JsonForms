@@ -186,7 +186,9 @@ class JsonForms {
 			$formDescriptor->view !== 'popup'
 		) {
 			$css_classes[] = "jsonforms-form-inline";
+
 		} else {
+			unset( $formDescriptor->width );
 			$css_classes[] = "jsonforms-form-popup";
 		}
 
@@ -915,7 +917,7 @@ class JsonForms {
 			$outputPage->enableOOUI();
 			$outputPage->addModules( "ext.JsonForms.infobox" );
 
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Schemas" );
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Schemas" );
 			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
 
 			$html = new \OOUI\MessageWidget( [
@@ -939,7 +941,7 @@ class JsonForms {
 			$outputPage->enableOOUI();
 			$outputPage->addModules( "ext.JsonForms.infobox" );
 
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage/Forms" );
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Forms" );
 			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
 
 			$html = new \OOUI\MessageWidget( [

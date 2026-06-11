@@ -71,6 +71,7 @@ class SpecialJsonForms extends QueryPage {
 
 		$formDescriptor = \JsonForms::getSourceSchema( $par, 'JsonForm' );
 		$formDescriptor->view = 'inline';
+		unset( $formDescriptor->width );
 
 		$html = \JsonForms::getPageForm( $out, $formDescriptor );
 
@@ -146,7 +147,8 @@ class SpecialJsonForms extends QueryPage {
 		$pageName = $result->page_title;
 
 		$title = SpecialPage::getTitleFor( 'JsonForms', $pageName );
-		return $this->getLinkRenderer()->makeKnownLink( $title, htmlspecialchars( $pageName ) );
+		$text = str_replace( '_', ' ', $pageName );
+		return $this->getLinkRenderer()->makeKnownLink( $title, htmlspecialchars( $text ) );
 	}
 
 }

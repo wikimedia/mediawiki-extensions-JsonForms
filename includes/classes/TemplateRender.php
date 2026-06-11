@@ -47,38 +47,65 @@ class TemplateRender {
 	 */
 	public function render( $data ) {
 		$templatePrefix = 'Template:' . $this->parameters['schema'];
-		$childrenHtml = $this->renderNode( $data, [], [], $templatePrefix );
-
-		// root container
-		$params = [
-			"children" => $childrenHtml,
-			"count" => is_array( $data )
-				? count( $data )
-				: ( is_object( $data )
-					? count( (array)$data )
-					: 1 ),
-			// 'data' => $data,
-			"key" => "",
-			"path" => "",
-			"type" => gettype( $data ),
-			"hasChildren" => !empty( $childrenHtml ),
-			'templateName' => $templatePrefix
-		];
-
-		$params_ = $params;
-		$params_['data'] = $data;
-		unset( $params_['children'] );
-
-		$params["params"] = "<pre>" .
-						json_encode(
-							$params_,
-							JSON_PRETTY_PRINT |
-								JSON_UNESCAPED_UNICODE |
-								JSON_UNESCAPED_SLASHES,
-						) .
-						"</pre>";
+		$children = $this->renderNode( $data, [], [], $templatePrefix );
+		$params = $this->createParams( '', $data, $children, '', $templatePrefix );
 
 		return $this->processTemplate( $templatePrefix, $params );
+	}
+
+	/**
+	 * @param string $text
+	 * @return string
+	 */
+	public function recursiveTagParseFully( $text ) {
+		return Parser::stripOuterParagraph(
+			$this->parser->recursiveTagParseFully( $text ) );
+	}
+
+	/**
+	 * @param string $key
+	 * @param array $value
+	 * @param array $children
+	 * @param string $path
+	 * @param string $templateName
+	 * @return string
+	 */
+	public function createParams( $key, $value, $children, $path, $templateName ) {
+		$params = [
+			"key" => $key,
+			"properties" => implode( ', ', array_keys( $children ) ),
+			"count" => is_array( $value )
+				? count( $value )
+				: count( (array)$value ),
+			"hasChildren" => count( $children ),
+			"path" => $path,
+			'templateName' => $templateName
+		];
+
+		$dataArray = is_array( $value ) ? $value : (array)$value;
+		$paramsDisplay = $params;
+		$paramsDisplay[ 'data' ] = $value;
+		$params[ 'children' ] = implode( $children );
+
+		foreach ( $children as $k => $v ) {
+			if ( array_key_exists( $k, $params ) ) {
+				$params[ '_' . $k ] = $params[$k];
+				$paramsDisplay[ '_' . $k ] = $params[$k];
+			}
+			$params[ $k ] = $v;
+			$paramsDisplay[ $k ] = is_scalar( $dataArray[$k] ) ? (string)$v : '<subitem>';
+		}
+
+		$params["params"] = "<details><pre>" .
+			json_encode(
+				$paramsDisplay,
+				JSON_PRETTY_PRINT |
+				JSON_UNESCAPED_UNICODE |
+				JSON_UNESCAPED_SLASHES,
+			) .
+			"</pre></details>";
+
+		return $params;
 	}
 
 	/**
@@ -86,10 +113,10 @@ class TemplateRender {
 	 * @param string $path
 	 * @param string $pathNoIndex
 	 * @param string $templatePrefix
-	 * @return string
+	 * @return array
 	 */
 	public function renderNode( $node, $path, $pathNoIndex, $templatePrefix ) {
-		$ret = "";
+		$ret = [];
 
 		foreach ( $node as $key => $value ) {
 			$newPath = $path;
@@ -113,46 +140,15 @@ class TemplateRender {
 			}
 
 			if ( is_array( $value ) || is_object( $value ) ) {
-				$childrenHtml = $this->renderNode(
+				$children = $this->renderNode(
 					$value,
 					$newPath,
 					$newPathNoIndex,
 					$templatePrefix,
 				);
 
-				$params = [
-					"key" => $key,
-					"children" => $childrenHtml,
-					"count" => is_array( $value )
-						? count( $value )
-						: count( (array)$value ),
-					"hasChildren" => true,
-					"path" => $pathStr,
-					'templateName' => $templateName
-				];
-
-				$dataArray = is_array( $value ) ? $value : (array)$value;
-				foreach ( $dataArray as $propKey => $propValue ) {
-					// Only include scalar values (strings, numbers, booleans, null)
-					if ( is_scalar( $propValue ) ) {
-						$params[$propKey] = (string)$propValue;
-					}
-				}
-
-				$params_ = $params;
-				unset( $params_['children'] );
-
-				$params["params"] =
-						"<pre>" .
-						json_encode(
-							$params_,
-							JSON_PRETTY_PRINT |
-								JSON_UNESCAPED_UNICODE |
-								JSON_UNESCAPED_SLASHES,
-						) .
-						"</pre>";
-
-				$ret .= $this->processTemplate( $templateName, $params );
+				$params = $this->createParams( $key, $value, $children, $pathStr, $templateName );
+				$ret[$key] = $this->processTemplate( $templateName, $params );
 
 			// Leaf
 			} else {
@@ -162,9 +158,9 @@ class TemplateRender {
 					"value" => $value,
 					"type" => gettype( $value ),
 					"hasChildren" => false,
-					'templateName' => $templateName,
-					"params" => $value,
+					'templateName' => $templateName
 				];
+				$params[$key] = $value;
 
 				$titleTemplate = TitleClass::newFromText(
 					$templateName,
@@ -172,13 +168,13 @@ class TemplateRender {
 				);
 
 				if ( !$this->parameters['print_scalar'] ) {
-					$ret .= $this->processTemplate( $templateName, $params );
+					$ret[$key] = $this->processTemplate( $templateName, $params );
 
 				} elseif ( $titleTemplate && $titleTemplate->isKnown() ) {
-					$ret .= $this->processTemplate( $templateName, $params );
+					$ret[$key] = $this->processTemplate( $templateName, $params );
 
 				} else {
-					$ret .= $value;
+					$ret[$key] = $value;
 				}
 			}
 		}

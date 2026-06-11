@@ -24,6 +24,8 @@
 define( "SLOT_ROLE_JSONFORMS_DATA", "jsonforms-data" );
 define( "SLOT_ROLE_JSONFORMS_METADATA", "jsonforms-metadata" );
 
+use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
+
 class JsonFormsHooks {
 	/** @var array */
 	public static $PageUpdate = [];
@@ -51,6 +53,9 @@ class JsonFormsHooks {
 			\JsonForms::class,
 			"parserFunctionQueryLink",
 		] );
+
+		// @see https://www.mediawiki.org/wiki/Extension:HTML_Tags
+		$parser->setHook( 'details', [ self::class, 'renderDetailsTag' ] );
 	}
 
 	/**
@@ -92,6 +97,22 @@ class JsonFormsHooks {
 				);
 			}
 		} );
+	}
+
+	/**
+	 * @see https://www.mediawiki.org/wiki/Extension:HTML_Tags
+	 *
+	 * @param string $input
+	 * @param string[] $args
+	 * @param Parser $parser
+	 * @param PPFrame $frame
+	 * @return string
+	 */
+	public static function renderDetailsTag( $input, $args, $parser, $frame ) {
+		$input = $parser->replaceVariables( $input, $frame );
+		$summaryHtml = HtmlClass::element( 'summary', [], 'Params' );
+		$attributes = [];
+		return HtmlClass::rawElement( 'details', $attributes, $summaryHtml . $input );
 	}
 
 	/**
@@ -362,10 +383,7 @@ class JsonFormsHooks {
 		];
 
 		if ( $user->isAllowed( "jsonforms-canmanageforms" ) ) {
-			$specialpage_title = SpecialPage::getTitleFor(
-				"JsonFormsManage",
-				"Forms",
-			);
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Forms" );
 			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
 				"text" => wfMessage( "jsonforms-sidepanel-managesforms" )->text(),
 				"href" => $specialpage_title->getLocalURL(),
@@ -373,10 +391,7 @@ class JsonFormsHooks {
 		}
 
 		if ( $user->isAllowed( "jsonforms-canmanageschemas" ) ) {
-			$specialpage_title = SpecialPage::getTitleFor(
-				"JsonFormsManage",
-				"Schemas",
-			);
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Schemas" );
 			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
 				"text" => wfMessage(
 					"jsonforms-sidepanel-manageschemas",
@@ -387,9 +402,7 @@ class JsonFormsHooks {
 
 		$groups = \JsonForms::slotManagerGroups();
 		if ( count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) ) ) {
-			$specialpage_title = SpecialPage::getTitleFor(
-				"JsonFormsSlotManager",
-			);
+			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsSlotManager" );
 			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
 				"text" => wfMessage( "jsonforms-sidepanel-slotmanager" )->text(),
 				"href" => $specialpage_title->getLocalURL(),

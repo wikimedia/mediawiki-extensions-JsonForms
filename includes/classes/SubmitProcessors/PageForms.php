@@ -459,6 +459,14 @@ metadata can be stored:
 				$targetSlot,
 			);
 			$wholeData = json_decode( $wholeDataStr, false );
+			$partialData = SchemaUtils::getValueByPath( $wholeData, $data->formDescriptor->edit_path );
+
+			// this ensures that properties not present in the partial schema
+			// are preserved (recursive)
+			if ( is_object( $partialData ) && is_object( $dataToSave ) ) {
+				$dataToSave = SchemaUtils::mergeObjectsRecursive( $dataToSave, $partialData );
+			}
+
 			SchemaUtils::setValueByPath(
 				$wholeData,
 				$data->formDescriptor->edit_path,

@@ -613,7 +613,7 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 	};
 
 	const captchaEditor = this.editor.getEditor( 'root.captcha' );
-	if ( captchaEditor) {
+	if ( captchaEditor ) {
 		data.options.captcha = captchaEditor.getValue();
 	}
 

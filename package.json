@@ -1,5 +1,5 @@
 {
-	"name": "JSonForms",
+	"name": "JsonForms",
 	"private": true,
 	"scripts": {
 		"test": "grunt test"

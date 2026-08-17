@@ -1,5 +1,5 @@
 {
-	"$id": "DescribedBy",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:DescribedBy",
 	"type": "object",
 	"title": "DescribedBy",
 	"properties": {

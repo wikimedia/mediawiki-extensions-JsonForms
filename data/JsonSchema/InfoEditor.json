@@ -1,5 +1,5 @@
 {
-	"$id": "InfoEditor",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:InfoEditor",
 	"type": "object",
 	"title": "Info Test Case",
 	"properties": {

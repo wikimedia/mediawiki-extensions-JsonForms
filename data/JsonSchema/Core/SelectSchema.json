@@ -1,6 +1,6 @@
 {
 	"type": "object",
-	"$id": "Core/SelectSchema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/SelectSchema",
 	"x-watch" : "schema",
 	"title": "Edit schema",
 	"x-collapsible": true,

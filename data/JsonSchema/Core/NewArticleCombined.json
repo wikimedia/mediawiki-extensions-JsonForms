@@ -1,7 +1,6 @@
 {
 	"type": "object",
-	"$id": "Core/NewArticleCombined",
-	"@type": "JsonForms default schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/NewArticleCombined",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
 	"required": [],
@@ -33,7 +32,34 @@
 				"rows": 6
 			}
 		},
+		"editor_suneditor": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "html",
+					"x-input": "SunEditor"
+				}
+			}			
+		},
+		"editor_easymde": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "markdown",
+					"x-input": "EasyMDE"
+				}
+			}
+		},
 		"article": {
+			"x-default-properties": ["title","content_model", "editor", "content", "categories"],
 			"properties": {
 				"title": {
 					"type": "string",
@@ -76,7 +102,6 @@
 		},
 		"newSchema": {
 			"type": "object",
-			"$id": "SelectSchema",
 			"x-watch": "schema",
 			"title": "Edit schema",
 			"properties": {
@@ -98,7 +123,8 @@
 						{
 							"rel": "describedBy",
 							"href": "JsonSchema:{{schema}}",
-							"x-destroy-values-on-switch": true
+							"x-destroy-values-on-switch": true,
+							"x-no-validate": true
 						}
 					]
 				}
@@ -123,7 +149,6 @@
 						"schemaName": {
 							"type": "string",
 							"title": "JSON Schema",
-							"description": "",
 							"default": "",
 							"minLength": 1,
 							"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
@@ -138,7 +163,7 @@
 							},
 							"x-watch": "schemaName",
 							"x-message": {
-								"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}<a/>"
+								"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}</a>"
 							},
 							"links": [
 								{
@@ -192,13 +217,14 @@
 		"footer": {
 			"x-compact": true,
 			"x-css-class": "jsonforms-outerform-footer",
+			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
 					"type": "string"
 				},
 				"minor": {
 					"type": "boolean",
-					"title": "",
+					"x-no-title": true,
 					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
@@ -210,7 +236,6 @@
 					"type": "object",
 					"x-layout": "horizontal",
 					"x-compact": true,
-					"x-css-class": "jsonforms-outerform-footer-buttons",
 					"properties": {
 						"submit": {
 							"type": "null",

@@ -1,5 +1,5 @@
 {
-	"$id": "Ajax",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Ajax",
 	"type": "array",
 	"title": "People",
 	"x-layout": "tabs",

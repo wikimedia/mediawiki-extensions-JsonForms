@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.1.1",
+	"version": "1.1.8",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -23,6 +23,7 @@
 		"JsonFormsActionSlotManager": "includes/JsonFormsActionSlotManager.php",
 		"JsonFormsActionJsonEdit": "includes/JsonFormsActionJsonEdit.php",
 		"SpecialJsonFormsDemo": "includes/specials/SpecialJsonFormsDemo.php",
+		"SpecialJsonFormsTests": "includes/specials/SpecialJsonFormsTests.php",
 		"SpecialJsonFormsCreate": "includes/specials/SpecialJsonFormsCreate.php",
 		"SpecialJsonFormsEdit": "includes/specials/SpecialJsonFormsEdit.php",
 		"SpecialJsonFormsManage": "includes/specials/SpecialJsonFormsManage.php",
@@ -71,6 +72,7 @@
 		"JsonFormsCreate": "SpecialJsonFormsCreate",
 		"JsonFormsEdit": "SpecialJsonFormsEdit",
 		"JsonFormsDemo": "SpecialJsonFormsDemo",
+		"JsonFormsTests": "SpecialJsonFormsTests",
 		"JsonFormsManage": "SpecialJsonFormsManage",
 		"JsonFormsSlotManager": "SpecialJsonFormsSlotManager",
 		"JsonFormsManageForms": "MediaWiki\\Extension\\JsonForms\\Specials\\ManageForms",
@@ -161,8 +163,7 @@
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
 			"styles": [
-				"datatables/datatables.min.css",
-				"datatables/style.css",
+				"libs/datatables/datatables.min.css",
 				"libs/autocomplete.min.css",
 				"style.css",
 				"libs/intl-tel-input/css/intlTelInput.min.css",
@@ -170,10 +171,10 @@
 				"OOJSPlus/widgets/ExpandablePanel.css"
 			],
 			"scripts": [
-				"datatables/object_hash.js",
-				"datatables/datatables.min.js",
+				"libs/datatables/datatables.min.js",
 				"libs/autocomplete.min.js",
 				"libs/handlebars.min.js",
+				"libs/Sortable.js",
 				"libs/split.min.js",
 				"libs/intl-tel-input/js/intlTelInput.js",
 				"editor/jsonforms-editor.js",
@@ -181,14 +182,8 @@
 				"Utilities.js",
 				"EnumProviders.js",
 				"AutocompleteProviders.js",
-				"UISchemaConverters.js",
-				"schema-converters/NewProperty.js",
-				"schema-converters/NewSchema.js",
-				"schema-converters/NewSlot.js",
-				"schema-converters/Survey.js",
-				"schema-converters/Field.js",
-				"schema-converters/Geolocation.js",
-				"schema-converters/Subitem.js",
+				"ValueConverters.js",
+				"valueConverters/Survey.js",
 				"OOUIElements.js",
 				"OOJSPlus/widgets/ColorPickerEmbeddable.js",
 				"OOJSPlus/widgets/ColorPickerPopup.js",
@@ -224,7 +219,10 @@
 				"mediawiki.widgets.UsersMultiselectWidget",
 				"mediawiki.Upload"
 			],
-			"messages": [ "jsonforms-jsmodule-return-errors" ],
+			"messages": [
+				"jsonforms-jsmodule-return-errors",
+				"jsonforms-jsmodule-fetch-ref-error"
+			],
 			"position": "top"
 		},
 		"ext.JsonForms.infobox": {
@@ -297,6 +295,20 @@
 			"messages": [],
 			"position": "top"
 		},
+		"ext.JsonForms.tests": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+			],
+			"scripts": [
+				"JsonFormsTests.js"
+			],
+			"dependencies": [
+				"ext.JsonForms.base"
+			],
+			"messages": [],
+			"position": "top"
+		},
 		"ext.JsonForms.ManageSchemas": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
@@ -328,8 +340,33 @@
 		"ext.JsonForms.jsoneditor": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [ "jsoneditor/jsoneditor.min.css" ],
-			"scripts": [ "jsoneditor/ace.js", "jsoneditor/jsoneditor.min.js" ]
+			"styles": [ "libs/jsoneditor/jsoneditor.min.css" ],
+			"scripts": [
+				"libs/jsoneditor/ace.js",
+				"libs/jsoneditor/jsoneditor.min.js"
+			]
+		},
+		"ext.JsonForms.easymde": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [ "libs/easymde/easymde.min.css" ],
+			"scripts": [ "libs/easymde/easymde.min.js" ]
+		},
+		"ext.JsonForms.suneditor": {
+			"localBasePath": "resources",
+			"remoteExtPath": "JsonForms/resources",
+			"styles": [
+				"libs/suneditor/suneditor.min.css",
+				"libs/suneditor/codemirror.min.css"
+			],
+			"scripts": [
+				"libs/suneditor/codemirror.min.js",
+				"libs/suneditor/xml.min.js",
+				"libs/suneditor/css.min.js",
+				"libs/suneditor/javascript.min.js",
+				"libs/suneditor/htmlmixed.min.js",
+				"libs/suneditor/suneditor.min.js"
+			]
 		}
 	},
 	"config": {

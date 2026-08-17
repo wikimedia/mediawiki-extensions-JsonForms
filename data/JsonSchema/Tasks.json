@@ -1,5 +1,5 @@
 {
-	"$id": "Tasks",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Tasks",
 	"required": [
 		"title",
 		"priority",

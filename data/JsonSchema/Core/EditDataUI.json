@@ -1,21 +1,19 @@
 {
 	"type": "object",
-	"$id": "Core/EditDataUI",
-	"@type": "JsonForms default schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/EditDataUI",
 	"x-compact": true,
-	"x-css-class": "jsonforms-outerform",
 	"required": [],
+	"x-default-properties": ["form","categories", "footer"],
 	"definitions": {
 		"newSchema": {
 			"type": "object",
-			"$id": "SelectSchema",
+			"x-value-converter": "newSchema",
 			"x-watch": "schema",
 			"title": "Edit schema",
 			"properties": {
 				"schema": {
 					"type": "string",
 					"title": "JSON Schema",
-					"description": "",
 					"default": "",
 					"x-format": "text",
 					"x-input": "OO.ui.DropdownInputWidget",
@@ -29,7 +27,7 @@
 						{
 							"rel": "describedBy",
 							"href": "JsonSchema:{{schema}}",
-							"x-destroy-values-on-switch": true
+							"x-no-validate": true
 						}
 					]
 				}
@@ -47,6 +45,7 @@
 					"additionalProperties": {
 						"type": "object",
 						"x-compact": true,
+						"x-rename": false,
 						"properties": {
 							"schemaName": {
 								"type": "string",
@@ -54,7 +53,7 @@
 							},
 							"editor": {
 								"x-message": {
-									"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}<a/>"
+									"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schemaName}}\">JsonSchema:{{schemaName}}</a>"
 								},
 								"x-watch": "schemaName",
 								"links": [
@@ -64,15 +63,17 @@
 									}
 								]
 							}
-						}
+						},
+						"required": [ "schemaName" ]
 					},
 					"maxProperties": 1,
-					"x-ui-schema": {
-						"label": "New schema",
-						"schema": "#/definitions/newSchema",
-						"name": "newSchema",
-						"popup_size": "large"
-					}
+					"x-additional-properties-ui": [
+						{
+							"label": "New schema",
+							"schema": "#/definitions/newSchema",
+							"popup_size": "large"
+						}
+					]
 				},
 				"options": {
 					"x-compact": true,
@@ -118,16 +119,26 @@
 				}
 			}
 		},
+		"categories": {
+			"x-padding": true,
+			"title": "Categories",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"x-input": "categorymultiselect"
+			}
+		},
 		"footer": {
 			"x-compact": true,
 			"x-css-class": "jsonforms-outerform-footer",
+			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
 					"type": "string"
 				},
 				"minor": {
 					"type": "boolean",
-					"title": "",
+					"x-no-title": true,
 					"description": "",
 					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
@@ -140,7 +151,6 @@
 					"type": "object",
 					"x-layout": "horizontal",
 					"x-compact": true,
-					"x-css-class": "jsonforms-outerform-footer-buttons",
 					"properties": {
 						"submit": {
 							"type": "null",

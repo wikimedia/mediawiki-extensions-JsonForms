@@ -25,19 +25,18 @@ namespace MediaWiki\Extension\JsonForms;
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\Extension\Scribunto\Engines\LuaStandalone\LuaStandaloneEngine;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\Parser;
+use MWException;
 
-class TemplateRender {
+class TemplateRender extends BaseRender {
 	private Parser $parser;
-	private array $parameters;
 
 	/**
 	 * @param Parser $parser
-	 * @param array $parameters
 	 */
-	public function __construct( Parser $parser, $parameters ) {
+	public function setParser( $parser ) {
 		$this->parser = $parser;
-		$this->parameters = $parameters;
 	}
 
 	/**
@@ -46,9 +45,15 @@ class TemplateRender {
 	 * @return string
 	 */
 	public function render( $data ) {
-		$templatePrefix = 'Template:' . $this->parameters['schema'];
-		$children = $this->renderNode( $data, [], [], $templatePrefix );
-		$params = $this->createParams( '', $data, $children, '', $templatePrefix );
+		$templatePrefix = 'Template:' . ( $this->parameters['template'] ?? $this->parameters['schema'] );
+
+		if ( is_array( $data ) || is_object( $data ) ) {
+			$children = $this->renderNode( $data, [], [], $templatePrefix );
+		} else {
+			$children = [];
+		}
+
+		$params = $this->createParams( '', $data, $children, [], '', $templatePrefix );
 
 		return $this->processTemplate( $templatePrefix, $params );
 	}
@@ -66,19 +71,22 @@ class TemplateRender {
 	 * @param string $key
 	 * @param array $value
 	 * @param array $children
+	 * @param array $pathArr
 	 * @param string $path
 	 * @param string $templateName
 	 * @return string
 	 */
-	public function createParams( $key, $value, $children, $path, $templateName ) {
+	public function createParams( $key, $value, $children, $pathArr, $path, $templateName ) {
 		$params = [
-			"key" => $key,
-			"properties" => implode( ', ', array_keys( $children ) ),
-			"count" => is_array( $value )
+			'key' => $key,
+			'properties' => implode( ', ', array_keys( $children ) ),
+			'count' => is_array( $value )
 				? count( $value )
 				: count( (array)$value ),
-			"hasChildren" => count( $children ),
-			"path" => $path,
+			'childrenCount' => count( $children ),
+			'path' => $path,
+			'jsonpath' => $this->getJsonPath( $path ),
+			'depth' => count( $pathArr ),
 			'templateName' => $templateName
 		];
 
@@ -96,22 +104,22 @@ class TemplateRender {
 			$paramsDisplay[ $k ] = is_scalar( $dataArray[$k] ) ? (string)$v : '<subitem>';
 		}
 
-		$params["params"] = "<details><pre>" .
+		$params['params'] = '<details><pre>' .
 			json_encode(
 				$paramsDisplay,
 				JSON_PRETTY_PRINT |
 				JSON_UNESCAPED_UNICODE |
 				JSON_UNESCAPED_SLASHES,
 			) .
-			"</pre></details>";
+			'</pre></details>';
 
 		return $params;
 	}
 
 	/**
 	 * @param array $node
-	 * @param string $path
-	 * @param string $pathNoIndex
+	 * @param array $path
+	 * @param array $pathNoIndex
 	 * @param string $templatePrefix
 	 * @return array
 	 */
@@ -131,12 +139,18 @@ class TemplateRender {
 				$newPathNoIndex[] = 'Item';
 			}
 
-			$pathStr = implode( ".", $newPath );
-			$pathStrNoIndex = implode( ".", $newPathNoIndex );
+			$pathStr = implode( '.', $newPath );
+			$pathStrNoIndex = implode( '.', $newPathNoIndex );
 
-			$templateName = $templatePrefix;
-			if ( !empty( $newPath ) ) {
-				$templateName .= "." . $pathStrNoIndex;
+			$schemaInfo = $this->getSchemaInfo( $pathStr, $key );
+			if ( empty( $schemaInfo['x-render-template'] ) ) {
+				$templateName = $templatePrefix;
+				if ( !empty( $newPath ) ) {
+					$templateName .= '.' . $pathStrNoIndex;
+				}
+
+			} else {
+				$templateName = $schemaInfo['x-render-template'];
 			}
 
 			if ( is_array( $value ) || is_object( $value ) ) {
@@ -147,17 +161,17 @@ class TemplateRender {
 					$templatePrefix,
 				);
 
-				$params = $this->createParams( $key, $value, $children, $pathStr, $templateName );
+				$params = $this->createParams( $key, $value, $children, $newPath, $pathStr, $templateName );
 				$ret[$key] = $this->processTemplate( $templateName, $params );
 
 			// Leaf
 			} else {
 				$params = [
-					"key" => $key,
-					"path" => $pathStr,
-					"value" => $value,
-					"type" => gettype( $value ),
-					"hasChildren" => false,
+					'key' => $key,
+					'path' => $pathStr,
+					'value' => $value,
+					'type' => gettype( $value ),
+					'childrenCount' => 0,
 					'templateName' => $templateName
 				];
 				$params[$key] = $value;
@@ -203,17 +217,17 @@ class TemplateRender {
 	 * - All parameter keys are cast to strings to ensure consistency.
 	 */
 	public function processTemplate( $titleStr, $params ) {
-		$templateParts = explode( "|", $titleStr, 2 );
+		$templateParts = explode( '|', $titleStr, 2 );
 		$templateName = trim( $templateParts[0] );
-		$additionalParamsString = $templateParts[1] ?? "";
+		$additionalParamsString = $templateParts[1] ?? '';
 
 		$additionalParams = [];
 		if ( !empty( $additionalParamsString ) ) {
-			$paramPairs = explode( "|", $additionalParamsString );
+			$paramPairs = explode( '|', $additionalParamsString );
 			foreach ( $paramPairs as $index => $pair ) {
 				// Named parameters
-				if ( strpos( $pair, "=" ) !== false ) {
-					$kv = explode( "=", $pair, 2 );
+				if ( strpos( $pair, '=' ) !== false ) {
+					$kv = explode( '=', $pair, 2 );
 					$additionalParams[trim( $kv[0] )] = trim( $kv[1] );
 
 				// Unnamed parameters
@@ -244,23 +258,23 @@ class TemplateRender {
 		// @see \MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaEngine::expandTemplate
 		if (
 			class_exists(
-				"MediaWiki\Extension\Scribunto\Engines\LuaStandalone\LuaStandaloneEngine",
+				'MediaWiki\Extension\Scribunto\Engines\LuaStandalone\LuaStandaloneEngine',
 			)
 		) {
 			$luaStandaloneEngine = new LuaStandaloneEngine( [
-				"parser" => $this->parser,
-				"title" => $this->parser->getTitle(),
+				'parser' => $this->parser,
+				'title' => $this->parser->getTitle(),
 			] );
-			$frameId = "empty";
+			$frameId = 'empty';
 			$text = $luaStandaloneEngine->expandTemplate(
 				$frameId,
 				$titleText,
 				$args,
 			);
-			return $text[0] ?? "";
+			return $text[0] ?? '';
 		}
 
-		return self->expandTemplate( $titleTemplate, $args );
+		return $this->expandTemplate( $titleTemplate, $args );
 	}
 
 	/**
@@ -277,7 +291,7 @@ class TemplateRender {
 			$frame->depth >= $this->parser->getOptions()->getMaxTemplateDepth()
 		) {
 			throw new MWException(
-				"expandTemplate: template depth limit exceeded",
+				'expandTemplate: template depth limit exceeded',
 			);
 		}
 
@@ -286,7 +300,7 @@ class TemplateRender {
 				->getNamespaceInfo()
 				->isNonincludable( $title->getNamespace() )
 		) {
-			throw new MWException( "expandTemplate: template inclusion denied" );
+			throw new MWException( 'expandTemplate: template inclusion denied' );
 		}
 
 		[ $dom, $finalTitle ] = $this->parser->getTemplateDom( $title );
@@ -297,7 +311,7 @@ class TemplateRender {
 		}
 
 		if ( !$frame->loopCheck( $finalTitle ) ) {
-			throw new MWException( "expandTemplate: template loop detected" );
+			throw new MWException( 'expandTemplate: template loop detected' );
 		}
 
 		$fargs = $this->parser->getPreprocessor()->newPartNodeArray( $args );

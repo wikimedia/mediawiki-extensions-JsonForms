@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "Core/SlotManager",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/SlotManager",
 	"type": "object",
 	"x-layout": "tabs",
 	"x-layout-config": {
@@ -50,10 +50,37 @@
 				"rows": 6
 			}
 		},
+		"editor_suneditor": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "html",
+					"x-input": "SunEditor"
+				}
+			}			
+		},
+		"editor_easymde": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "markdown",
+					"x-input": "EasyMDE"
+				}
+			}
+		},
 		"slotOptions": {
 			"type": "object",
 			"x-compact": true,
-			"required": ["content_model", "editor"],
+			"x-rename": false,
+			"required": ["content_model"],
 			"x-default-properties": ["content_model", "editor", "content"],
 			"properties": {
 				"role": {
@@ -88,7 +115,8 @@
 			}
 		},
 		"newSlot": {
-			"title": "New slot",
+			"title": "New slot b",
+			"x-value-converter": "newSlot",
 			"type": "object",
 			"required": ["name"],
 			"properties": {
@@ -130,12 +158,13 @@
 			}
 		}
 	],
-	"x-ui-schema": {
-		"label": "New slot",
-		"schema": "#/definitions/newSlot",
-		"name": "newSlot",
-		"popup_size": "medium"
-	},
+	"x-additional-properties-ui": [
+		{
+			"label": "New slot",
+			"schema": "#/definitions/newSlot",
+			"popup_size": "medium"
+		}
+	],
 	"patternProperties": {
 		"^[a-zA-Z0-9_-]+$": {
 			"allOf": [
@@ -146,4 +175,3 @@
 		}
 	}
 }
-

@@ -43,7 +43,13 @@ JsonFormsNewArticle.prototype.onFormButton = function ( action, editor ) {
 				JsonForms.Alert( 'there are errors' );
 				return;
 			} else {
-				this.submitForm().catch( ( err ) => console.error( 'API error:', err ) );
+				editor.disable();
+				this.submitForm()
+					.then( () => editor.enable() )
+					.catch( ( err ) => {
+						console.error( 'API error:', err );
+						editor.enable();
+					} );
 			} }
 			break;
 	}
@@ -72,7 +78,9 @@ JsonFormsNewArticle.prototype.initialize = async function () {
 };
 
 JsonForms.prototype.initButtons = function ( jsonEditor ) {
-	switch ( jsonEditor.schema.$id ) {
+	// https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
+	const parsedId = jsonEditor.schema.$id.split( 'JsonSchema:' )[ 1 ].split( '/' ).pop();
+	switch ( parsedId ) {
 		case 'NewArticleDataOnly':
 			{
 				const summaryInput = jsonEditor.getEditor( 'root.footer.summary' );
@@ -91,9 +99,11 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 		metadata = {};
 
 	const editorValue = this.editor.getValue();
-	const articleID = this.data.schema.$id.split( '/' ).slice( -1 )[ 0 ];
+	let structuredValue;
 
-	switch ( articleID ) {
+	// https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
+	const parsedId = this.data.schema.$id.split( 'JsonSchema:' )[ 1 ].split( '/' ).pop();
+	switch ( parsedId ) {
 		case 'NewArticleCombined':
 			{
 				const mainEditor = this.editor.getEditor( 'root.form.main' );
@@ -109,8 +119,10 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 				const schemaEditor = this.editor.getEditor(
 					'root.form.schema.editor'
 				);
+
 				if ( schemaEditor ) {
 					value = schemaEditor.getValue();
+					structuredValue = schemaEditor.getStructuredValue();
 				}
 
 				const schemaNameEditor = this.editor.getEditor(
@@ -140,8 +152,10 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 				const schemaEditor = this.editor.getEditor(
 					'root.form.editor'
 				);
+
 				if ( schemaEditor ) {
 					value = schemaEditor.getValue();
+					structuredValue = schemaEditor.getStructuredValue();
 				}
 
 				const schemaNameEditor = this.editor.getEditor(
@@ -173,12 +187,13 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 	}
 
 	// *** submission data are arbitrary and depend on the
-	// SubmitProcessor
+	// SubmitProcessorprocessedsche
 	const data = {
 		options,
 		value,
 		metadata,
 		config: mw.config.get( 'jsonforms' ),
+		structuredValue,
 
 		// submit processor
 		processor: 'NewArticle'
@@ -196,7 +211,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 		new mw.Api()
 			.postWithToken( 'csrf', payload )
 			.done( ( thisRes ) => {
-				console.log( 'thisRes', thisRes );
+				// console.log( 'thisRes', thisRes );
 				let result = thisRes[ payload.action ].result;
 				result = JSON.parse( result );
 				if ( result.errors && result.errors.length ) {
@@ -207,7 +222,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 						),
 						type: 'error'
 					};
-					resolve( result );
+					resolve( false );
 					const nonModalDialog = new JsonForms.NonModalDialog();
 					nonModalDialog.open( config );
 				} else {
@@ -216,6 +231,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 					} else {
 						window.location.href = result.returnUrl;
 					}
+					resolve( result );
 				}
 			} )
 			.fail( ( thisRes ) => {
@@ -234,11 +250,9 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 
 			console.log( 'data', data );
 
-			const jsonForms = new JsonFormsNewArticle( el, data );
-
-			await jsonForms.initialize();
-
-			const editor = jsonForms.createDefaultEditor();
+			const jsonFormsNewArticle = new JsonFormsNewArticle( el, data );
+			await jsonFormsNewArticle.initialize();
+			const editor = jsonFormsNewArticle.createDefaultEditor();
 
 		} );
 	} );

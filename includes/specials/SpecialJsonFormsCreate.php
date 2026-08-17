@@ -77,21 +77,24 @@ class SpecialJsonFormsCreate extends SpecialPage {
 		}
 
 		$jsonForm = \JsonForms::getSourceSchema( $schema, 'JsonSchema/Core' );
-		// $jsonForm = \JsonForms::processSchema( $out, $jsonForm );
+
+		if ( !$jsonForm ) {
+			throw new MWException( 'Cannot load core schema' );
+		}
 
 		$formData = (object)[
 			'schema' => $jsonForm,
-			'editorOptions' => 'MediaWiki:DefaultEditorOptions',
-			'editorScript' => 'MediaWiki:DefaultEditorScript',
-			// 'metadata'=> $metadata,
-			// 'editPage' => $editPage,
+			'formDescriptor' => (object)[
+				'editor_options' => (object)[
+					'base_options' => 'MediaWiki:DefaultEditorOptions',
+					'base_script' => 'MediaWiki:DefaultEditorScript',
+				]
+			],
+			'width' => 'auto'
 		];
 
 		$formData = \JsonForms::prepareFormData( $out, $formData );
-
-		$res_ = \JsonForms::getJsonFormHtml( $formData, [
-			'width' => 'auto'
-		] );
+		$res_ = \JsonForms::getJsonFormHtml( $formData );
 
 		if ( !$res_->ok ) {
 			return $this->printError( $out, $res_->error );

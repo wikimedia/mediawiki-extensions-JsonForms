@@ -23,12 +23,20 @@
 				this.emit('stateChange', this.collapsed);
 			},
 		});
-		this.$area = $('<div>').html(this.$cnt);
+		this.$area = $('<div class="jsonforms-expandable-panel-area">').html(this.$cnt);
 		if (this.collapsed) {
 			this.$area.hide();
 		}
 
 		this.$element.append(this.button.$element, this.$area);
+		
+		/*
+		$wrapper = $('<fieldset>')
+		$wrapper.append($('<legend>abc</legend>'))
+		
+		$wrapper.append(this.$element)
+		this.$element = $wrapper;
+		*/
 
 		// this.$element.addClass( 'oojsplus-ui-expandable-panel' );
 		this.$element.addClass([

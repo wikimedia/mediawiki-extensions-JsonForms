@@ -1,5 +1,5 @@
 {
-	"$id": "StarRating",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:StarRating",
 	"title": "starrating example",
 	"type": "object",
 	"properties": {

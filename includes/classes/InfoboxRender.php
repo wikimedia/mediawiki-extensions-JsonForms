@@ -27,200 +27,73 @@ use MediaWiki\Extension\JsonForms\Aliases\Linker as LinkerClass;
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use User;
 
-class InfoboxRender {
-	private string $schemaName;
-	private User $user;
+class InfoboxRender extends BaseRender {
 
-	/** @var Title|TitleClass */
-	private $title;
+	public static array $formatToIconOOUI = [
+		'email' => 'message',
+		'idn-email' => 'message',
+		'url' => 'link',
+		'uri-reference' => 'link',
+		'uri' => 'linkExternal',
+		'iri' => 'linkExternal',
+		'ipv4' => 'network',
+		'ipv6' => 'network',
+		'json-pointer' => 'article',
+		'relative-json-pointer' => 'article',
+		'autocomplete' => 'search',
+		'captcha' => 'lock',
+		'color' => 'palette',
+		'json' => 'code',
+		'uri-template' => 'code',
+		'hidden' => 'eyeClosed',
+		'file' => 'attachment',
+		'date' => 'calendar',
+		'month' => 'calendar',
+		'pagename' => 'article',
+		'rating' => 'star',
+		'user' => 'userAvatarOutline',
+		'wikitext' => 'wikiText',
+		'category' => 'tag',
+		'uniqueItems' => 'key',
+	];
 
-	private array $schemaMap = [];
-
-	/**
-	 * param string $schemaName
-	 * param stdClass $processedSchema null
-	 */
-	public function __construct( $user, $title, $schemaName, $processedSchema = null ) {
-		$this->user = $user;
-		$this->title = $title;
-		$this->schemaName = $schemaName;
-
-		if ( $processedSchema ) {
-			$this->buildSchemaMap( $processedSchema );
-		}
-	}
-
-	/**
-	 * Build a map of property paths to their schema definitions from processed schema (object)
-	 *
-	 * param stdClass $schema
-	 * param string $path
-	 */
-	private function buildSchemaMap( $schema, $path = "" ) {
-		// Convert object to array for iteration if needed
-		$schemaArray = is_object( $schema ) ? get_object_vars( $schema ) : $schema;
-
-		foreach ( $schemaArray as $key => $value ) {
-			// Handle array of items (numeric keys)
-			if (
-				is_numeric( $key ) &&
-				is_object( $value ) &&
-				property_exists( $value, "schema" )
-			) {
-				$currentPath = $path ? $path . "." . $key : $key;
-				$this->schemaMap[$currentPath] = $value->schema;
-
-				if (
-					property_exists( $value, "value" ) &&
-					( is_object( $value->value ) || is_array( $value->value ) )
-				) {
-					$this->buildSchemaMapFromValue( $value->value, $currentPath );
-				}
-			} elseif ( is_object( $value ) && property_exists( $value, "schema" ) ) {
-				// Regular property with schema
-				$currentPath = $path ? $path . "." . $key : $key;
-				$this->schemaMap[$currentPath] = $value->schema;
-
-				if (
-					property_exists( $value, "value" ) &&
-					( is_object( $value->value ) || is_array( $value->value ) )
-				) {
-					$this->buildSchemaMapFromValue( $value->value, $currentPath );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Build schema map from value part of processed schema
-	 *
-	 * param stdClass $value
-	 * param string $path
-	 */
-	private function buildSchemaMapFromValue( $value, $path ) {
-		$valueArray = is_object( $value ) ? get_object_vars( $value ) : $value;
-
-		foreach ( $valueArray as $key => $item ) {
-			if ( is_object( $item ) && property_exists( $item, "schema" ) ) {
-				$currentPath = $path . "." . $key;
-				$this->schemaMap[$currentPath] = $item->schema;
-
-				if (
-					property_exists( $item, "value" ) &&
-					( is_object( $item->value ) || is_array( $item->value ) )
-				) {
-					$this->buildSchemaMapFromValue( $item->value, $currentPath );
-				}
-			} elseif ( is_array( $item ) && isset( $item["schema"] ) ) {
-				$currentPath = $path . "." . $key;
-				$this->schemaMap[$currentPath] = $item["schema"];
-
-				if (
-					isset( $item["value"] ) &&
-					( is_array( $item["value"] ) || is_object( $item["value"] ) )
-				) {
-					$this->buildSchemaMapFromValue(
-						$item["value"],
-						$currentPath,
-					);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Get schema info for a property path
-	 *
-	 * @param string $key
-	 * @param string $path
-	 * @return array
-	 */
-	private function getSchemaInfo( $key, $path = "" ) {
-		$fullPath = $path;
-
-		if ( isset( $this->schemaMap[$fullPath] ) ) {
-			$schema = $this->schemaMap[$fullPath];
-
-			// Handle both object and array schema
-			$isObj = is_object( $schema );
-
-			return [
-				"title" => $isObj
-					? $schema->title ?? $key
-					: $schema["title"] ?? $key,
-				"description" => $isObj
-					? $schema->description ?? ""
-					: $schema["description"] ?? "",
-				"format" => $isObj
-					? $schema->format ?? ""
-					: $schema["format"] ?? "",
-				"layout" => $isObj
-					? $schema->layout ?? ""
-					: $schema["layout"] ?? "",
-				"uniqueItems" => $isObj
-					? $schema->uniqueItems ?? false
-					: $schema["uniqueItems"] ?? false,
-				"required" => $isObj
-					? $schema->required ?? false
-					: $schema["required"] ?? false,
-			];
-		}
-
-		return [
-			"title" => '',
-			"description" => '',
-			"format" => "",
-			"layout" => "",
-			"uniqueItems" => false,
-			"required" => false,
-		];
-	}
-
-	/**
-	 * @param array $processedNode
-	 * @return array
-	 */
-	private function extractData( $processedNode ) {
-		if ( !is_object( $processedNode ) && !is_array( $processedNode ) ) {
-			return $processedNode;
-		}
-
-		// If this is a processed schema node with schema and value
-		if (
-			is_object( $processedNode ) &&
-			property_exists( $processedNode, "schema" ) &&
-			property_exists( $processedNode, "value" )
-		) {
-			return $this->extractData( $processedNode->value );
-		}
-
-		if (
-			is_array( $processedNode ) &&
-			isset( $processedNode["schema"] ) &&
-			isset( $processedNode["value"] )
-		) {
-			return $this->extractData( $processedNode["value"] );
-		}
-
-		// Preserve the original type
-		$isInputObject = is_object( $processedNode );
-		$result = $isInputObject ? new \stdClass() : [];
-
-		$items = $isInputObject
-			? get_object_vars( $processedNode )
-			: $processedNode;
-
-		foreach ( $items as $key => $value ) {
-			$extractedValue = $this->extractData( $value );
-			if ( $isInputObject ) {
-				$result->$key = $extractedValue;
-			} else {
-				$result[$key] = $extractedValue;
-			}
-		}
-
-		return $result;
-	}
+	public static array $formatToIconUnicode = [
+		'textarea' => '📄',
+		'html' => '📄',
+		'html' => '📄',
+		'string' => '🔤',
+		'text' => '🔤',
+		'email' => '✉️',
+		'idn-email' => '✉️',
+		'hostname' => '🖥️',
+		'idn-hostname' => '🖥️',
+		'ipv4' => '🌐',
+		'ipv6' => '🌐',
+		'url' => '🔗',
+		'uri' => '🔗',
+		'iri' => '🔗',
+		'uri-reference' => '↗️',
+		'uri-template' => '⚙️',
+		'json-pointer' => '👉',
+		'relative-json-pointer' => '↪️',
+		'tel' => '📞',
+		// or 🔢
+		'number' => '#️⃣',
+		'integer' => '#️⃣',
+		'autocomplete' => '🔍',
+		'captcha' => '🤖',
+		'color' => '🎨',
+		'json' => '📋',
+		'hidden' => '🙈',
+		'file' => '📎',
+		'month' => '📅',
+		'pagename' => '📄',
+		'rating' => '⭐',
+		'user' => '👤',
+		'uuid' => '🆔',
+		'wikitext' => '📝',
+		'uniqueItems' => '🔑',
+	];
 
 	/**
 	 * @param array $node
@@ -230,7 +103,7 @@ class InfoboxRender {
 	 * @return string
 	 */
 	public function renderNode( $node, $path, $pathNoIndex, $level = 0 ) {
-		$ret = "";
+		$ret = '';
 		$nextLevel = $level + 1;
 
 		// Handle both objects and arrays
@@ -247,14 +120,11 @@ class InfoboxRender {
 			$newPathNoIndex = $pathNoIndex;
 
 			$newPath[] = $key;
-
 			if ( !is_numeric( $key ) && is_string( $key ) ) {
 				$newPathNoIndex[] = $key;
-			} else {
-				$newPathNoIndex[] = "Item";
 			}
 
-			$pathStr = implode( ".", $newPath );
+			$pathStr = implode( '.', $newPath );
 
 			if ( is_array( $value ) || is_object( $value ) ) {
 				$childrenHtml = $this->renderNode(
@@ -276,6 +146,7 @@ class InfoboxRender {
 					$value,
 					gettype( $value ),
 					$pathStr,
+					is_array( $node )
 				);
 			}
 		}
@@ -290,19 +161,20 @@ class InfoboxRender {
 	 * @param string $path
 	 * @return string
 	 */
-	private function getDisplayKey( $key, $path = "" ) {
-		$schemaInfo = $this->getSchemaInfo( $key, $path );
+	private function getDisplayKey( $path, $key ) {
+		$schemaInfo = $this->getSchemaInfo( $path, !is_numeric( $key ) ? $key : null );
 
-		if ( !empty( $schemaInfo["title"] ) ) {
-			return $schemaInfo["title"];
+		// $schemaInfo are already escaped
+		if ( !empty( $schemaInfo['title'] ) ) {
+			return $schemaInfo['title'];
 		}
 
 		// For numeric keys (array items)
 		if ( is_numeric( $key ) ) {
-			return "Item " . ( $key + 1 );
+			return 'Item ' . ( $key + 1 );
 		}
 
-		return $key;
+		return htmlspecialchars( $key );
 	}
 
 	/**
@@ -310,10 +182,8 @@ class InfoboxRender {
 	 * @return string
 	 */
 	public function render( $processedData ) {
-		// Extract actual data from processed schema
-		$actualData = $this->extractData( $processedData );
-		$childrenHtml = $this->renderNode( $actualData, [], [], 0 );
-		return $this->rootContainer( $actualData, $childrenHtml );
+		$childrenHtml = $this->renderNode( $processedData, [], [], 0 );
+		return $this->rootContainer( $processedData, $childrenHtml );
 	}
 
 	/**
@@ -323,27 +193,29 @@ class InfoboxRender {
 	 */
 	private function rootContainer( $value, $childrenHtml ) {
 		$type = gettype( $value );
-		$isArray = $type === "array";
-		$schema = \JsonForms::getSourceSchema( $this->schemaName, 'JsonSchema' );
+		$isArray = $type === 'array';
+		$schemaName = $this->parameters['schema'];
+
+		$schema = \JsonForms::getSourceSchema( $schemaName, 'JsonSchema' );
 		$count = is_array( $value ) ? count( $value ) : null;
 
-		$countDisplay = "";
+		$countDisplay = '';
 		if ( $count !== null ) {
-			$countDisplay = '<span class="infobox-count">(' . $count . ")</span>";
+			$countDisplay = '<span class="infobox-count">(' . $count . ')</span>';
 		}
 
 		if ( $this->user->isAllowed( 'jsonforms-caneditdata' ) ) {
-			$editUrl = $this->title->getLocalURL( "action=jsonedit" );
+			$editUrl = $this->title->getLocalURL( 'action=jsonedit' );
 			$edit = new \OOUI\ButtonWidget( [
-				"icon" => "edit",
+				'icon' => 'edit',
 				'flags' => [ 'progressive' ],
 				'framed' => false,
-				"href" => $editUrl
+				'href' => $editUrl
 			] );
 		}
 
-		$title = TitleClass::newFromText( 'JsonSchema:' . $this->schemaName );
-		$link = LinkerClass::link( $title, $schema->title ?? $this->schemaName );
+		$title = TitleClass::newFromText( 'JsonSchema:' . $schemaName );
+		$link = LinkerClass::link( $title, $schema->title ?? $schemaName );
 
 		if ( $isArray ) {
 			$ret =
@@ -357,12 +229,9 @@ class InfoboxRender {
 			'</span></span><span class="infobox-header-right"><span class="infobox-edit">' .
 				$edit .
 			'</span>
-</span>
-</div>
-<div class="infobox-array-content">' .
+</span></div><div class="infobox-array-content">' .
 				$childrenHtml .
-			'</div>
-		</div>';
+			'</div></div>';
 
 		} else {
 			$ret =
@@ -376,12 +245,9 @@ class InfoboxRender {
 			'</span></span><span class="infobox-header-right"><span class="infobox-edit">' .
 				$edit .
 			'</span>
-</span>
-</div>
-<div class="infobox-object-content">' .
+</span></div><div class="infobox-object-content">' .
 				$childrenHtml .
-			'</div>
-		</div>';
+			'</div></div>';
 		}
 
 		return $ret;
@@ -396,225 +262,406 @@ class InfoboxRender {
 	 * @return string
 	 */
 	private function renderContainer( $key, $value, $childrenHtml, $level, $path ) {
-		$displayKey = $this->getDisplayKey( $key, $path );
-		$escapedKey = htmlspecialchars( (string)$displayKey );
+		$displayKey = $this->getDisplayKey( $path, $key );
 		$count = is_array( $value ) ? count( $value ) : null;
 		$type = gettype( $value );
-		$isArray = $type === "array";
+		$isArray = $type === 'array';
 
-		$schemaInfo = $this->getSchemaInfo( $key, $path );
+		$schemaInfo = $this->getSchemaInfo( $path, $key );
 
-		$layoutHint = "";
-		if ( !empty( $schemaInfo["layout"] ) ) {
-			$layoutHint =
-			'<span class="infobox-layout-hint" title="Layout: ' .
-			htmlspecialchars( $schemaInfo["layout"] ) .
-			'">📐</span>';
+		$uniqueHint = '';
+		if ( $isArray && $schemaInfo['uniqueItems'] ) {
+			// $uniqueHint = '<span class="infobox-unique-hint" title="Unique values only">🔑</span>';
+			$uniqueHint = $formatHint = $this->getFormatHint( 'uniqueItems' );
 		}
 
-		$uniqueHint = "";
-		if ( $isArray && $schemaInfo["uniqueItems"] ) {
-			$uniqueHint =
-			'<span class="infobox-unique-hint" title="Unique values only">🔒</span>';
-		}
-
-		$countDisplay = "";
+		$countDisplay = '';
 		if ( $count !== null ) {
-			$countDisplay =
-			'<span class="infobox-count">(' . $count . ")</span>";
+			$countDisplay = '<span class="infobox-count">(' . $count . ')</span>';
 		}
 
 		// Only add collapsible classes and toggle for level > 0
 		$isCollapsible = $level > 0;
-		$collapsibleClass = $isCollapsible ? "mw-collapsible mw-collapsed" : "";
-		$collapsibleContentClass = $isCollapsible ? "mw-collapsible-content" : "";
+		$collapsibleClass = $isCollapsible ? 'mw-collapsible mw-collapsed' : '';
+		$collapsibleContentClass = $isCollapsible ? 'mw-collapsible-content' : '';
 
 		// Add expand/collapse toggle for collapsible sections
-		$toggleHtml = "";
+		$toggleHtml = '';
 		if ( $isCollapsible ) {
 			$toggleHtml = '';
 		}
 
 		if ( $isArray ) {
-			$ret =
-			'<div class="toccolours infobox-array ' . $collapsibleClass . '">
-<div class="infobox-array-header">' . $toggleHtml .
+			$ret = '<div class="toccolours infobox-array ' . $collapsibleClass . '">' .
+'<div class="infobox-array-header">' . $toggleHtml .
 	'<span class="infobox-key">' .
-					$escapedKey .
+					$displayKey .
 				'</span>' .
-				$layoutHint .
 				$uniqueHint .
 				'<span class="infobox-meta"><span class="infobox-type">array</span>' .
 					$countDisplay .
-				'</span>
-</div>
-<div class="infobox-array-content ' . $collapsibleContentClass . '">' .
+				'</span></div>' .
+'<ul class="infobox-array-content ' . $collapsibleContentClass . '">' .
 				$childrenHtml .
-			'</div>
-		</div>';
+			'</ul></div>';
 
 		} else {
-			$ret =
-			'<div class="toccolours infobox-object ' . $collapsibleClass . '">
-<div class="infobox-object-header">' . $toggleHtml .
+			$ret = '<div class="toccolours infobox-object ' . $collapsibleClass . '">' .
+'<div class="infobox-object-header">' . $toggleHtml .
 	'<span class="infobox-key">' .
-					$escapedKey .
+					$displayKey .
 				'</span>' .
-				$layoutHint .
 				'<span class="infobox-meta"><span class="infobox-type">object</span>' .
 					$countDisplay .
-				'</span>
-</div>
-<div class="infobox-object-content ' . $collapsibleContentClass . '">' .
+				'</span></div>' .
+'<div class="infobox-object-content ' . $collapsibleContentClass . '">' .
 				$childrenHtml .
-			'</div>
-		</div>';
+			'</div></div>';
 		}
 
 		return $ret;
 	}
 
 	/**
-	 * @param string $key
-	 * @param stdClass $value
-	 * @param string $type
-	 * @param string $path
+	 * @param string $format
 	 * @return string
 	 */
-	private function renderLeaf( $key, $value, $type, $path ) {
-		$displayKey = $this->getDisplayKey( $key, $path );
-		$escapedKey = htmlspecialchars( (string)$displayKey );
+	private function getFormatHint( $format ) {
+		$icon = $this->getFormatIcon( $format );
+
+		if ( $icon ) {
+			$iconWidget = new \OOUI\IconWidget( [
+				'icon' => $icon,
+				'classes' => [ 'infobox-format-hint' ],
+				'title' => 'Format: ' . htmlspecialchars( $format )
+			] );
+			return $iconWidget;
+		}
+		$icon = $this->getFormatIconHtml( $format );
+		if ( !$icon ) {
+			return '';
+		}
+		return '<span class="infobox-format-hint">' . $icon . '</span>';
+	}
+
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 * @param string $type
+	 * @param string $path
+	 * @param bool $isArrayItem
+	 * @return string
+	 */
+	private function renderLeaf( $key, $value, $type, $path, $isArrayItem ) {
+		$displayKey = $this->getDisplayKey( $path, $key );
 		$escapedType = htmlspecialchars( $type );
-		$displayValue = $this->formatValue( $value, $type, $path );
 
-		$schemaInfo = $this->getSchemaInfo( $key, $path );
-		$requiredMark = $schemaInfo["required"]
-			? '<span class="infobox-required" title="Required">*</span>'
-			: "";
-
-		$descriptionAttr = "";
-		if ( !empty( $schemaInfo["description"] ) ) {
-			$descriptionAttr =
-				' title="' . htmlspecialchars( $schemaInfo["description"] ) . '"';
+		$schemaInfo = $this->getSchemaInfo( $path, $key );
+		if ( !$schemaInfo['type'] ) {
+			$schemaInfo['type'] = strtolower( $type );
 		}
 
-		$formatHint = "";
-		if ( !empty( $schemaInfo["format"] ) ) {
-			$formatHint =
-				'<span class="infobox-format-hint" title="Format: ' .
-				htmlspecialchars( $schemaInfo["format"] ) .
-				'">' .
-				$this->getFormatIcon( $schemaInfo["format"] ) .
-				"</span>";
+		$format = $this->getComputedFormat( $schemaInfo );
+
+		if ( !empty( $schemaInfo['x-hidden'] ) || $format === 'hidden' ) {
+			return '';
+		}
+
+		$displayValue = $this->formatValue( $value, $schemaInfo );
+		$descriptionAttr = '';
+
+		// @TODO strip tags if format is html
+		if ( !empty( $schemaInfo['description'] ) ) {
+			$descriptionAttr = ' title="' . $schemaInfo['description'] . '" ';
+		}
+
+		$formatHint = '';
+		if ( !empty( $schemaInfo['show-hint'] ) ) {
+			$formatHint = $this->getFormatHint( $format );
+		}
+
+		if ( $isArrayItem ) {
+			return '<li class="infobox-value" ' . $descriptionAttr . '>' .
+			$formatHint .
+			$displayValue .	'</li>';
 		}
 
 		return '<div class="infobox-row"' .
 			$descriptionAttr .
-			'>
-<div class="infobox-label">
-<span class="infobox-key-label">' .
-			$escapedKey .
-			'</span>' .
-			$requiredMark .
+			'><div class="infobox-label">' .
 			$formatHint .
-			'<sup><span class="infobox-type-badge">' .
-			$escapedType .
-			'</span></sup>
-</div>
-<div class="infobox-value">' .
+			'<span class="infobox-key-label">' .
+			$displayKey .
+			'</span>' .
+			'</div><div class="infobox-value">' .
 			$displayValue .
-			'
-</div>
-</div>';
+		'</div></div>';
 	}
 
 	/**
+	 * Get OOUI icon for format https://doc.wikimedia.org/oojs-ui/master/demos/?page=icons&theme=wikimediaui&direction=ltr&platform=desktop
+	 *
 	 * @param string $format
-	 * @return string
+	 * @return string|null
 	 */
 	private function getFormatIcon( $format ) {
-		switch ( $format ) {
-			case "textarea":
-				return "📝";
-			case "text":
-				return "📄";
-			case "email":
-				return "📧";
-			case "url":
-				return "🔗";
-			case "tel":
-				return "📞";
-			case "number":
-				return "#️⃣";
-			default:
-				return "🏷️";
+		if ( array_key_exists( $format, self::$formatToIconOOUI ) ) {
+			return self::$formatToIconOOUI[ $format ];
 		}
+		return null;
 	}
 
 	/**
-	 * @param stdClass $value
 	 * @param string $format
-	 * @param string $path
 	 * @return string
 	 */
-	private function formatValue( $value, $type, $path ) {
-		$schemaInfo = $this->getSchemaInfo( null, $path );
+	private function getFormatIconHtml( $format ) {
+		if ( array_key_exists( $format, self::$formatToIconUnicode ) ) {
+			return self::$formatToIconUnicode[ $format ];
+		}
 
-		switch ( $type ) {
-			case "boolean":
+		return '▪️';
+	}
+
+	/**
+	 * Format a value based on its type and schema format
+	 *
+	 * @param mixed $value
+	 * @param array &$schemaInfo
+	 * @return string
+	 */
+	private function formatValue( $value, &$schemaInfo ) {
+		$format = $this->getComputedFormat( $schemaInfo );
+
+		// Handle file format - display thumbnail
+		if ( $format === 'file' && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderFileThumbnail( $value, $schemaInfo );
+		}
+
+		// Handle user format - display link to user page
+		if ( $format === 'user' && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderUserLink( $value );
+		}
+
+		// Handle category format - display link to category
+		if ( $format === 'category' && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderCategoryLink( $value );
+		}
+
+		// Handle pagename format - display link to page
+		if ( $format === 'pagename' && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderPageLink( $value );
+		}
+
+		if ( ( $format === 'url' || $format === 'uri' ) && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderLink( $value );
+		}
+
+		// Default formatting by type
+		switch ( $schemaInfo['type'] ) {
+			case 'boolean':
 				return '<span class="value-boolean">' .
-					( $value ? "true" : "false" ) .
-					"</span>";
-			case "NULL":
+					( $value ? 'true' : 'false' ) .
+					'</span>';
+
+			case 'null':
 				return '<span class="value-null">null</span>';
-			case "integer":
-			case "double":
+
+			case 'integer':
+			case 'number':
+			case 'double':
 				return '<span class="value-number">' .
 					htmlspecialchars( (string)$value ) .
-					"</span>";
-			case "string":
+					'</span>';
+
+			case 'string':
 				if ( $this->isHtml( $value ) ) {
-					return '<div class="value-html">' . $value . "</div>";
+					$value = $this->truncateTextUtf8( $value, 260 );
+					return '<div class="value-html">' . $value . '</div>';
 				}
-				if (
-					!empty( $schemaInfo["format"] ) &&
-					$schemaInfo["format"] === "textarea"
-				) {
+				if ( $format === 'textarea' ) {
+					$value = $this->truncateTextUtf8( $value, 260 );
 					return '<div class="value-textarea">' .
 						nl2br( htmlspecialchars( $value ) ) .
-						"</div>";
+						'</div>';
 				}
-				if ( $value === "" ) {
+				if ( $value === '' ) {
 					return '<span class="value-empty"></span>';
 				}
+
+				$value = $this->truncateTextUtf8( $value );
 				return '<span class="value-string">' .
 					nl2br( htmlspecialchars( $value ) ) .
-					"</span>";
+					'</span>';
+
 			default:
 				if ( is_object( $value ) ) {
-					if ( method_exists( $value, "__toString" ) ) {
+					if ( method_exists( $value, '__toString' ) ) {
 						return '<span class="value-object">' .
 							htmlspecialchars( $value->__toString() ) .
-							"</span>";
+							'</span>';
 					}
 					return '<span class="value-object">Object (' .
 						htmlspecialchars( get_class( $value ) ) .
-						")</span>";
+						')</span>';
 				}
 				return '<span class="value-default">' .
 					htmlspecialchars( (string)$value ) .
-					"</span>";
+					'</span>';
 		}
 	}
 
 	/**
-	 * @param mixed $content
-	 * @return bool
+	 * Render a file thumbnail using OOUI
+	 *
+	 * @param string $filename
+	 * @param array &$schemaInfo
+	 * @return string
 	 */
-	private function isHtml( $content ) {
-		if ( !is_string( $content ) ) {
-			return false;
+	private function renderFileThumbnail( string $filename, &$schemaInfo ): string {
+		$title = TitleClass::newFromText( $filename, NS_FILE );
+
+		if ( !$title || !$title->exists() ) {
+			return (string)new \OOUI\LabelWidget( [
+				'label' => $filename,
+				'classes' => [ 'value-file' ]
+			] );
 		}
-		return preg_match( "/<[a-z][a-z0-9]*[^>]*>/i", $content ) === 1;
+
+		$wikiFilePage = new \WikiFilePage( $title );
+		$file = $wikiFilePage->getFile();
+
+		if ( !$file ) {
+			return (string)new \OOUI\LabelWidget( [
+				'label' => $filename,
+				'classes' => [ 'value-file' ]
+			] );
+		}
+
+		$schemaInfo['show-hint'] = false;
+
+		$frameParams = [
+			'caption' => $filename,
+			'align' => 'none'
+		];
+
+		$handlerParams = [
+			'width' => 140,
+		];
+
+		return LinkerClass::makeThumbLink2( $title, $file, $frameParams, $handlerParams );
 	}
+
+	/**
+	 * Render a user link using OOUI
+	 *
+	 * @param string $username
+	 * @return string
+	 */
+	private function renderUserLink( string $username ): string {
+		$userTitle = TitleClass::newFromText( $username, NS_USER );
+
+		if ( !$userTitle ) {
+			return (string)new \OOUI\LabelWidget( [
+				'label' => $username,
+				'classes' => [ 'value-user' ]
+			] );
+		}
+
+		$user = User::newFromName( $username );
+		$exists = $user && $user->getId() > 0;
+
+		$link = new \OOUI\ButtonWidget( [
+			'label' => $username,
+			'href' => $userTitle->getLocalURL(),
+			'target' => '_blank',
+			'framed' => false,
+			'flags' => [ 'progressive' ],
+			'classes' => [ 'infobox-user-link' ]
+		] );
+
+		return $link;
+	}
+
+	/**
+	 * Render a category link using OOUI
+	 *
+	 * @param string $categoryName
+	 * @return string
+	 */
+	private function renderCategoryLink( string $categoryName ): string {
+		$categoryTitle = TitleClass::newFromText( $categoryName, NS_CATEGORY );
+
+		if ( !$categoryTitle ) {
+			return (string)new \OOUI\LabelWidget( [
+				'label' => $categoryName,
+				'classes' => [ 'value-category' ]
+			] );
+		}
+
+		$link = new \OOUI\ButtonWidget( [
+			'label' => $categoryName,
+			'href' => $categoryTitle->getLocalURL(),
+			'target' => '_blank',
+			'framed' => false,
+			'flags' => [ 'progressive' ],
+			'classes' => [ 'infobox-category-link' ]
+		] );
+
+		return $link;
+	}
+
+	/**
+	 * Render a page link using OOUI
+	 *
+	 * @param string $pageName
+	 * @return string
+	 */
+	private function renderLink( string $url ): string {
+		$link = new \OOUI\ButtonWidget( [
+			'label' => $url,
+			'href' => $url,
+			'target' => '_blank',
+			'framed' => false,
+			'flags' => [ 'progressive' ],
+			'classes' => [ 'infobox-page-link' ]
+		] );
+
+		return (string)new \OOUI\FieldLayout( $link, [
+			'align' => 'inline',
+			'classes' => [ 'value-link' ]
+		] );
+	}
+
+	/**
+	 * Render a page link using OOUI
+	 *
+	 * @param string $pageName
+	 * @return string
+	 */
+	private function renderPageLink( string $pageName ): string {
+		$pageTitle = TitleClass::newFromText( $pageName );
+
+		if ( !$pageTitle ) {
+			return (string)new \OOUI\LabelWidget( [
+				'label' => $pageName,
+				'classes' => [ 'value-page' ]
+			] );
+		}
+
+		$link = new \OOUI\ButtonWidget( [
+			'label' => $pageName,
+			'href' => $pageTitle->getLocalURL(),
+			'target' => '_blank',
+			'framed' => false,
+			'flags' => [ 'progressive' ],
+			'classes' => [ 'infobox-page-link' ]
+		] );
+
+		return (string)new \OOUI\FieldLayout( $link, [
+			'align' => 'inline',
+			'classes' => [ 'value-page' ]
+		] );
+	}
+
 }

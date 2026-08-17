@@ -1,5 +1,5 @@
 {
-	"$id": "SimpleTree",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SimpleTree",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Tree Item",
 	"x-layout": "paged",

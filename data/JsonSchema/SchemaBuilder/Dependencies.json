@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "SchemaBuilder/Dependencies",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/Dependencies",
 	"title": "DependencyCondition",
 	"oneOf": [
 		{
@@ -49,8 +49,77 @@
 		"atomicCondition": {
 			"title": "Atomic Condition",
 			"type": "object",
-			"x-input": "OO.ui.DropdownInputWidget",
+			"x-switch": "OO.ui.DropdownInputWidget",
 			"oneOf": [
+				{
+					"title": "Compare Another Field to Constant",
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"minLength": 1
+						},
+						"op": {
+							"$ref": "#/definitions/operator"
+						},
+						"value": {
+							"type": [
+								"string",
+								"number",
+								"boolean",
+								"null"
+							]
+						}
+					},
+					"required": [
+						"path",
+						"op",
+						"value"
+					]
+				},
+				{
+					"title": "Exists Check",
+					"type": "object",
+					"properties": {
+						"op": {
+							"type": "string",
+							"const": "exists"
+						},
+						"path": {
+							"type": "string",
+							"minLength": 1
+						}
+					},
+					"required": [
+						"op",
+						"path"
+					]
+				},
+				{
+					"title": "Compare Current Field to Another Field",
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string",
+							"minLength": 1
+						},
+						"op": {
+							"type": "string",
+							"enum": [
+								"==",
+								"!=",
+								"\u003E",
+								"\u003C",
+								"\u003E=",
+								"\u003C="
+							]
+						}
+					},
+					"required": [
+						"path",
+						"op"
+					]
+				},
 				{
 					"title": "Compare Current Field to Constant",
 					"type": "object",
@@ -73,72 +142,6 @@
 					]
 				},
 				{
-					"title": "Compare Another Field to Constant",
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string"
-						},
-						"op": {
-							"$ref": "#/definitions/operator"
-						},
-						"value": {
-							"type": [
-								"string",
-								"number",
-								"boolean",
-								"null"
-							]
-						}
-					},
-					"required": [
-						"path",
-						"op",
-						"value"
-					]
-				},
-				{
-					"title": "Compare Current Field to Another Field",
-					"type": "object",
-					"properties": {
-						"path": {
-							"type": "string"
-						},
-						"op": {
-							"type": "string",
-							"enum": [
-								"==",
-								"!=",
-								"\u003E",
-								"\u003C",
-								"\u003E=",
-								"\u003C="
-							]
-						}
-					},
-					"required": [
-						"path",
-						"op"
-					]
-				},
-				{
-					"title": "Exists Check",
-					"type": "object",
-					"properties": {
-						"op": {
-							"type": "string",
-							"const": "exists"
-						},
-						"path": {
-							"type": "string"
-						}
-					},
-					"required": [
-						"op",
-						"path"
-					]
-				},
-				{
 					"title": "Matches Regex",
 					"type": "object",
 					"properties": {
@@ -150,7 +153,8 @@
 							"type": "string"
 						},
 						"path": {
-							"type": "string"
+							"type": "string",
+							"minLength": 1
 						}
 					},
 					"required": [

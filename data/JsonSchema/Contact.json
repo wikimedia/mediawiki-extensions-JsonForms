@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "Contact",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Contact",
 	"title": "Contact",
 	"description": "A contact person or entity",
 	"type": "object",
@@ -19,14 +19,18 @@
 					"name": {
 						"type": "object"
 					}
-				}
+				},
+				"required": [
+					"name"
+				]
 			},
 			"then": {
 				"properties": {
 					"fullname": {
 						"type": "string",
 						"title": "Full Name",
-						"description": "Computed full name",
+						"x-hidden_": true,
+						"description": "Computed full name from name object",
 						"x-watch": [
 							"name.salutation",
 							"name.first_name",
@@ -41,9 +45,10 @@
 			"else": {
 				"properties": {
 					"fullname": {
+						"x-hidden": true,
 						"type": "string",
 						"title": "Full Name",
-						"description": "Computed full name",
+						"description": "Computed full name from simple name string",
 						"x-watch": [
 							"name"
 						],
@@ -57,7 +62,8 @@
 		"fullname": {
 			"type": "string",
 			"title": "Full Name",
-			"description": "Computed full name"
+			"x-hidden_": true,
+			"description": "Computed full name (auto-generated based on name format)"
 		},
 		"name": {
 			"oneOf": [
@@ -120,7 +126,10 @@
 			"type": "string",
 			"x-format": "textarea",
 			"title": "Notes",
-			"description": "Additional notes about the contact"
+			"description": "Additional notes about the contact",
+			"x-input-config": {
+				"icon": "textSummary"
+			}
 		},
 		"email": {
 			"type": "array",
@@ -129,11 +138,12 @@
 				"type": "string",
 				"format": "email",
 				"title": "Email Address",
-				"description": "An email address"
+				"description": "An email address",
+				"x-input-config": {
+					"icon": "message"
+				}
 			},
-			"minItems": 0,
 			"uniqueItems": true,
-			"description": "Email addresses",
 			"default": []
 		},
 		"phone": {
@@ -146,7 +156,6 @@
 				"pattern": "^[+]?[0-9\\s\\-()]{7,}$",
 				"description": "A phone number"
 			},
-			"minItems": 0,
 			"uniqueItems": true,
 			"description": "Phone numbers",
 			"default": []
@@ -158,7 +167,10 @@
 				"type": "string",
 				"format": "uri",
 				"title": "Link",
-				"description": "A URL link"
+				"description": "A URL link",
+				"x-input-config": {
+					"icon": "link"
+				}
 			},
 			"description": "Any useful links (CV, personal blogs, etc.)",
 			"default": []
@@ -167,7 +179,8 @@
 			"type": "string",
 			"title": "Picture",
 			"description": "Picture filename or URL (e.g., File:image.jpg)",
-			"pattern": "^(File:|https?://).*"
+			"x-format": "file",
+			"x-input": "OO.ui.SelectFileWidget"
 		},
 		"language": {
 			"type": "array",
@@ -175,7 +188,10 @@
 			"items": {
 				"type": "string",
 				"title": "Language",
-				"description": "A language spoken by the contact"
+				"description": "A language spoken by the contact",
+				"x-input-config": {
+					"icon": "textLanguage"
+				}
 			},
 			"uniqueItems": true,
 			"description": "Languages spoken by the contact",
@@ -201,13 +217,11 @@
 			"properties": {
 				"street": {
 					"type": "string",
-					"title": "Street",
-					"description": "Street address"
+					"title": "Street"
 				},
 				"city": {
 					"type": "string",
-					"title": "City",
-					"description": "City"
+					"title": "City"
 				},
 				"state": {
 					"type": "string",
@@ -216,13 +230,11 @@
 				},
 				"postal_code": {
 					"type": "string",
-					"title": "Postal Code",
-					"description": "Postal or ZIP code"
+					"title": "Postal Code"
 				},
 				"country": {
 					"type": "string",
-					"title": "Country",
-					"description": "Country"
+					"title": "Country"
 				}
 			}
 		},

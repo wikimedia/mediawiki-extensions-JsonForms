@@ -22,6 +22,8 @@
  * @copyright Copyright ©2026, https://wikisphere.org
  */
 
+use MediaWiki\Extension\JsonForms\ParametersProcessor;
+
 class SpecialJsonForms extends QueryPage {
 
 	/** @inheritDoc */
@@ -61,6 +63,8 @@ class SpecialJsonForms extends QueryPage {
 			return;
 		}
 
+		$out->enableOOUI();
+
 		$specialPageTitle = SpecialPage::getTitleFor( 'JsonForms' );
 		$out->addWikiMsg(
 			'jsonforms-special-forms-returnlink',
@@ -69,17 +73,50 @@ class SpecialJsonForms extends QueryPage {
 
 		// $out->addHTML( '<br />' );
 
+		$formSchema = \JsonForms::getSourceSchema(
+			'CreatePageForm',
+			'JsonSchema/Core',
+		);
+
+		if ( !$formSchema ) {
+			throw new MWException( 'Cannot load core schema' );
+		}
+
+		$parametersProcessor = new ParametersProcessor( [], $formSchema );
+		$parametersProcessor->buildOptionsSchema();
+		$allParameters = $parametersProcessor->getOptions();
+
 		$formDescriptor = \JsonForms::getSourceSchema( $par, 'JsonForm' );
+
+		if ( !$formDescriptor ) {
+			return $this->printError( $out, 'jsonforms-special-form-no-defined' );
+		}
+
+		$formDescriptor = $parametersProcessor->mergeFormDescriptor( $formDescriptor );
+
 		$formDescriptor->view = 'inline';
 		unset( $formDescriptor->width );
 
-		$html = \JsonForms::getPageForm( $out, $formDescriptor );
+		$html = \JsonForms::getPageForm( $user, $out, $formDescriptor );
 
 		$out->addModules( 'ext.JsonForms.pageForms' );
 
 		\JsonForms::addJsConfigVars( $out );
 
 		$out->addHTML( $html );
+	}
+
+	/**
+	 * @param Output $out
+	 * @param string $msg
+	 */
+	private function printError( $out, $msg ) {
+		$out->addHTML(
+			new \OOUI\MessageWidget( [
+				'type' => 'error',
+				'label' => new \OOUI\HtmlSnippet( $this->msg( $msg )->parse() ),
+			] ),
+		);
 	}
 
 	/**

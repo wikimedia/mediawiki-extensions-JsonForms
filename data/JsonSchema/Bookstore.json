@@ -1,10 +1,11 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"$id": "Bookstore",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Bookstore",
 	"type": "object",
 	"title": "Bookstore",
 	"definitions": {
 		"newPropertySchema": {
+			"x-value-converter": "newPropertyWithOptions",
 			"title": "New property",
 			"type": "object",
 			"required": [
@@ -74,20 +75,21 @@
 				"type": "object",
 				"title": "book",
 				"additionalProperties": true,
-				"x-additional-properties-ui": {
-					"schema": {
-						"$ref": "#/definitions/newPropertySchema"
-					},
-					"name": "NewProperty",
-					"label": "New property"
-				},
+				"x-additional-properties-ui": [
+					{
+						"schema": {
+							"type": "object",
+							"$ref": "#/definitions/newPropertySchema"
+						},
+						"label": "New property"
+					}
+				],
 				"properties": {
 					"Title": {
 						"type": "string"
 					},
 					"Author": {
 						"type": "array",
-						"title": "",
 						"x-layout": "booklet",
 						"x-collapsible": true,
 						"items": {

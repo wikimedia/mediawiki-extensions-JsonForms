@@ -25,6 +25,7 @@ function JsonFormsManageSchemas( el, data ) {
 	JsonFormsManageSchemas.super.call( this, el, data );
 
 	this.formDescriptor = data.formDescriptor;
+	this.debug = this.formDescriptor.editor_options.debug;
 }
 
 OO.inheritClass( JsonFormsManageSchemas, JsonForms );
@@ -53,33 +54,32 @@ JsonFormsManageSchemas.prototype.initialize = async function () {
 		}
 	);
 
-	// this.defaultOptions.callbacks.template = {
-	// ...this.defaultOptions.callbacks.template,
-	// ...this.enumProviders,
-	// };
-
-	// console.log('this.defaultOptions', this.defaultOptions);
-
 	this.schema = this.adjustFormSchema();
 };
 
-JsonFormsManageSchemas.prototype.onFormButton = function ( action, editor ) {
+JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor ) {
+	buttonEditor.disable();
+
 	const innerformEditor = this.editor.getEditor( 'root.editor' );
 	const innerEditor = innerformEditor.input.editor;
 
 	switch ( action ) {
 		case 'submit': {
 			const innerEditorValidationResults = innerEditor.validate();
-			// console.log('innerEditorValidationResults', innerEditorValidationResults);
 
 			if ( innerEditorValidationResults.length ) {
-				console.log( 'innerEditorValidationResults', innerEditorValidationResults );
+				if ( this.debug ) {
+					console.log( 'innerEditorValidationResults', innerEditorValidationResults );
+				}
 				JsonForms.Alert( 'there are errors' );
+				buttonEditor.enable();
 				return;
 			}
 
 			const schemaName = innerEditor.getSchemaName();
+
 			if ( schemaName && innerEditor.getValue()[ 'x-name' ] !== schemaName ) {
+				// @TODO rename or create with new name
 				JsonForms.Alert(
 					'This will rename the schema, ok ?',
 					{ size: 'small' },
@@ -88,10 +88,19 @@ JsonFormsManageSchemas.prototype.onFormButton = function ( action, editor ) {
 						);
 					}
 				);
+
+				buttonEditor.enable();
 				return;
 			}
-			this.submitForm( innerEditor ).catch( ( err ) => console.error( 'API error:', err )
-			);
+
+			buttonEditor.disable();
+			this.submitForm( innerEditor )
+				.then( () => buttonEditor.enable() )
+				.catch( ( err ) => {
+					console.error( 'API error:', err );
+					buttonEditor.enable();
+				} );
+
 			break;
 		}
 		case 'cancel': {
@@ -117,20 +126,15 @@ JsonFormsManageSchemas.prototype.adjustFormSchema = function () {
 };
 
 JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
-	// console.log('innerEditor', innerEditor);
+	const structuredValue = innerEditor.getStructuredValue();
 
 	const vars = {};
-	const structuredValue = innerEditor.getStructuredValue();
-	// console.log('structuredValue', structuredValue);
-
-	for ( const path in structuredValue ) {
-		vars[ path ] = structuredValue[ path ].value;
+	for ( const path in structuredValue.values ) {
+		vars[ path ] = structuredValue.values[ path ].value;
 	}
 
 	// Create a shallow copy to avoid mutating the original
 	const formDescriptor = { ...this.formDescriptor };
-
-	// console.log('vars', vars);
 
 	if ( !formDescriptor.pagename_formula ) {
 		console.error(
@@ -167,19 +171,27 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 		processor: 'ManageSchemas'
 	};
 
-	console.log( 'data', data );
+	if ( this.debug ) {
+		console.log( 'data', data );
+	}
 
+	/*
+return new Promise( ( resolve, reject ) => {
+resolve()
+})
+*/
 	const payload = {
 		data: JSON.stringify( data ),
 		action: 'jsonforms-submit-form'
 	};
 
-	// console.log('payload', payload);
 	return new Promise( ( resolve, reject ) => {
 		new mw.Api()
 			.postWithToken( 'csrf', payload )
 			.done( ( thisRes ) => {
-				console.log( 'thisRes', thisRes );
+				if ( this.debug ) {
+					console.log( 'thisRes', thisRes );
+				}
 				let result = thisRes[ payload.action ].result;
 				result = JSON.parse( result );
 				if ( result.errors && result.errors.length ) {
@@ -190,6 +202,7 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 						),
 						type: 'error'
 					};
+					resolve( false );
 					const nonModalDialog = new JsonForms.NonModalDialog();
 					nonModalDialog.open( config );
 				} else if ( result.returnUrl ) {
@@ -198,14 +211,15 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 					} else {
 						window.location.href = result.returnUrl;
 					}
+					resolve( result );
 				} else {
+					resolve( result );
 					const config = {
 						htmlMessage: result.message,
 						type: 'success'
 					};
 					const nonModalDialog = new JsonForms.NonModalDialog();
 					nonModalDialog.open( config );
-					resolve( result );
 					this.editor.destroy();
 					this.createDefaultEditor().then( ( editor ) => {} );
 				}
@@ -222,12 +236,9 @@ $( () => {
 	$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 		this.el = el;
 		const data = $( el ).data().formData;
-		const editorConfig = data.editorConfig || {};
-		console.log( 'data', data );
-
-		const jsonForms = new JsonFormsManageSchemas( el, data );
-		await jsonForms.initialize();
-
-		const editor = await jsonForms.createDefaultEditor( editorConfig );
+		const jsonFormsManageSchemas = new JsonFormsManageSchemas( el, data );
+		await jsonFormsManageSchemas.initialize();
+		const editor = await jsonFormsManageSchemas.createDefaultEditor();
 	} );
+
 } );

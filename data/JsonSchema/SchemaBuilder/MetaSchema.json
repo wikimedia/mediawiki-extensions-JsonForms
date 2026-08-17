@@ -1,6 +1,6 @@
 {
 	"title": "JSON Schema builder",
-	"$id": "SchemaBuilder/MetaSchema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/MetaSchema",
 	"description": "Meta-schema for defining editable JSON schemas with UI layout controls, custom input widgets, and conditional display logic. Extends standard JSON Schema with MediaWiki-specific widget configurations and layout options.",
 	"x-layout": "paged",
 	"x-layout-config": {
@@ -9,6 +9,34 @@
 	"$ref": "#/definitions/schemaRoot",
 	"type": "object",
 	"definitions": {
+		"newProperty": {
+			"title": "New property",
+			"x-value-converter": "newPropertyMeta",
+			"type": "object",
+			"required": ["name", "type"],
+			"properties": {
+				"name": {
+					"title": "name",
+					"type": "string",
+					"minLength": 1
+				},
+				"type": {
+					"title": "type",
+					"type": "string",
+					"enum": [
+						"string",
+						"integer",
+						"number",
+						"boolean",
+						"object",
+						"array",
+						"null",
+						"multiple",
+						"survey"
+					]
+				}
+			}
+		},
 		"controlConfig": {
 			"x-message": {
 				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.FieldLayout OO.ui.FieldLayout]",
@@ -49,6 +77,10 @@
 					"type": "string",
 					"description": "The label text"
 				},
+				"x-label-template": {
+					"type": "string",
+					"description": "label template (overrides label, usually used in conjunction with x-watch)"
+				},
 				"text": {
 					"type": "string",
 					"description": "Text to insert"
@@ -67,6 +99,7 @@
 				"label": {
 					"type": "string",
 					"description": "Display label for the property",
+					"minLength": 1,
 					"examples": ["field", "subitem"]
 				},
 				"schema": {
@@ -81,46 +114,25 @@
 							]
 						},
 						{
-							"$ref": "#/definitions/schema",
+							"$ref": "#/definitions/typedSchema/object",
 							"title": "schema",
+							"tyoe": "object",
 							"description": "Inline schema"
 						}
 					]
 				},
-				"name": {
-					"type": "string",
-					"description": "Property name identifier used when adding this item to an object",
-					"examples": ["field", "subitem"]
-				},
 				"popup_size": {
+					"title": "popup size",
 					"type": "string",
 					"default": "medium",
 					"enum": ["medium", "large", "small"]
 				}
 			}
 		},
-		"commonOptions": {
-			"description": "Common UI options applicable to all field types",
-			"type": "object",
-			"properties": {
-				"x-compact": {
-					"type": "boolean",
-					"description": "Render the field in a more compact form with reduced spacing"
-				},
-				"x-css-class": {
-					"type": "string",
-					"description": "Custom CSS class name to apply to the container"
-				},
-				"x-dependency": {
-					"$ref": "JsonSchema:SchemaBuilder/Dependencies",
-					"description": "Conditional display logic - field only shown when dependencies are met"
-				}
-			}
-		},
 		"baseProperties": {
 			"description": "Base JSON Schema keywords common to all schema types (excluding multiple-related keywords)",
 			"type": "object",
-			"x-default-properties": ["type", "title"],
+			"x-default-properties": ["type", "title", "description", "x-required"],
 			"properties": {
 				"const": {
 					"description": "The value must be equal to this constant"
@@ -136,11 +148,7 @@
 				"x-title-format": {
 					"type": "string",
 					"description": "title format",
-					"enum": [
-						"text",
-						"html",
-						"wikitext"
-					]
+					"enum": ["text", "html", "wikitext"]
 				},
 				"description": {
 					"type": "string",
@@ -150,11 +158,7 @@
 				"x-description-format": {
 					"type": "string",
 					"description": "description format",
-					"enum": [
-						"text",
-						"html",
-						"wikitext"
-					]
+					"enum": ["text", "html", "wikitext"]
 				},
 				"x-title-template": {
 					"type": "string",
@@ -168,22 +172,17 @@
 				},
 				"$comment": {
 					"type": "string",
-					"description": "Developer comment - ignored by validation, for documentation purposes"
+					"description": "Developer comment - ignored by validation, for documentation purposes",
+					"x-format": "textarea"
 				},
 				"$ref": {
 					"x-message": {
 						"label": "Reference to another schema (eg. #definitions/subschema, or JsonSchema:SubSchema, or JsonSchema:SubSchema#definitions/sub-subschema)",
-						"x-label-template": "label template (overrides label, usually used in conjunction with x-watch)",
 						"type": "warning"
 					},
 					"format": "uri-reference",
 					"type": "string",
 					"description": "Reference to another schema definition"
-				},
-				"$schema": {
-					"format": "uri",
-					"type": "string",
-					"description": "JSON Schema dialect URI (e.g., https://json-schema.org/draft-07/schema)"
 				},
 				"contentEncoding": {
 					"type": "string",
@@ -239,23 +238,88 @@
 				"x-hidden": {
 					"type": "boolean",
 					"description": "Hide the field from the form UI"
+				},
+				"x-compact": {
+					"type": "boolean",
+					"description": "Hide title, description and error holder, disable border and padding"
+				},
+				"x-no-title": {
+					"type": "boolean",
+					"description": "Hide title"
+				},
+				"x-no-description": {
+					"type": "boolean",
+					"description": "Hide description"
+				},
+				"x-css-class": {
+					"type": "string",
+					"description": "Custom CSS class name to apply to the container"
+				},
+				"x-css-inline": {
+					"type": "string",
+					"description": "Inline css to apply to the container"
+				},
+				"x-dependency": {
+					"$ref": "JsonSchema:SchemaBuilder/Dependencies",
+					"description": "Conditional display logic - field only shown when dependencies are met"
+				},
+				"x-show": {
+					"type": "boolean",
+					"description": "Property will be always visible"
+				},
+				"x-required": {
+					"type": "boolean",
+					"x-runtime-only": true,
+					"x-show": true,
+					"description": "Set the property as required (it will be handled within the \"required\" property in the parent schema)"
+				},
+				"x-padding": {
+					"type": "boolean",
+					"description": "Force padding to the container"
+				},
+				"x-border": {
+					"type": "boolean",
+					"description": "Force border to the container"
+				},
+				"x-data": {
+					"type": "object",
+					"description": "Data object to be used in conjunction with converters or enum providers",
+					"additionalProperties": true
 				}
 			},
 			"required": ["type"]
 		},
-		"multipleSchema": {
+		"multiple": {
 			"description": "Schema for logical combinations (oneOf, anyOf, allOf, not, if/then/else). Matches when type is NOT set.",
 			"type": "object",
+			"allOf": [
+				{
+					"$ref": "#/definitions/baseProperties"
+				},
+				{
+					"type": "object",
+					"properties": {
+						"type": {
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": [
+									"string",
+									"integer",
+									"boolean",
+									"number",
+									"object",
+									"array"
+								],
+								"x-input-config": {
+									"allowArbitrary": false
+								}
+							}
+						}
+					}
+				}
+			],
 			"properties": {
-				"title": {
-					"type": "string",
-					"description": "Field title"
-				},
-				"description": {
-					"type": "string",
-					"x-format": "textarea",
-					"description": "Description or help text for the field"
-				},
 				"oneOf": {
 					"description": "Schema must be valid against exactly one of the subschemas (logical XOR)",
 					"type": "array",
@@ -296,6 +360,24 @@
 					"$ref": "#/definitions/schema",
 					"description": "Conditional validation: must validate when 'if' does NOT validate"
 				},
+				"properties": {
+					"x-toolbar": "button",
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"x-additional-properties-ui": [
+						{
+							"label": "New property",
+							"schema": "#/definitions/newProperty",
+							"popup_size": "medium"
+						}
+					],
+					"additionalProperties": true,
+					"description": "Explicitly defined object properties with their schemas"
+				},
 				"links": {
 					"type": "array",
 					"x-layout": "tabs_",
@@ -311,34 +393,45 @@
 							"href": {
 								"type": "string",
 								"description": "URI template for the link"
+							},
+							"x-destroy-values-on-switch": {
+								"type": "boolean",
+								"default": false,
+								"description": "Destroy value on switch"
+							},
+							"x-no-validate": {
+								"type": "boolean",
+								"default": false,
+								"description": "No validate"
 							}
 						}
 					}
 				},
-				"x-input": {
+				"x-switch": {
 					"type": "string",
 					"description": "Widget for switch",
 					"enum": [
 						"OO.ui.ButtonMenuSelectWidget",
 						"OO.ui.ButtonSelectWidget",
+						"OO.ui.RadioSelectInputWidget",
 						"OO.ui.DropdownInputWidget"
 					],
 					"default": "OO.ui.ButtonSelectWidget"
 				},
-				"x-input-config": {
+				"x-switch-config": {
 					"type": "object",
 					"description": "Configuration options passed to the selected input widget",
-					"x-watch": "x-input",
+					"x-watch": "x-switch",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-switch}}"
 						}
 					]
 				}
-			},
-			"not": {
-				"required": ["type"]
 			}
 		},
 		"string": {
@@ -382,19 +475,24 @@
 				"x-enum-titles-format": {
 					"type": "string",
 					"description": "description format",
-					"enum": [
-						"text",
-						"html",
-						"wikitext"
-					]
+					"enum": ["text", "html", "wikitext"]
 				},
 				"x-enum-template": {
 					"$ref": "JsonSchema:SchemaBuilder/EnumTemplate",
 					"description": "Dynamic source for enum using templates"
 				},
 				"x-enum-provider": {
-					"type": "text",
-					"description": "Name of the registered enum provider to be used in selects. Must be registered in EnumProviders.providers and provide at least a \"source\" method"
+					"type": "string",
+					"description": "Name of the enum provider to be used in selects. When not a built-in function, must be declared in [[MediaWiki:DefaultEditorOptions]] and provide at least a \"source\" method",
+					"x-description-format": "wikitext",
+					"x-input": "OO.ui.ComboBoxInputWidget",
+					"enum": [
+						"uGroups",
+						"slotRoles",
+						"jsonSlots",
+						"contentModels",
+						"jsonSchemas"
+					]
 				},
 				"maxLength": {
 					"minimum": 0,
@@ -425,17 +523,45 @@
 		"stringOptions": {
 			"description": "UI configuration options specific to string-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
+			"if": {
+				"properties": {
+					"format": {
+						"enum": [
+							"date-time",
+							"time",
+							"date",
+							"email",
+							"idn-email",
+							"hostname",
+							"idn-hostname",
+							"ipv4",
+							"ipv6",
+							"uri",
+							"uri-reference",
+							"iri",
+							"uri-template",
+							"json-pointer",
+							"relative-json-pointer",
+							"regex"
+						]
+					}
+				},
+				"required": ["format"]
+			},
+			"then": {
+				"properties": {
+					"x-format-type": {
+						"default": "default"
+					}
+				},
+				"required": ["x-format-type"]
+			},
 			"properties": {
 				"x-format-type": {
 					"type": "string",
 					"enum": ["custom", "default"],
 					"default": "custom",
-					"writeOnly": true,
+					"x-runtime-only": true,
 					"description": "Selects whether to use standard JSON Schema formats or custom formats"
 				},
 				"format": {
@@ -466,23 +592,26 @@
 				},
 				"x-format": {
 					"type": "string",
+					"default": "text",
 					"enum": [
 						"autocomplete",
-						"captcha",
 						"color",
 						"json",
 						"hidden",
+						"file",
+						"html",
+						"markdown",
 						"month",
+						"pagename",
 						"rating",
 						"tel",
 						"text",
 						"textarea",
+						"user",
 						"url",
 						"uuid",
-						"week",
 						"wikitext"
 					],
-					"default": "text",
 					"x-dependency": {
 						"x-format-type": "custom"
 					},
@@ -496,7 +625,7 @@
 						"ColorPicker",
 						"intl-tel-input",
 						"JsonEditor",
-						"jsonForms",
+						"JsonForms",
 						"LookupElement",
 						"month",
 						"mw.widgets.DateInputWidget",
@@ -561,10 +690,102 @@
 								"op": "!=",
 								"value": ""
 							}
-						]							
+						]
 					},
 					"description": "Configuration options passed to the selected input widget",
 					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+						}
+					]
+				},
+				"x-control-config": {
+					"type": "object",
+					"description": "Additional control configuration for the string field",
+					"$ref": "#/definitions/controlConfig"
+				},
+				"x-autocomplete-provider": {
+					"type": "string",
+					"description": "Autocomplete configuration for text inputs",
+					"x-dependency": {
+						"or": [
+							{
+								"path": "x-input",
+								"op": "matches",
+								"value": "LookupElement"
+							},
+							{
+								"path": "x-input",
+								"op": "matches",
+								"value": "autocomplete"
+							}
+						]
+					}
+				},
+				"x-value-formula": {
+					"type": "string",
+					"description": "Post-process value after form submission. Use <value> to print the input value. Can contain wikitext."
+				}
+			}
+		},
+		"stringOptionsMultiselect": {
+			"description": "UI configuration options specific to string-type fields",
+			"type": "object",
+			"properties": {
+				"x-format-type": {
+					"type": "string",
+					"enum": ["custom", "default"],
+					"default": "custom",
+					"x-runtime-only": true,
+					"description": "Selects whether to use standard JSON Schema formats or custom formats"
+				},
+				"x-format": {
+					"type": "string",
+					"enum": ["text", "title", "user", "category"],
+					"default": "text"
+				},
+				"x-input": {
+					"x-watch": ["format", "x-format"],
+					"x-enum-provider": "metaSchemaArrayFormatToInput",
+					"enum_": [
+						"ButtonMultiselectWidget",
+						"GroupMultiSelectWidget",
+						"mw.widgets.CategoryMultiselectWidget",
+						"mw.widgets.TitlesMultiselectWidget",
+						"mw.widgets.UsersMultiselectWidget",
+						"OO.ui.CheckboxMultiselectInputWidget",
+						"OO.ui.MenuTagMultiselectWidget",
+						"OO.ui.TagMultiselectWidget"
+					],
+					"default": "OO.ui.TagMultiselectWidget",
+					"type": "string",
+					"description": "Widget type for string input."
+				},
+				"x-input-config": {
+					"type": "object",
+					"x-dependency": {
+						"and": [
+							{
+								"path": "x-input",
+								"op": "exists"
+							},
+							{
+								"path": "x-input",
+								"op": "!=",
+								"value": ""
+							}
+						]
+					},
+					"description": "Configuration options passed to the selected input widget",
+					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
@@ -653,11 +874,6 @@
 		"numberOptions": {
 			"description": "UI configuration options specific to number-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-format": {
 					"type": "string",
@@ -687,10 +903,66 @@
 								"op": "!=",
 								"value": ""
 							}
-						]							
+						]
 					},
 					"description": "Configuration options passed to the selected input widget",
 					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+						}
+					]
+				},
+				"x-control-config": {
+					"type": "object",
+					"description": "Additional control configuration for the number field",
+					"$ref": "#/definitions/controlConfig"
+				}
+			}
+		},
+		"numberOptionsMultiselect": {
+			"description": "UI configuration options specific to number-type fields",
+			"type": "object",
+			"properties": {
+				"x-format": {
+					"type": "string",
+					"enum": ["number"],
+					"default": "number",
+					"description": "Custom format type"
+				},
+				"x-input": {
+					"enum": ["OO.ui.TagMultiselectWidget"],
+					"type": "string",
+					"x-dependency": {
+						"path": "x-format",
+						"op": "exists"
+					},
+					"description": "Widget type for number input"
+				},
+				"x-input-config": {
+					"type": "object",
+					"x-dependency": {
+						"and": [
+							{
+								"path": "x-input",
+								"op": "exists"
+							},
+							{
+								"path": "x-input",
+								"op": "!=",
+								"value": ""
+							}
+						]
+					},
+					"description": "Configuration options passed to the selected input widget",
+					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
@@ -761,11 +1033,6 @@
 		"integerOptions": {
 			"description": "UI configuration options specific to integer-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-format": {
 					"type": "string",
@@ -774,7 +1041,9 @@
 					"description": "Custom format type"
 				},
 				"x-input": {
-					"enum": ["OO.ui.NumberInputWidget", "RangeWidget", "RatingWidget"],
+					"x-watch": ["x-format"],
+					"x-enum-provider": "metaSchemaIntegerFormatToInput",
+					"enum_": ["OO.ui.NumberInputWidget", "RangeWidget", "RatingWidget"],
 					"type": "string",
 					"x-dependency": {
 						"path": "x-format",
@@ -795,10 +1064,66 @@
 								"op": "!=",
 								"value": ""
 							}
-						]							
+						]
 					},
 					"description": "Configuration options passed to the selected input widget",
 					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+						}
+					]
+				},
+				"x-control-config": {
+					"type": "object",
+					"description": "Additional control configuration for the input field",
+					"$ref": "#/definitions/controlConfig"
+				}
+			}
+		},
+		"integerOptionsMultiselect": {
+			"description": "UI configuration options specific to integer-type fields",
+			"type": "object",
+			"properties": {
+				"x-format": {
+					"type": "string",
+					"enum": ["number"],
+					"default": "number",
+					"description": "Custom format type"
+				},
+				"x-input": {
+					"enum": ["OO.ui.TagMultiselectWidget"],
+					"type": "string",
+					"x-dependency": {
+						"path": "x-format",
+						"op": "exists"
+					},
+					"description": "Widget type for integer input"
+				},
+				"x-input-config": {
+					"type": "object",
+					"x-dependency": {
+						"and": [
+							{
+								"path": "x-input",
+								"op": "exists"
+							},
+							{
+								"path": "x-input",
+								"op": "!=",
+								"value": ""
+							}
+						]
+					},
+					"description": "Configuration options passed to the selected input widget",
+					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
@@ -844,11 +1169,6 @@
 		"booleanOptions": {
 			"description": "UI configuration options specific to boolean-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-input": {
 					"enum": ["OO.ui.CheckboxInputWidget", "OO.ui.ToggleSwitchWidget"],
@@ -869,10 +1189,13 @@
 								"op": "!=",
 								"value": ""
 							}
-						]							
+						]
 					},
 					"description": "Configuration options passed to the selected input widget",
 					"x-watch": "x-input",
+					"x-message": {
+						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
@@ -911,11 +1234,6 @@
 		"nullOptions": {
 			"description": "UI configuration options for null-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-format": {
 					"type": "string",
@@ -929,6 +1247,10 @@
 						"x-format": "button"
 					},
 					"description": "Configuration options passed to the selected input widget",
+					"x-message": {
+						"label": "Using options from [[JsonSchema:SchemaBuilder/InputOptions]] (#/definitions/button)",
+						"x-label-format": "wikitext"
+					},
 					"links": [
 						{
 							"rel": "describedBy",
@@ -939,6 +1261,36 @@
 				"x-button-action": {
 					"type": "string",
 					"description": "action name registered in form options -\u003E callbacks -\u003E button"
+				},
+				"x-message": {
+					"type": "object",
+					"description": "Contextual message to display with the object field",
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["notice", "error", "warning", "success"],
+							"description": "Message severity level"
+						},
+						"label": {
+							"type": "string",
+							"x-format": "textarea",
+							"description": "Message text content"
+						},
+						"x-label-format": {
+							"type": "string",
+							"description": "label format",
+							"enum": ["text", "html", "wikitext"]
+						},
+						"icon": {
+							"type": "string",
+							"description": "OOUI icon name to display ([https://doc.wikimedia.org/oojs-ui/master/demos/?page=icons\u0026theme=wikimediaui\u0026direction=ltr\u0026platform=desktop see here])",
+							"x-description-format": "wikitext"
+						},
+						"inline": {
+							"type": "boolean",
+							"description": "Display message inline within the field"
+						}
+					}
 				}
 			}
 		},
@@ -968,25 +1320,6 @@
 				"contains": {
 					"$ref": "#/definitions/schema",
 					"description": "Schema that at least one item in the array must satisfy"
-				},
-				"items": {
-					"x-toolbar": "button",
-					"description": "Schema for array items.",
-					"oneOf": [
-						{
-							"title": "simple",
-							"$ref": "#/definitions/schema"
-						},
-						{
-							"title": "tuple",
-							"type": "array",
-							"x-layout": "tabs_",
-							"items": {
-								"$ref": "#/definitions/schema"
-							},
-							"minItems": 1
-						}
-					]
 				},
 				"maxContains": {
 					"type": "integer",
@@ -1028,66 +1361,35 @@
 		},
 		"arrayOptions": {
 			"description": "UI configuration options specific to array-type fields",
+			"x-default-properties": ["items"],
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-layout": {
 					"type": "string",
-					"enum": ["default", "tabs", "booklet", "table"],
-					"description": "Layout style for array items"
+					"enum": [
+						"default",
+						"multiselect",
+						"booklet",
+						"tabs",
+						"table",
+						"tuple"
+					],
+					"default": "default",
+					"description": "",
+					"x-show": true
 				},
 				"x-layout-config": {
 					"type": "object",
 					"description": "Additional configuration for the selected layout"
 				},
-				"x-input": {
-					"type": "string",
-					"enum": [
-						"",
-						"ButtonMultiselectWidget",
-						"GroupMultiSelectWidget",
-						"mw.widgets.CategoryMultiselectWidget",
-						"mw.widgets.TitlesMultiselectWidget",
-						"mw.widgets.UsersMultiselectWidget",
-						"OO.ui.CheckboxMultiselectInputWidget",
-						"OO.ui.MenuTagMultiselectWidget",
-						"OO.ui.TagMultiselectWidget"
-					],
-					"default": "",
-					"description": "Widget type for array's items (leave empty if not primitives)"
-				},
-				"x-input-config": {
-					"type": "object",
-					"description": "Configuration options passed to the selected input widget",
-					"x-watch": "x-input",
-					"x-dependency": {
-						"and": [
-							{
-								"path": "x-input",
-								"op": "exists"
-							},
-							{
-								"path": "x-input",
-								"op": "!=",
-								"value": ""
-							}
-						]							
-					},
+				"items": {
+					"x-watch": "x-layout",
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "#/definitions/ArrayItems-{{x-layout}}"
 						}
 					]
-				},
-				"x-control-config": {
-					"type": "object",
-					"description": "Configuration for array control buttons",
-					"$ref": "#/definitions/controlConfig"
 				},
 				"x-collapsible": {
 					"type": "boolean",
@@ -1110,11 +1412,47 @@
 							"x-description-format": "wikitext"
 						}
 					}
+				},
+				"x-render-template": {
+					"type": "string",
+					"description": "Template name to be used by the parser function <code>jsonformsrender</code> instead of the computed name",
+					"x-description-format": "wikitext",
+					"x-input": "mw.widgets.TitleInputWidget",
+					"x-input-config": {
+						"namespace": 10
+					}
+				}
+			}
+		},
+		"survey": {
+			"description": "JSON Schema object type definition",
+			"x-default-properties": ["properties"],
+			"type": "object",
+			"allOf": [
+				{
+					"$ref": "#/definitions/baseProperties"
+				},
+				{
+					"$ref": "JsonSchema:SurveyBuilderLinear"
+				}
+			],
+			"properties": {
+				"type": {
+					"enum": ["object"],
+					"const": "object",
+					"x-format": "hidden",
+					"description": "JSON Schema primitive type"
+				}
+			},
+			"patternProperties": {
+				".*": {
+					"$ref": "#/definitions/schema"
 				}
 			}
 		},
 		"object": {
 			"description": "JSON Schema object type definition",
+			"x-default-properties": ["properties"],
 			"type": "object",
 			"allOf": [
 				{
@@ -1143,10 +1481,6 @@
 						"x-input": "OO.ui.TagMultiselectWidget"
 					},
 					"description": "List of property names that should be included by default"
-				},
-				"x-ui-schema": {
-					"$ref": "#/definitions/uiSchemaItem",
-					"description": "UI schema used for pattern properties when editing"
 				},
 				"x-ui-name": {
 					"type": "string",
@@ -1188,28 +1522,30 @@
 							"$ref": "#/definitions/schema"
 						}
 					},
+					"x-additional-properties-ui": [
+						{
+							"label": "New property",
+							"schema": "#/definitions/newProperty",
+							"popup_size": "medium"
+						}
+					],
 					"additionalProperties": true,
 					"description": "Explicitly defined object properties with their schemas",
 					"x-additional-properties-ui_": [
 						{
 							"label": "field",
-							"schema": "JsonSchema:SchemaBuilder/Field",
-							"name": "field"
-						},
+							"schema": "JsonSchema:SchemaBuilder/Field"						},
 						{
 							"label": "subitem",
-							"schema": "JsonSchema:SchemaBuilder/Subitem",
-							"name": "subitem"
+							"schema": "JsonSchema:SchemaBuilder/Subitem"
 						},
 						{
 							"label": "geolocation",
-							"schema": "JsonSchema:SchemaBuilder/Geolocation",
-							"name": "geolocation"
+							"schema": "JsonSchema:SchemaBuilder/Geolocation"
 						},
 						{
 							"label": "survey",
-							"schema": "JsonSchema:SchemaBuilder/Survey",
-							"name": "survey"
+							"schema": "JsonSchema:SchemaBuilder/Survey"
 						}
 					]
 				},
@@ -1223,31 +1559,49 @@
 						"type": "string",
 						"x-input": "OO.ui.TagMultiselectWidget"
 					},
+					"x-hidden": true,
 					"uniqueItems": true,
+					"readOnly": true,
 					"description": "List of property names that must be present"
+				},
+				"x-group-properties": {
+					"type": "object",
+					"description": "Add properties representing group names. Only works in conjunction with tabs or booklet layouts.",
+					"additionalProperties": {
+						"title": "Properties",
+						"type": "array",
+						"description": "Add properties for each group",
+						"items": {
+							"type": "string",
+							"x-input": "OO.ui.MenuTagMultiselectWidget",
+							"x-enum-provider": "sameLevelProperties"
+						}
+					}
+				},
+				"allOf": {
+					"description": "Schema must be valid against all of the subschemas (logical AND)",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/schema"
+					}
+				},
+				"x-value-converter": {
+					"type": "string",
+					"description": "A value converter defined as [[MediaWiki:DefaultEditorOptions]]'s callback to convert forth and back the value",
+					"x-description-format": "wikitext"
 				}
-			}
+			},
+			"required": []
 		},
 		"objectOptions": {
 			"description": "UI configuration options specific to object-type fields",
 			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonOptions"
-				}
-			],
 			"properties": {
 				"x-layout": {
 					"type": "string",
-					"enum": [
-						"default",
-						"tabs",
-						"booklet",
-						"horizontal",
-						"survey",
-						"table"
-					],
-					"description": "Layout style for object properties"
+					"enum": ["default", "tabs", "booklet", "horizontal"],
+					"description": "Layout style for object properties",
+					"x-show": true
 				},
 				"x-layout-config": {
 					"type": "object",
@@ -1293,11 +1647,7 @@
 						"x-label-format": {
 							"type": "string",
 							"description": "label format",
-							"enum": [
-								"text",
-								"html",
-								"wikitext"
-							]
+							"enum": ["text", "html", "wikitext"]
 						},
 						"icon": {
 							"type": "string",
@@ -1328,8 +1678,18 @@
 							"uniqueItems": true
 						}
 					]
+				},
+				"x-render-template": {
+					"type": "string",
+					"description": "Template name to be used by the parser function <code>jsonformsrender</code> instead of the computed name",
+					"x-description-format": "wikitext",
+					"x-input": "mw.widgets.TitleInputWidget",
+					"x-input-config": {
+						"namespace": 10
+					}
 				}
-			}
+			},
+			"required": []
 		},
 		"rootOptions": {
 			"description": "Root-level configuration properties for the schema editor",
@@ -1340,36 +1700,65 @@
 					"title": "name",
 					"description": "Unique identifier for this schema definition",
 					"minLength": 1,
-					"writeOnly": true
+					"x-runtime-only": true
+				},
+				"$schema": {
+					"format": "uri",
+					"type": "string",
+					"description": "JSON Schema dialect URI (e.g., https://json-schema.org/draft-07/schema)"
 				},
 				"$id": {
 					"format": "uri",
 					"type": "string",
-					"description": "Unique identifier URI for this schema"
+					"description": "Unique identifier URI for this schema",
+					"x-watch": "x-name",
+					"x-template": "{{wgServer}}{{replace wgArticlePath '$1' 'JsonSchema:'}}{{replace x-name ' ' '_'}}"
 				},
 				"x-layout": {
 					"type": "string",
 					"description": "Controls how the form fields are arranged in the UI",
-					"enum": [
-						"default",
-						"paged",
-						"tabs",
-						"booklet",
-						"horizontal",
-						"survey",
-						"table"
-					]
+					"enum": ["default", "paged", "tabs", "booklet", "horizontal"],
+					"x-show": true
+				},
+				"x-required": {
+					"x-hidden": true
+				}
+			},
+			"required": ["x-name"]
+		},
+		"rootOptionsArray": {
+			"description": "Root-level configuration properties for the schema editor",
+			"type": "object",
+			"properties": {
+				"x-name": {
+					"type": "string",
+					"title": "name",
+					"description": "Unique identifier for this schema definition",
+					"minLength": 1,
+					"x-runtime-only": true
+				},
+				"$schema": {
+					"format": "uri",
+					"type": "string",
+					"description": "JSON Schema dialect URI (e.g., https://json-schema.org/draft-07/schema)"
+				},
+				"$id": {
+					"format": "uri",
+					"type": "string",
+					"description": "Unique identifier URI for this schema",
+					"x-watch": "x-name",
+					"x-template": "{{wgServer}}{{replace wgArticlePath '$1' 'JsonSchema:'}}{{replace x-name ' ' '_'}}"
+				},
+				"x-required": {
+					"x-hidden": true
 				}
 			},
 			"required": ["x-name"]
 		},
 		"schema": {
 			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
-			"default": {
-				"type": "object"
-			},
-			"x-input": "OO.ui.ButtonMenuSelectWidget",
-			"x-input-config": {
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
 				"icon": "menu",
 				"label": "switch type",
 				"flags": ["primary", "progressive"]
@@ -1405,7 +1794,134 @@
 				},
 				{
 					"title": "Multiple",
-					"$ref": "#/definitions/multipleSchema"
+					"$ref": "#/definitions/typedSchema/multiple"
+				}
+			]
+		},
+		"ArrayItems-default": {
+			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
+			"default": {
+				"type": "object"
+			},
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
+				"icon": "menu",
+				"label": "switch type",
+				"flags": ["primary", "progressive"]
+			},
+			"oneOf": [
+				{
+					"title": "String",
+					"$ref": "#/definitions/typedSchema/string"
+				},
+				{
+					"title": "Number",
+					"$ref": "#/definitions/typedSchema/number"
+				},
+				{
+					"title": "Integer",
+					"$ref": "#/definitions/typedSchema/integer"
+				},
+				{
+					"title": "Boolean",
+					"$ref": "#/definitions/typedSchema/boolean"
+				},
+				{
+					"title": "Null",
+					"$ref": "#/definitions/typedSchema/null"
+				},
+				{
+					"title": "Array",
+					"$ref": "#/definitions/typedSchema/array"
+				},
+				{
+					"title": "Object",
+					"$ref": "#/definitions/typedSchema/object"
+				},
+				{
+					"title": "Multiple",
+					"$ref": "#/definitions/typedSchema/multiple"
+				}
+			]
+		},
+		"ArrayItems-multiselect": {
+			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
+			"default": {
+				"type": "object"
+			},
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
+				"icon": "menu",
+				"label": "switch type",
+				"flags": ["primary", "progressive"]
+			},
+			"oneOf": [
+				{
+					"title": "String",
+					"$ref": "#/definitions/typedSchema/stringMultiselect"
+				},
+				{
+					"title": "Number",
+					"$ref": "#/definitions/typedSchema/numberMultiselect"
+				},
+				{
+					"title": "Integer",
+					"$ref": "#/definitions/typedSchema/integerMultiselect"
+				}
+			]
+		},
+		"ArrayItems-booklet": {
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
+				"icon": "menu",
+				"label": "switch type",
+				"flags": ["primary", "progressive"]
+			},
+			"oneOf": [
+				{
+					"title": "Object",
+					"$ref": "#/definitions/typedSchema/object"
+				},
+				{
+					"title": "Multiple",
+					"$ref": "#/definitions/typedSchema/multiple"
+				}
+			]
+		},
+		"ArrayItems-tuple": {
+			"allOf": [
+				{
+					"title": "tuple",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/schema"
+					}
+				}
+			]
+		},
+		"ArrayItems-tabs": {
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
+				"icon": "menu",
+				"label": "switch type",
+				"flags": ["primary", "progressive"]
+			},
+			"oneOf": [
+				{
+					"title": "Object",
+					"$ref": "#/definitions/typedSchema/object"
+				},
+				{
+					"title": "Multiple",
+					"$ref": "#/definitions/typedSchema/multiple"
+				}
+			]
+		},
+		"ArrayItems-table": {
+			"allOf": [
+				{
+					"title": "Object",
+					"$ref": "#/definitions/typedSchema/object"
 				}
 			]
 		},
@@ -1451,6 +1967,36 @@
 					}
 				]
 			},
+			"stringMultiselect": {
+				"allOf": [
+					{
+						"$ref": "#/definitions/string"
+					},
+					{
+						"$ref": "#/definitions/stringOptionsMultiselect"
+					}
+				]
+			},
+			"numberMultiselect": {
+				"allOf": [
+					{
+						"$ref": "#/definitions/number"
+					},
+					{
+						"$ref": "#/definitions/numberOptionsMultiselect"
+					}
+				]
+			},
+			"integerMultiselect": {
+				"allOf": [
+					{
+						"$ref": "#/definitions/integer"
+					},
+					{
+						"$ref": "#/definitions/integerOptionsMultiselect"
+					}
+				]
+			},
 			"null": {
 				"allOf": [
 					{
@@ -1480,6 +2026,13 @@
 						"$ref": "#/definitions/objectOptions"
 					}
 				]
+			},
+			"multiple": {
+				"allOf": [
+					{
+						"$ref": "#/definitions/multiple"
+					}
+				]
 			}
 		},
 		"schemaRoot": {
@@ -1487,8 +2040,8 @@
 			"default": {
 				"type": "object"
 			},
-			"x-input": "OO.ui.ButtonMenuSelectWidget",
-			"x-input-config": {
+			"x-switch": "OO.ui.ButtonMenuSelectWidget",
+			"x-switch-config": {
 				"icon": "menu",
 				"label": "switch type",
 				"flags": ["primary", "progressive"]
@@ -1512,7 +2065,7 @@
 							"$ref": "#/definitions/typedSchema/array"
 						},
 						{
-							"$ref": "#/definitions/rootOptions"
+							"$ref": "#/definitions/rootOptionsArray"
 						}
 					]
 				},
@@ -1520,10 +2073,10 @@
 					"title": "Multiple",
 					"allOf": [
 						{
-							"$ref": "#/definitions/multipleSchema"
+							"$ref": "#/definitions/typedSchema/multiple"
 						},
 						{
-							"$ref": "#/definitions/rootOptions"
+							"$ref": "#/definitions/rootOptionsArray"
 						}
 					]
 				}
@@ -1531,4 +2084,3 @@
 		}
 	}
 }
-

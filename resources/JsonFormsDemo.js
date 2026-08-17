@@ -38,36 +38,9 @@ OO.inheritClass( JsonFormsDemo, JsonForms );
 
 			console.log( 'data', data );
 
-			const jsonForms = new JsonFormsDemo( el, data );
-			await jsonForms.initialize();
-			const editor = jsonForms.createDefaultEditor();
-
-			// console.log('editor',editor)
-
-			const textarea = $( '<textarea>', {
-				class: 'form-control',
-				id: 'value',
-				rows: 12,
-				style: 'font-size: 12px; font-family: monospace;'
-			} );
-			$( el ).append( textarea );
-
-			const textareaB = $( '<textarea>', {
-				class: 'form-control',
-				id: 'value',
-				rows: 12,
-				style: 'font-size: 12px; font-family: monospace;'
-			} );
-			$( el ).append( textareaB );
-
-			editor.on( 'change', () => {
-			// console.log('editor.on change')
-
-				textarea.val( JSON.stringify( editor.getValue(), null, 2 ) );
-				textareaB.val( JSON.stringify( Object.keys( editor.editors ), null, 2 ) );
-			} );
-
-			editor.on( 'ready', () => {} );
+			const jsonFormsDemo = new JsonFormsDemo( el, data );
+			await jsonFormsDemo.initialize();
+			const editor = jsonFormsDemo.createDefaultEditor();
 		} );
 	} );
 

@@ -1,9 +1,9 @@
 {
 	"type": "object",
-	"$id": "Core/SimpleFormUI",
-	"@type": "JsonForms default schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/SimpleFormUI",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
+	"x-default-properties": ["editor", "footer"],
 	"required": [],
 	"properties": {
 		"editor": {
@@ -18,18 +18,18 @@
 		"footer": {
 			"x-compact": true,
 			"x-css-class": "jsonforms-outerform-footer",
+			"x-default-properties": ["summary", "minor", "buttons"],
 			"properties": {
 				"summary": {
 					"type": "string"
 				},
 				"minor": {
 					"type": "boolean",
-					"title": "",
-					"description": "",
+					"x-no-title": true,
 					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
-					"x-control-config":  {
+					"x-control-config": {
 						"align": "inline"
 					}
 				},
@@ -37,7 +37,6 @@
 					"type": "object",
 					"x-layout": "horizontal",
 					"x-compact": true,
-					"x-css-class": "jsonforms-outerform-footer-buttons",
 					"properties": {
 						"submit": {
 							"type": "null",

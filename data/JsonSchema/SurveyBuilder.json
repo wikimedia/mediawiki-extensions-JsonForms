@@ -1,5 +1,5 @@
 {
-	"$id": "SurveyBuilder",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SurveyBuilder",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Nested Matrix Builder",
 	"description": "Each item can have multiple rows and columns and nested child items.",
@@ -27,12 +27,15 @@
 					"type": "object",
 					"compact": true,
 					"x-collapsible": true,
+					"x-collapsible-config": {
+						"collapsed": false
+					},
 					"description": "Configuration options passed to the selected input widget",
 					"x-watch": "input",
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:MetaSchema/InputOptions#/definitions/{{input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{input}}"
 						}
 					]
 				}

@@ -1,14 +1,14 @@
 {
 	"type": "object",
-	"$id": "Core/NewArticleDataOnly",
-	"@type": "JsonForms default schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
 	"required": [],
 	"properties": {
 		"form": {
-			"title": "",
+			"x-no-title": true,
 			"description": "The data will be saved in the main slot as json content-model.",
+			"x-default-properties": ["title","schema", "editor", "categories"],
 			"properties": {
 				"title": {
 					"type": "string",
@@ -18,7 +18,6 @@
 				"schema": {
 					"type": "string",
 					"title": "JSON Schema",
-					"description": "",
 					"default": "",
 					"minLength": 1,
 					"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
@@ -33,7 +32,7 @@
 					},
 					"x-watch": "schema",
 					"x-message": {
-						"x-label-template": "Using schema href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}<a/>"
+						"x-label-template": "Using schema <a href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}</a>"
 					},
 					"links": [
 						{
@@ -45,7 +44,6 @@
 				},
 				"categories": {
 					"type": "array",
-					"x-collapsible": true,
 					"items": {
 						"type": "string",
 						"x-input": "categorymultiselect"
@@ -57,14 +55,14 @@
 		"footer": {
 			"x-compact": true,
 			"x-css-class": "jsonforms-outerform-footer",
+			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
 					"type": "string"
 				},
 				"minor": {
 					"type": "boolean",
-					"title": "",
-					"description": "",
+					"x-no-title": true,
 					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
@@ -76,7 +74,6 @@
 					"type": "object",
 					"x-layout": "horizontal",
 					"x-compact": true,
-					"x-css-class": "jsonforms-outerform-footer-buttons",
 					"properties": {
 						"submit": {
 							"type": "null",

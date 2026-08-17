@@ -34,7 +34,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 		$listed = false;
 
 		// https://www.mediawiki.org/wiki/Manual:Special_pages
-		parent::__construct( "JsonFormsEdit", "", $listed );
+		parent::__construct( 'JsonFormsEdit', '', $listed );
 	}
 
 	/**
@@ -46,30 +46,35 @@ class SpecialJsonFormsEdit extends SpecialPage {
 
 		$out = $this->getOutput();
 
-		$out->addModuleStyles( "mediawiki.special" );
-		$this->addHelpLink( "Extension:JsonForms" );
+		$out->addModuleStyles( 'mediawiki.special' );
+		$this->addHelpLink( 'Extension:JsonForms' );
 
 		$out->enableOOUI();
 
 		if ( !$par ) {
-			return $this->printError( $out, "jsonforms-special-edit-notitle" );
+			return $this->printError( $out, 'jsonforms-special-edit-notitle' );
 		}
 
 		$editTitle = TitleClass::newFromText( $par );
 
-		if ( !$editTitle || !$editTitle->isKnown() ) {
+		// title can be empty (new article)
+		if ( !$editTitle ) {
 			return $this->printError(
 				$out,
-				"jsonforms-special-edit-title-unknown",
+				'jsonforms-special-submit-title-not-valid',
 			);
 		}
 
-		$out->addWikiMsg( "jsonforms-special-edit-message" );
+		$out->addWikiMsg( 'jsonforms-special-edit-message' );
 
 		$jsonForm = \JsonForms::getSourceSchema(
-			"EditDataUI",
-			"JsonSchema/Core",
+			'EditDataUI',
+			'JsonSchema/Core',
 		);
+
+		if ( !$jsonForm ) {
+			throw new MWException( 'Cannot load core schema' );
+		}
 
 		$startVal = new stdClass();
 		$startVal->form = new stdClass();
@@ -78,6 +83,10 @@ class SpecialJsonFormsEdit extends SpecialPage {
 
 		$wikiPage = \JsonForms::getWikiPage( $editTitle );
 		$metadata = \JsonForms::getMetadata( $wikiPage );
+
+		if ( isset( $metadata->categories ) ) {
+			$startVal->categories = (array)$metadata->categories;
+		}
 
 		if (
 			$metadata &&
@@ -100,34 +109,36 @@ class SpecialJsonFormsEdit extends SpecialPage {
 			}
 
 			if ( $targetSlot ) {
-				$slot = $metadataSlots->$targetSlot;
+				$slotMetadata = $metadataSlots->$targetSlot;
 				$content = \JsonForms::getSlotContent( $wikiPage, $targetSlot );
 
-				if ( isset( $slot->schema ) ) {
-					$startVal->form->schema->selectedSchema->schemaName = $slot->schema;
+				if ( isset( $slotMetadata->schema ) ) {
+					$startVal->form->schema->selectedSchema->schemaName = $slotMetadata->schema;
+				}
 
-					if ( $content ) {
-						$startVal->form->schema->selectedSchema->editor = json_decode(
-							$content,
-							false,
-						);
-					}
+				if ( $content ) {
+					$json = \JsonForms::processFormData( $content, $slotMetadata );
+					$startVal->form->schema->selectedSchema->editor = $json;
 				}
 
 				$metadataKeys = [
-					"show_infobox" => "showInfobox",
-					"infobox_template" => "infoboxTemplate",
+					'show_infobox' => 'showInfobox',
+					'infobox_template' => 'infoboxTemplate',
+					'infobox_position' => 'infoboxPosition',
 				];
 
 				foreach ( $metadataKeys as $k => $v ) {
-					if ( property_exists( $slot, $v ) ) {
+					if ( property_exists( $slotMetadata, $v ) ) {
 						if ( !isset( $startVal->form->options ) ) {
 							$startVal->form->options = new stdClass();
 						}
-						$startVal->form->options->$k = $slot->$v;
+						$startVal->form->options->$k = $slotMetadata->$v;
 					}
 				}
 			}
+
+		} elseif ( $wikiPage && $editTitle->getContentModel() === 'json' ) {
+			$startVal->form->schema->selectedSchema->editor = \JsonForms::getJsonArticle( $editTitle );
 		}
 
 		if ( empty( (array)$startVal->form->schema->selectedSchema ) ) {
@@ -136,18 +147,23 @@ class SpecialJsonFormsEdit extends SpecialPage {
 
 		$formData = new stdClass();
 		$formData->schema = $jsonForm;
-		$formData->editorOptions = "MediaWiki:DefaultEditorOptions";
-		$formData->editorScript = "MediaWiki:DefaultEditorScript";
+		$formData->formDescriptor = (object)[
+			'edit' => $editTitle->getFullText(),
+			'editor_options' => (object)[
+				'base_options' => 'MediaWiki:DefaultEditorOptions',
+				'base_script' => 'MediaWiki:DefaultEditorScript',
+			],
+			'width' => 'auto'
+		];
+
 		$formData->metadata = $metadata;
-		$formData->editTitle = $editTitle->getFullText();
 
 		if ( !empty( (array)$startVal->form ) ) {
 			$formData->startval = $startVal;
 		}
 
 		$formData = \JsonForms::prepareFormData( $out, $formData );
-
-		$res_ = \JsonForms::getJsonFormHtml( $formData, [ "width" => "auto" ] );
+		$res_ = \JsonForms::getJsonFormHtml( $formData );
 
 		if ( !$res_->ok ) {
 			return $this->printError( $out, $res_->error );
@@ -155,7 +171,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 
 		$html = $res_->value;
 
-		$out->addModules( "ext.JsonForms.editSchema" );
+		$out->addModules( 'ext.JsonForms.editSchema' );
 		\JsonForms::addJsConfigVars( $out );
 		$out->addHTML( $html );
 	}
@@ -167,8 +183,8 @@ class SpecialJsonFormsEdit extends SpecialPage {
 	private function printError( $out, $msg ) {
 		$out->addHTML(
 			new \OOUI\MessageWidget( [
-				"type" => "error",
-				"label" => new \OOUI\HtmlSnippet( $this->msg( $msg )->parse() ),
+				'type' => 'error',
+				'label' => new \OOUI\HtmlSnippet( $this->msg( $msg )->parse() ),
 			] ),
 		);
 	}
@@ -177,6 +193,6 @@ class SpecialJsonFormsEdit extends SpecialPage {
 	 * @return string
 	 */
 	protected function getGroupName() {
-		return "jsonforms";
+		return 'jsonforms';
 	}
 }

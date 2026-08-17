@@ -27,6 +27,8 @@
 function JsonFormsEditSchema( el, data ) {
 	JsonFormsEditSchema.super.call( this, el, data );
 
+	this.formDescriptor = data.formDescriptor;
+
 	this.metadata = data.metadata;
 	this.jsonformsConfig = mw.config.get( 'jsonforms' );
 	this.editTitle = data.editTitle;
@@ -54,7 +56,13 @@ JsonFormsEditSchema.prototype.onFormButton = function ( action, editor ) {
 				JsonForms.Alert( 'there are errors' );
 				return;
 			} else {
-				this.submitForm().catch( ( err ) => console.error( 'API error:', err ) );
+				editor.disable();
+				this.submitForm()
+					.then( () => editor.enable() )
+					.catch( ( err ) => {
+						console.error( 'API error:', err );
+						editor.enable();
+					} );
 			} }
 			break;
 	}
@@ -83,33 +91,29 @@ JsonFormsEditSchema.prototype.initialize = async function () {
 			}
 		}
 	);
-
-	// this.defaultOptions.callbacks.template = {
-	// ...this.defaultOptions.callbacks.template,
-	// ...this.enumProviders,
-	// };
 };
 
 JsonFormsEditSchema.prototype.submitForm = function () {
 	const editorValue = this.editor.getValue();
 
 	// console.log('editorValue', editorValue);
-	let processedSchema;
-	// processedSchema = this.editor.getProcessedSchema();
-	// console.log('processedSchema', processedSchema);
+	let structuredValue;
 
 	const selectedSchemaEditor = this.editor.getEditor(
 		'root.form.schema.selectedSchema.editor'
 	);
+	// console.log('selectedSchemaEditor', selectedSchemaEditor);
 
+	let schemaId;
 	if ( selectedSchemaEditor ) {
-		processedSchema = selectedSchemaEditor.getProcessedSchema();
+		structuredValue = selectedSchemaEditor.getStructuredValue();
+		schemaId = selectedSchemaEditor.schema.$id;
 	}
 
-	const options = { title: this.editTitle };
-	let value;
+	// form.options: "show_infobox", "infobox_position" ,"infobox_template", ...
 	const metadata = { ...editorValue.form.options };
 
+	let value;
 	if ( editorValue.form.schema && editorValue.form.schema.selectedSchema ) {
 		value = editorValue.form.schema.selectedSchema.editor;
 		metadata.schemaName = editorValue.form.schema.selectedSchema.schemaName;
@@ -118,12 +122,13 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 	// *** submission data are arbitrary and depend on the
 	// SubmitProcessor
 	const data = {
-		processedSchema,
+		structuredValue,
 		value,
-		options,
 		metadata,
+		formDescriptor: this.formDescriptor,
 		config: mw.config.get( 'jsonforms' ),
-
+		schemaId,
+		options: { categories: editorValue.categories },
 		// submit processor
 		processor: 'EditSchema'
 	};
@@ -140,7 +145,7 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 		new mw.Api()
 			.postWithToken( 'csrf', payload )
 			.done( ( thisRes ) => {
-				console.log( 'thisRes', thisRes );
+				// console.log( 'thisRes', thisRes );
 				let result = thisRes[ payload.action ].result;
 				result = JSON.parse( result );
 				if ( result.errors && result.errors.length ) {
@@ -151,7 +156,7 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 						),
 						type: 'error'
 					};
-					resolve( result );
+					resolve( false );
 					// eslint-disable-next-line no-undef
 					const nonModalDialog = new JsonForms.NonModalDialog();
 					nonModalDialog.open( config );
@@ -161,6 +166,7 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 					} else {
 						window.location.href = result.returnUrl;
 					}
+					resolve( result );
 				}
 			} )
 			.fail( ( thisRes ) => {
@@ -182,12 +188,10 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 
 			console.log( 'data', data );
 
-			const jsonForms = new JsonFormsEditSchema( el, data );
+			const jsonFormsEditSchema = new JsonFormsEditSchema( el, data );
+			await jsonFormsEditSchema.initialize();
 
-			await jsonForms.initialize();
-
-			const editor = jsonForms.createDefaultEditor();
-
+			const editor = jsonFormsEditSchema.createDefaultEditor();
 		} );
 	} );
 

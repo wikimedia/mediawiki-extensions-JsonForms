@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "SchemaBuilder/Subitem",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/Subitem",
     "title": "Subitem",
 	"type": "object",
 	"properties": {

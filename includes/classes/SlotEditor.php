@@ -57,7 +57,7 @@ class SlotEditor {
 
 	public function __construct() {
 		$this->slotRegistry = MediaWikiServices::getInstance()->getSlotRoleRegistry();
-		$this->logger = LoggerFactory::getInstance( "JsonForms" );
+		$this->logger = LoggerFactory::getInstance( 'JsonForms' );
 		$this->jsonContentModels = SlotHelper::getJsonContentModels();
 	}
 
@@ -69,10 +69,16 @@ class SlotEditor {
 			return false;
 		}
 
+		// return false if the main slot of the previous revision wasn't JSON
+		$mainSlot = $oldRevision->getSlots()->getSlot( SlotRecord::MAIN );
+		if ( !$mainSlot || $mainSlot->getModel() !== CONTENT_MODEL_JSON ) {
+			return false;
+		}
+
 		foreach ( $slotUpdates as $data ) {
 			if (
-				!array_key_exists( "content", $data ) ||
-				$data["content"] !== ""
+				!array_key_exists( 'content', $data ) ||
+				$data['content'] !== ''
 			) {
 				return false;
 			}
@@ -108,34 +114,39 @@ class SlotEditor {
 	 * @param array $slotUpdates
 	 * @param string $summary
 	 * @param bool $append
+	 * @param string $watchlist
+	 * @param bool $prepend
 	 * @param bool $bot
 	 * @param bool $minor
 	 * @param bool $createonly
 	 * @param bool $nocreate
 	 * @param bool $suppress
 	 * @param string $updateStrategy
+	 * @param array &$errors
 	 * @return bool
 	 */
 	public function editSlots(
 		User $user,
 		$wikiPage,
 		array $slotUpdates,
-		string $summary = "",
-		bool $append = false,
-		string $watchlist = "",
-		bool $prepend = false,
-		bool $bot = false,
-		bool $minor = false,
-		bool $createonly = false,
-		bool $nocreate = false,
-		bool $suppress = false,
-		string $updateStrategy = 'merge'
+		string $summary,
+		bool $append,
+		string $watchlist,
+		bool $prepend,
+		bool $bot,
+		bool $minor,
+		bool $createonly,
+		bool $nocreate,
+		bool $suppress,
+		string $updateStrategy,
+		array &$errors
 	) {
 		$title = $wikiPage->getTitle();
 
 		if ( !$title ) {
-			$this->logger->alert( "Invalid WikiPage: missing Title" );
-			return [ wfMessage( "jsonforms-error-invalid-wikipage-object" ) ];
+			$this->logger->alert( 'Invalid WikiPage: missing Title' );
+			$errors[] = wfMessage( 'jsonforms-error-invalid-wikipage-object' );
+			return false;
 		}
 
 		// bind request-scoped state
@@ -160,7 +171,7 @@ class SlotEditor {
 		}
 
 		if ( $this->shouldDeletePage( $oldRevision, $slotUpdates ) ) {
-			$reason = "cleared content";
+			$reason = 'cleared content';
 			\JsonForms::deletePage( $wikiPage, $user, $reason );
 			return true;
 		}
@@ -210,7 +221,6 @@ class SlotEditor {
 			return $value;
 		}
 
-		// , !$returnObject
 		$decoded = json_decode( $value );
 
 		if ( json_last_error() === JSON_ERROR_NONE ) {
@@ -259,14 +269,12 @@ class SlotEditor {
 	) {
 		if ( !$this->slotRegistry->isDefinedRole( $slotName ) ) {
 			return [
-				wfMessage( "jsonforms-apierror-unknownslot", $slotName ),
-				"unknownslot",
+				wfMessage( 'jsonforms-apierror-unknownslot', $slotName ),
+				'unknownslot',
 			];
 		}
 
-		$text = (string)( $slotData["content"] ?? "" );
-		$model = $slotData["model"] ?? null;
-
+		$text = (string)( $slotData['content'] ?? '' );
 		if ( $append || $prepend ) {
 			$text = $this->applyAppendPrepend(
 				$slotName,
@@ -276,15 +284,16 @@ class SlotEditor {
 			);
 
 			if ( $text === null ) {
-				return [ wfMessage( "apierror-appendnotsupported" ) ];
+				return [ wfMessage( 'apierror-appendnotsupported' ) ];
 			}
 		}
 
-		if ( $text === "" && $slotName !== SlotRecord::MAIN ) {
+		if ( $text === '' && $slotName !== SlotRecord::MAIN ) {
 			$pageUpdater->removeSlot( $slotName );
 			return true;
 		}
 
+		$model = $slotData['model'] ?? null;
 		$modelId =
 			$model ??
 			$this->resolveModelId( $oldRevision, $slotName, $this->title );
@@ -297,7 +306,7 @@ class SlotEditor {
 		$pageUpdater->setContent( $slotName, $content );
 
 		if ( $slotName !== SlotRecord::MAIN ) {
-			$pageUpdater->addTag( "jsonforms-slot-edit" );
+			$pageUpdater->addTag( 'jsonforms-slot-edit' );
 		}
 
 		return true;
@@ -365,7 +374,7 @@ class SlotEditor {
 		array $slotUpdates
 	): void {
 		if ( $oldRevision === null && !isset( $slotUpdates[SlotRecord::MAIN] ) ) {
-			$content = ContentHandler::makeContent( "", $this->title );
+			$content = ContentHandler::makeContent( '', $this->title );
 			$pageUpdater->setContent( SlotRecord::MAIN, $content );
 		}
 	}
@@ -400,9 +409,9 @@ class SlotEditor {
 
 	private function maybePurge( PageUpdater $pageUpdater ): void {
 		if (
-			$pageUpdater->wasRevisionCreated() && \JsonForms::getConfigValue( 'JsonFormsDoPurge' )
+			!$pageUpdater->isUnchanged() && \JsonForms::getConfigValue( 'JsonFormsDoPurge' )
 		) {
-			$comment = CommentStoreComment::newUnsavedComment( "" );
+			$comment = CommentStoreComment::newUnsavedComment( '' );
 			$updater = $this->wikiPage->newPageUpdater( $this->user );
 			$updater->saveRevision(
 				$comment,
@@ -414,7 +423,7 @@ class SlotEditor {
 	private function getWatchlistValue( string $watchlist ): bool {
 		$services = MediaWikiServices::getInstance();
 
-		if ( method_exists( MediaWikiServices::class, "getWatchlistManager" ) ) {
+		if ( method_exists( MediaWikiServices::class, 'getWatchlistManager' ) ) {
 			// >=1.37
 			$userWatching = $services
 				->getWatchlistManager()
@@ -428,13 +437,13 @@ class SlotEditor {
 		$userOptionsLookup = $services->getUserOptionsLookup();
 
 		switch ( $watchlist ) {
-			case "watch":
+			case 'watch':
 				return true;
 
-			case "unwatch":
+			case 'unwatch':
 				return false;
 
-			case "preferences":
+			case 'preferences':
 				// If the user is already watching, don't bother checking
 				if ( $userWatching ) {
 					return true;
@@ -445,11 +454,11 @@ class SlotEditor {
 				}
 				return $userOptionsLookup->getBoolOption(
 					$this->user,
-					"watchdefault"
+					'watchdefault'
 				) ||
 					( $userOptionsLookup->getBoolOption(
 						$this->user,
-						"watchcreations"
+						'watchcreations'
 					) &&
 						!$title->exists() );
 
@@ -464,7 +473,7 @@ class SlotEditor {
 
 		$services = MediaWikiServices::getInstance();
 
-		if ( method_exists( $services, "getWatchlistManager" ) ) {
+		if ( method_exists( $services, 'getWatchlistManager' ) ) {
 			$services
 				->getWatchlistManager()
 				->setWatch( $watch, $this->user, $this->title );

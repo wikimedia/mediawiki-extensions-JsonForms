@@ -1,5 +1,5 @@
 {
-	"$id": "Recursive",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Recursive",
 	"$ref": "#/definitions/person",
 	"type": "object",
 	"title": "Person",
@@ -31,7 +31,7 @@
 				},
 				"bestFriend": {
 					"title": "best friend",
-					"x-input": "OO.ui.ButtonSelectWidget",
+					"x-switch": "OO.ui.ButtonSelectWidget",
 					"oneOf": [
 						{
 							"title": "none",

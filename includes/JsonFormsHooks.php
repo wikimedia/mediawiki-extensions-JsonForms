@@ -21,8 +21,8 @@
  * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
 
-define( "SLOT_ROLE_JSONFORMS_DATA", "jsonforms-data" );
-define( "SLOT_ROLE_JSONFORMS_METADATA", "jsonforms-metadata" );
+define( 'SLOT_ROLE_JSONFORMS_DATA', 'jsonforms-data' );
+define( 'SLOT_ROLE_JSONFORMS_METADATA', 'jsonforms-metadata' );
 
 use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
 
@@ -41,17 +41,17 @@ class JsonFormsHooks {
 	 * @param Parser $parser
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
-		$parser->setFunctionHook( "jsonforms", [
+		$parser->setFunctionHook( 'jsonforms', [
 			\JsonForms::class,
-			"parserFunctionForm",
+			'parserFunctionForm',
 		] );
-		$parser->setFunctionHook( "jsonformsrender", [
+		$parser->setFunctionHook( 'jsonformsrender', [
 			\JsonForms::class,
-			"parserFunctionRender",
+			'parserFunctionRender',
 		] );
-		$parser->setFunctionHook( "jsonformsquerylink", [
+		$parser->setFunctionHook( 'jsonformsquerylink', [
 			\JsonForms::class,
-			"parserFunctionQueryLink",
+			'parserFunctionQueryLink',
 		] );
 
 		// @see https://www.mediawiki.org/wiki/Extension:HTML_Tags
@@ -71,28 +71,28 @@ class JsonFormsHooks {
 	 * @return void
 	 */
 	public static function onMediaWikiServices( $services ) {
-		$services->addServiceManipulator( "SlotRoleRegistry", static function (
+		$services->addServiceManipulator( 'SlotRoleRegistry', static function (
 			\MediaWiki\Revision\SlotRoleRegistry $registry,
 		) {
 			if ( !$registry->isDefinedRole( SLOT_ROLE_JSONFORMS_DATA ) ) {
 				$registry->defineRoleWithModel(
 					SLOT_ROLE_JSONFORMS_DATA,
-					"json",
+					'json',
 					[
-						"display" => "none",
-						"region" => "center",
-						"placement" => "append",
+						'display' => 'none',
+						'region' => 'center',
+						'placement' => 'append',
 					],
 				);
 			}
 			if ( !$registry->isDefinedRole( SLOT_ROLE_JSONFORMS_METADATA ) ) {
 				$registry->defineRoleWithModel(
 					SLOT_ROLE_JSONFORMS_METADATA,
-					"json",
+					'json',
 					[
-						"display" => "none",
-						"region" => "center",
-						"placement" => "append",
+						'display' => 'none',
+						'region' => 'center',
+						'placement' => 'append',
 					],
 				);
 			}
@@ -193,9 +193,9 @@ class JsonFormsHooks {
 		$data = json_decode( $data, true );
 
 		// this includes annotated categories and tracking categories
-		$getCategoriesMethod = version_compare( MW_VERSION, "1.38", ">=" )
-			? "getCategoryNames"
-			: "getCategoryLinks";
+		$getCategoriesMethod = version_compare( MW_VERSION, '1.38', '>=' )
+			? 'getCategoryNames'
+			: 'getCategoryLinks';
 
 		$categoryNames = $parserOutput->$getCategoriesMethod();
 
@@ -203,8 +203,8 @@ class JsonFormsHooks {
 			$parserOutput->addCategory( $category );
 		}
 
-		if ( $data && !empty( $data["categories"] ) ) {
-			foreach ( $data["categories"] as $category ) {
+		if ( $data && !empty( $data['categories'] ) ) {
+			foreach ( $data['categories'] as $category ) {
 				$parserOutput->addCategory( $category );
 			}
 		}
@@ -230,7 +230,7 @@ class JsonFormsHooks {
 		if ( \JsonForms::isKnownArticle( $outputPage->getTitle() ) &&
 			$articleUrl === $requestUrl
 		) {
-			\JsonForms::appendContent( $outputPage );
+			\JsonForms::printInfobox( $outputPage );
 		}
 	}
 
@@ -260,54 +260,54 @@ class JsonFormsHooks {
 			// edit slots
 			$groups = \JsonForms::slotManagerGroups();
 			if (
-				count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) ) &&
+				\JsonForms::isAuthorized( $user, $groups ) &&
 				in_array( $ns, JsonForms::getConfigValue( 'JsonFormsEditSlotsNamespaces' ) )
 			) {
 				$link = [
-					"class" =>
-						$skinTemplate->getRequest()->getVal( "action" ) ===
-						"slotedit"
-							? "selected"
-							: "",
-					"text" => wfMessage( "jsonforms-slotedit-label" )->text(),
-					"href" => $title->getLocalURL( "action=slotedit" ),
+					'class' =>
+						$skinTemplate->getRequest()->getVal( 'action' ) ===
+						'slotedit'
+							? 'selected'
+							: '',
+					'text' => wfMessage( 'jsonforms-slotedit-label' )->text(),
+					'href' => $title->getLocalURL( 'action=slotedit' ),
 				];
 
-				$keys = array_keys( $links["views"] );
-				$pos = array_search( "edit", $keys );
+				$keys = array_keys( $links['views'] );
+				$pos = array_search( 'edit', $keys );
 
-				$links["views"] =
+				$links['views'] =
 					array_intersect_key(
-						$links["views"],
+						$links['views'],
 						array_flip( array_slice( $keys, 0, $pos + 1 ) ),
-					) + [ "slotedit" => $link ] +
+					) + [ 'slotedit' => $link ] +
 					array_intersect_key(
-						$links["views"],
+						$links['views'],
 						array_flip( array_slice( $keys, $pos + 1 ) ),
 					);
 			}
 
 			// edit schema
 			if ( in_array( $ns, JsonForms::getConfigValue( 'JsonFormsEditSchemaNamespaces' ) ) ) {
-				$keys = array_keys( $links["views"] );
-				$pos = array_search( "edit", $keys );
+				$keys = array_keys( $links['views'] );
+				$pos = array_search( 'edit', $keys );
 
 				$link = [
-					"class" =>
-						$skinTemplate->getRequest()->getVal( "action" ) === "jsonedit"
-							? "selected"
-							: "",
-					"text" => wfMessage( "jsonforms-jsonedit-label" )->text(),
-					"href" => $title->getLocalURL( "action=jsonedit" ),
+					'class' =>
+						$skinTemplate->getRequest()->getVal( 'action' ) === 'jsonedit'
+							? 'selected'
+							: '',
+					'text' => wfMessage( 'jsonforms-jsonedit-label' )->text(),
+					'href' => $title->getLocalURL( 'action=jsonedit' ),
 				];
 
-				$links["views"] =
+				$links['views'] =
 					array_intersect_key(
-						$links["views"],
+						$links['views'],
 						array_flip( array_slice( $keys, 0, $pos + 1 ) ),
-					) + [ "jsonedit" => $link ] +
+					) + [ 'jsonedit' => $link ] +
 					array_intersect_key(
-						$links["views"],
+						$links['views'],
 						array_flip( array_slice( $keys, $pos + 1 ) ),
 					);
 			}
@@ -346,12 +346,12 @@ class JsonFormsHooks {
 		$title = $out->getTitle();
 		$user = $out->getUser();
 
-		if ( $parserOutput->getExtensionData( "jsonforms" ) !== null ) {
+		if ( $parserOutput->getExtensionData( 'jsonforms' ) !== null ) {
 			\JsonForms::addJsConfigVars( $out, [
-				"context" => "parserfunction",
+				'context' => 'parserfunction',
 			] );
 
-			$out->addModules( "ext.JsonForms.pageForms" );
+			$out->addModules( 'ext.JsonForms.pageForms' );
 		}
 	}
 
@@ -361,51 +361,51 @@ class JsonFormsHooks {
 	 * @return void
 	 */
 	public static function onSkinBuildSidebar( $skin, &$bar ) {
-		if ( !empty( $GLOBALS["wgJsonFormsDisableSidebarLink"] ) ) {
+		if ( !empty( $GLOBALS['wgJsonFormsDisableSidebarLink'] ) ) {
 			return;
 		}
 
 		$user = $skin->getUser();
 		$title = $skin->getTitle();
 
-		$specialpage_title = SpecialPage::getTitleFor( "JsonForms" );
-		$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-			"text" => wfMessage( "jsonforms-forms" )->text(),
-			"class" => "jsonforms-forms",
-			"href" => $specialpage_title->getLocalURL(),
+		$specialpage_title = SpecialPage::getTitleFor( 'JsonForms' );
+		$bar[wfMessage( 'jsonforms-sidepanel-section' )->text()][] = [
+			'text' => wfMessage( 'jsonforms-forms' )->text(),
+			'class' => 'jsonforms-forms',
+			'href' => $specialpage_title->getLocalURL(),
 		];
 
-		$specialpage_title = SpecialPage::getTitleFor( "JsonFormsCreate" );
-		$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-			"text" => wfMessage( "jsonforms-new-article" )->text(),
-			"class" => "jsonforms-new-article",
-			"href" => $specialpage_title->getLocalURL(),
+		$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsCreate' );
+		$bar[wfMessage( 'jsonforms-sidepanel-section' )->text()][] = [
+			'text' => wfMessage( 'jsonforms-new-article' )->text(),
+			'class' => 'jsonforms-new-article',
+			'href' => $specialpage_title->getLocalURL(),
 		];
 
-		if ( $user->isAllowed( "jsonforms-canmanageforms" ) ) {
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Forms" );
-			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-				"text" => wfMessage( "jsonforms-sidepanel-managesforms" )->text(),
-				"href" => $specialpage_title->getLocalURL(),
+		if ( $user->isAllowed( 'jsonforms-canmanageforms' ) ) {
+			$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsManage', 'Forms' );
+			$bar[wfMessage( 'jsonforms-sidepanel-section' )->text()][] = [
+				'text' => wfMessage( 'jsonforms-sidepanel-managesforms' )->text(),
+				'href' => $specialpage_title->getLocalURL(),
 			];
 		}
 
-		if ( $user->isAllowed( "jsonforms-canmanageschemas" ) ) {
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Schemas" );
-			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-				"text" => wfMessage(
-					"jsonforms-sidepanel-manageschemas",
+		if ( $user->isAllowed( 'jsonforms-canmanageschemas' ) ) {
+			$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsManage', 'Schemas' );
+			$bar[wfMessage( 'jsonforms-sidepanel-section' )->text()][] = [
+				'text' => wfMessage(
+					'jsonforms-sidepanel-manageschemas',
 				)->text(),
-				"href" => $specialpage_title->getLocalURL(),
+				'href' => $specialpage_title->getLocalURL(),
 			];
 		}
 
 		$groups = \JsonForms::slotManagerGroups();
 		if ( count( array_intersect( $groups, \JsonForms::getUserGroups( $user ) ) ) ) {
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsSlotManager" );
-			$bar[wfMessage( "jsonforms-sidepanel-section" )->text()][] = [
-				"text" => wfMessage( "jsonforms-sidepanel-slotmanager" )->text(),
-				"href" => $specialpage_title->getLocalURL(),
+			$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsSlotManager' );
+			$bar[wfMessage( 'jsonforms-sidepanel-section' )->text()][] = [
+				'text' => wfMessage( 'jsonforms-sidepanel-slotmanager' )->text(),
+				'href' => $specialpage_title->getLocalURL(),
 			];
 		}
 	}

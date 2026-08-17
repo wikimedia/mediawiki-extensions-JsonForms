@@ -5,11 +5,12 @@ namespace MediaWiki\Extension\JsonForms;
 use stdClass;
 
 class SchemaUtils {
+	public static array $appendSymbols = [ '.[]', '.', '[]' ];
 
 	/**
 	 * Get value from an array by dot notation path
 	 *
-	 * @param array|null $obj Source array
+	 * @param array|stdClass $obj
 	 * @param string|null $path Dot notation path (e.g., "a.b.1.c")
 	 * @param mixed $default Default value to return if path not found
 	 * @return mixed Value at path or default
@@ -29,8 +30,8 @@ class SchemaUtils {
 		}
 
 		// Convert bracket notation to dot notation: a[1].b -> a.1.b
-		$normalizedPath = preg_replace( "/\[(\d+)\]/", '.$1', $path );
-		$keys = explode( ".", $normalizedPath );
+		$normalizedPath = preg_replace( '/\[(\d+)\]/', '.$1', $path );
+		$keys = explode( '.', $normalizedPath );
 		$current = $obj;
 
 		foreach ( $keys as $key ) {
@@ -113,16 +114,12 @@ class SchemaUtils {
 	 * Check if path ends with an append symbol
 	 *
 	 * @param string $path The original path
-	 * @param array $appendSymbols Array of symbols to check for
 	 * @return array [shouldAppend, cleanedPath]
 	 */
-	public static function parseAppendPath(
-		$path,
-		$appendSymbols = [ ".[]", ".", "[]" ],
-	) {
-		foreach ( $appendSymbols as $symbol ) {
+	public static function parseAppendPath( $path ) {
+		foreach ( self::$appendSymbols as $symbol ) {
 			$symbolLen = strlen( $symbol );
-			if ( substr( $path, -$symbolLen ) === $symbol ) {
+			if ( substr( $path, -symbolLen ) === $symbol ) {
 				return [ true, substr( $path, 0, -$symbolLen ) ];
 			}
 		}
@@ -171,8 +168,8 @@ class SchemaUtils {
 		$pathToUse = $cleanPath ?: $path;
 
 		// Convert bracket notation to dot notation
-		$normalizedPath = preg_replace( "/\[(\d+)\]/", '.$1', $pathToUse );
-		$keys = explode( ".", $normalizedPath );
+		$normalizedPath = preg_replace( '/\[(\d+)\]/', '.$1', $pathToUse );
+		$keys = explode( '.', $normalizedPath );
 		$current = &$obj;
 
 		foreach ( $keys as $i => $key ) {
@@ -261,30 +258,44 @@ class SchemaUtils {
 		$path = [],
 		&$parent = null,
 		$parentKey = null,
+		&$shouldContinue = true
 	) {
 		if ( $parent === null ) {
-			// Root call
-			$emptyParent = is_object( $schema ) ? new stdClass() : [];
-			$callback( $emptyParent, "", $schema, [] );
+			$shouldContinue = true;
 
+			$result = $callback( $schema, '', $schema, [] );
+			if ( $result === false ) {
+				$shouldContinue = false;
+				return $schema;
+			}
+
+			// Traverse children
 			if ( is_object( $schema ) ) {
 				foreach ( get_object_vars( $schema ) as $key => $value ) {
+					if ( !$shouldContinue ) {
+						break;
+					}
 					self::traverseSchema(
 						$value,
 						$callback,
 						[ $key ],
 						$schema,
 						$key,
+						$shouldContinue
 					);
 				}
 			} elseif ( is_array( $schema ) ) {
 				foreach ( $schema as $key => $value ) {
+					if ( !$shouldContinue ) {
+						break;
+					}
 					self::traverseSchema(
 						$value,
 						$callback,
 						[ $key ],
 						$schema,
 						$key,
+						$shouldContinue
 					);
 				}
 			}
@@ -293,11 +304,18 @@ class SchemaUtils {
 		}
 
 		// Process current node
-		$callback( $parent, $parentKey, $schema, $path );
+		$result = $callback( $parent, $parentKey, $schema, $path );
+		if ( $result === false ) {
+			$shouldContinue = false;
+			return $schema;
+		}
 
 		// Recurse into children
 		if ( is_object( $schema ) ) {
 			foreach ( get_object_vars( $schema ) as $key => $value ) {
+				if ( !$shouldContinue ) {
+					break;
+				}
 				$newPath = $path;
 				$newPath[] = $key;
 				self::traverseSchema(
@@ -306,10 +324,14 @@ class SchemaUtils {
 					$newPath,
 					$schema,
 					$key,
+					$shouldContinue
 				);
 			}
 		} elseif ( is_array( $schema ) ) {
 			foreach ( $schema as $key => $value ) {
+				if ( !$shouldContinue ) {
+					break;
+				}
 				$newPath = $path;
 				$newPath[] = $key;
 				self::traverseSchema(
@@ -318,6 +340,7 @@ class SchemaUtils {
 					$newPath,
 					$schema,
 					$key,
+					$shouldContinue
 				);
 			}
 		}

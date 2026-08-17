@@ -1,5 +1,5 @@
 {
-	"$id": "SchoolManager",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchoolManager",
 	"title": "SchoolManager",
 	"type": "array",
 	"x-layout": "tabs",

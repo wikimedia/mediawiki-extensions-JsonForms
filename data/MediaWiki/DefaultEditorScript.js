@@ -1,6 +1,5 @@
 export default function( editor, config, updateEditorCallBack ) {
     editor.on('ready', () => {
-
 		// use updateEditorCallBack(newConfig) to reload the editor
     });
     
@@ -9,14 +8,6 @@ export default function( editor, config, updateEditorCallBack ) {
     });
 
     editor.on('buildComplete', () => {
-
-    });
-    
-    editor.on('schemaLoaded', () => {
-
-    });
-    
-    editor.on('allSchemasLoaded', () => {
 
     });
 }

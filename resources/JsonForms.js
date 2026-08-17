@@ -30,35 +30,25 @@ function JsonForms(el, data) {
 	this.schema = data.schema;
 	this.schemaName = data.schemaName;
 	this.startval = data.startval;
-	this.editor = null;
 
+	this.editor = null;
 	this.data = data;
-	// @TODO add upload providers
+
+	this._schemaCache = {};
+	this._pendingRequests = {};
 }
 
 JsonForms.prototype.initialize = async function () {
-	// console.log('this.data.editorOptions',defaultOptions)
 	this.editorOptions = await this.getModule(this.data.editorOptions);
-	this.editorScript = await this.getModule(this.data.editorScript);
 
-	// console.log('this.editorOptions',this.editorOptions)
-
-	// this.enumProviders = this.formatProviders(JsonForms.enumProviders);
 	this.enumProviders = JsonForms.enumProviders;
-
-	// console.log('this.enumProviders',this.enumProviders)
-
 	this.autocompleteProviders = JsonForms.autocompleteProviders;
+	const ValueConverters = new JsonForms.ValueConverters();
 
-	const UISchemaConverters = new JsonForms.UISchemaConverters();
-
-	// console.log('defaultOptions',defaultOptions)
-
-	const defaultOptions = this.editorOptions || {};
-
-	// const defaultOptions = JSON.parse(JSON.stringify(this.editorOptions));
-
-	// console.log('defaultOptions',defaultOptions)
+	const defaultOptions = {
+		...JFEditor.defaults.options,
+		...(this.editorOptions || {}),
+	};
 
 	defaultOptions.callbacks = defaultOptions.callbacks || {};
 
@@ -75,10 +65,9 @@ JsonForms.prototype.initialize = async function () {
 			{}),
 	};
 
-	defaultOptions.callbacks.ui_schema_converters = {
-		...UISchemaConverters.converters,
-		...((defaultOptions.callbacks &&
-			defaultOptions.callbacks.ui_schema_converters) ||
+	defaultOptions.callbacks.converters = {
+		...ValueConverters.converters,
+		...((defaultOptions.callbacks && defaultOptions.callbacks.converters) ||
 			{}),
 	};
 
@@ -86,14 +75,16 @@ JsonForms.prototype.initialize = async function () {
 };
 
 JsonForms.prototype.createDefaultEditor = function (config = {}) {
-	this.createEditor(this.el, {
+	config = {
 		jsonFormsInstance: this,
 		schema: this.schema,
 		schemaName: this.schemaName,
 		startval: this.startval,
+		...((this.data.formDescriptor || {}).editor_options || {}),
 		...config,
-	});
+	};
 
+	this.createEditor(this.el, config);
 	return this.editor;
 };
 
@@ -148,20 +139,20 @@ JsonForms.prototype.getModule = async function (str) {
 
 // use as schema loader - location
 JsonForms.prototype.getBasePath = function () {
-    const server = mw.config.get('wgServer');
+	const server = mw.config.get('wgServer');
 
-    // "/wiki/$1" or "/index.php/$1"
-    const articlePath = mw.config.get('wgArticlePath');
-    
-    // "/wiki/" or "/index.php/"
-    const basePath = articlePath.replace('$1', '');
-    return server + basePath;    
-}
+	// "/wiki/$1" or "/index.php/$1"
+	const articlePath = mw.config.get('wgArticlePath');
+
+	// "/wiki/" or "/index.php/"
+	const basePath = articlePath.replace('$1', '');
+	return server + basePath;
+};
 
 // use as schema loader - fetchUrl
 JsonForms.prototype.MWSchemaUrl = function (schemaName) {
 	if (schemaName.indexOf('#') === -1) {
-		schemaName = schemaName.split('#')[0]
+		schemaName = schemaName.split('#')[0];
 	}
 
 	// OR
@@ -171,11 +162,7 @@ JsonForms.prototype.MWSchemaUrl = function (schemaName) {
 };
 
 JsonForms.prototype.isMWSchema = function (maybeUrl, fileBase) {
-// filebase is from core -> location
-
-	// console.log('isMWSchema config', mw.config);
-	// console.log('maybeUrl', maybeUrl);
-	// console.log('fileBase', fileBase);
+	// filebase is from core -> location
 
 	if (JsonForms.Utilities.hasProtocol(maybeUrl)) {
 		return false;
@@ -183,17 +170,12 @@ JsonForms.prototype.isMWSchema = function (maybeUrl, fileBase) {
 	if (!fileBase) {
 		return true;
 	}
-	
-	const basePath = this.getBasePath();
-	
-	// console.log('basePath', basePath);
-	
-	return fileBase.startsWith(basePath) || basePath.startsWith(fileBase);
 
+	const basePath = this.getBasePath();
+	return fileBase.startsWith(basePath) || basePath.startsWith(fileBase);
 };
 
 JsonForms.prototype.processSchema = function (schema) {
-	//  console.log('fetchSchema',schema)
 	const payload = {
 		action: 'jsonforms-process-schema',
 		format: 'json',
@@ -219,34 +201,62 @@ JsonForms.prototype.processSchema = function (schema) {
 	});
 };
 
-JsonForms.prototype.fetchSchema = function (schema) {
-	//  console.log('fetchSchema',schema)
+JsonForms.prototype.notifyRefFetchFailed = function (uri, options) {
+	const external = options.external === true;
+	const config = {
+		type: 'error',
+		htmlMessage: mw.msg('jsonforms-jsmodule-fetch-ref-error', uri),
+	};
+	if (!this.isPopup) {
+		const nonModalDialog = new JsonForms.NonModalDialog();
+		nonModalDialog.open(config);
+	} else {
+		JsonForms.Alert(config.htmlMessage);
+	}
+};
+
+JsonForms.prototype.fetchSchema = function (schemaName) {
+	if (this._schemaCache[schemaName]) {
+		return Promise.resolve(this._schemaCache[schemaName]);
+	}
+
+	if (this._pendingRequests[schemaName]) {
+		return this._pendingRequests[schemaName];
+	}
+
 	const payload = {
 		action: 'jsonforms-fetch-schema',
 		format: 'json',
-		schema,
+		schema: schemaName,
 	};
 
-	// console.log('payload',payload)
-	return new Promise((resolve, reject) => {
+	this._pendingRequests[schemaName] = new Promise((resolve, reject) => {
 		new mw.Api()
 			.get(payload)
 			.done((thisRes) => {
-				// console.log('thisRes', thisRes);
-				let result = thisRes[payload.action].result;
-				result = JSON.parse(result);
-				// console.log('result', result);
-				resolve(result);
+				if ( 'error' in thisRes[payload.action] ) {
+					reject(thisRes[payload.action].error);
+				} else {
+					let result = thisRes[payload.action].result;
+					result = JSON.parse(result);
+					this._schemaCache[schemaName] = result;
+					delete this._pendingRequests[schemaName];
+
+					// @IMPORTANT !! otherwise the processed schema could
+					// be returned instead of the original schema
+					const schema = JsonForms.Utilities.clone(result);
+					resolve(schema);
+				}
 			})
 			.fail((error, errorCode) => {
+				delete this._pendingRequests[schemaName];
 				console.error('API call failed - error:', error);
 				console.error('Error code:', errorCode);
 				reject(error);
 			});
-	}).catch((err) => {
-		console.error('API call failed:', err);
-		throw err;
 	});
+
+	return this._pendingRequests[schemaName];
 };
 
 JsonForms.prototype.getEditor = function () {
@@ -285,20 +295,6 @@ JsonForms.prototype.processTemplate = function (str, vars, options = {}) {
 	});
 };
 
-/*
-JsonForms.prototype.processTemplate = function (str, vars, options = {}) {
-	if ( options.replaceAngularBrackets ) {
-		str = str.replace('<', '{{').replace('>', '}}');
-	}
-
-	const template = this.editor.compileTemplate( str );
-	return this.editor.getTemplateResult(
-		template,
-		vars,
-	);
-};
-*/
-
 window.JsonForms = JsonForms;
 
 (function ($) {
@@ -336,4 +332,3 @@ window.JsonForms = JsonForms;
 
 	// eslint-disable-next-line no-undef
 })(jQuery);
-

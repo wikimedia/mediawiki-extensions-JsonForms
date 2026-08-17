@@ -57,19 +57,34 @@ class SpecialJsonFormsDemo extends SpecialPage {
 		$out->addModules( 'ext.JsonForms.demo' );
 
 		$jsonForm = \JsonForms::getSourceSchema( 'DemoForm', 'JsonSchema/Core' );
-		// $jsonForm = \JsonForms::processSchema( $out, $jsonForm );
 
-		$formData = (object)[
+		if ( !$jsonForm ) {
+			throw new MWException( 'Cannot load core schema' );
+		}
+
+		$config = (object)[
 			'schema' => $jsonForm,
-			'editorOptions' => 'MediaWiki:DefaultEditorOptions',
-			'editorScript' => 'MediaWiki:DefaultEditorScript',
+			'formDescriptor' => (object)[
+				'editor_options' => (object)[
+					'base_options' => 'MediaWiki:DefaultEditorOptions',
+					'base_script' => 'MediaWiki:DefaultEditorScript',
+					'validation' => 'always',
+					'template' => 'default',
+					'max_depth' => 32,
+					'separator' => '.',
+					'default_additional_properties' => false,
+					'use_lazy_properties' => 'threshold',
+					'lazy_properties_threshold' => 6,
+					'remove_empty_properties' => true,
+					'remove_false_properties' => false,
+					'debug' => true,
+				],
+				'width' => '800px'
+			]
 		];
 
-		$formData = \JsonForms::prepareFormData( $out, $formData );
-
-		$res_ = \JsonForms::getJsonFormHtml( $formData, [
-			'width' => '800px'
-		] );
+		$formData = \JsonForms::prepareFormData( $out, $config );
+		$res_ = \JsonForms::getJsonFormHtml( $formData );
 
 		if ( !$res_->ok ) {
 			return $this->printError( $out, $res_->error );

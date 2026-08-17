@@ -22,22 +22,26 @@
  */
 
 use MediaWiki\Content\JsonContent;
+use MediaWiki\Exception\ErrorPageError;
 use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
 use MediaWiki\Extension\JsonForms\Aliases\Linker as LinkerClass;
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
-use MediaWiki\Extension\JsonForms\FormParameters;
-use MediaWiki\Extension\JsonForms\InfoboxRender;
+use MediaWiki\Extension\JsonForms\BaseRender;
+use MediaWiki\Extension\JsonForms\FormBuilder;
+use MediaWiki\Extension\JsonForms\ParametersProcessor;
 use MediaWiki\Extension\JsonForms\QueryLinkParameters;
 use MediaWiki\Extension\JsonForms\ResultWrapper;
+use MediaWiki\Extension\JsonForms\SchemaProcessor;
 use MediaWiki\Extension\JsonForms\SchemaUtils;
 use MediaWiki\Extension\JsonForms\SlotEditor;
 use MediaWiki\Extension\JsonForms\SlotHelper;
 use MediaWiki\Extension\JsonForms\TemplateRender;
+use MediaWiki\Extension\JsonForms\Utils\JsonValidator;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
 
-if ( is_readable( __DIR__ . "/../vendor/autoload.php" ) ) {
-	include_once __DIR__ . "/../vendor/autoload.php";
+if ( is_readable( __DIR__ . '/../vendor/autoload.php' ) ) {
+	include_once __DIR__ . '/../vendor/autoload.php';
 }
 
 class JsonForms {
@@ -58,50 +62,113 @@ class JsonForms {
 	}
 
 	/**
+	 * @param mixed $data
+	 * @param stdClass $mappedSchema
+	 * @return bool
+	 */
+	public static function checkData( $data, $mappedSchema ) {
+		$ret = true;
+
+		$callback = static function ( &$parent, $key, &$value, $pathArr ) use (
+			$mappedSchema,
+			&$ret
+		) {
+			$path = implode( '.', $pathArr );
+
+			if ( !isset( $mappedSchema->$path ) ) {
+				return true;
+			}
+
+			$schemaInfo = $mappedSchema->$path;
+
+			// type mismatch
+			if ( !empty( $schemaInfo->type ) && gettype( $value ) !== $schemaInfo->type ) {
+				$ret = false;
+				return false;
+			}
+
+			return true;
+		};
+
+		SchemaUtils::traverseSchema( $data, $callback );
+
+		return $ret;
+	}
+
+	/**
 	 * @param Parser $parser
 	 * @param mixed ...$argv
 	 * @return array
 	 */
 	public static function parserFunctionRender( Parser $parser, ...$argv ) {
-		// @TODO, create separate schema or merge with parserFunctionForm
-		// (action = render)
+		$parserOutput = $parser->getOutput();
+		$context = RequestContext::getMain();
+		$user = $context->getUser();
+
+		// @TODO, create separate schema
 		$formSchema = (object)[
-			"type" => "object",
-			"properties" => (object)[
-				"schema" => (object)[
-					"type" => "string",
+			'type' => 'object',
+			'properties' => (object)[
+				'template' => (object)[
+					'type' => 'string',
 				],
-				"slot" => (object)[
-					"type" => "string",
-					"default" => SLOT_ROLE_JSONFORMS_DATA,
+				'path' => (object)[
+					'type' => 'string',
 				],
-				"print_scalar" => (object)[
-					"type" => "bool",
-					"default" => true,
+				'slot' => (object)[
+					'type' => 'string',
+					'default' => SLOT_ROLE_JSONFORMS_DATA,
+				],
+				'print_scalar' => (object)[
+					'type' => 'bool',
+					'default' => true,
 				],
 			],
 		];
 
 		$titleText = $argv[0];
 
-		$parameters = new FormParameters( $argv, $formSchema );
-
-		$named = $parameters->getOptions();
+		$parametersProcessor = new ParametersProcessor( $argv, $formSchema );
+		$parametersProcessor->buildOptionsSchema();
+		$allParameters = $parametersProcessor->getOptions();
 
 		$title = TitleClass::newFromText( $titleText );
-
 		$wikiPage = self::getWikiPage( $title );
+		$content = self::getSlotContent( $wikiPage, $allParameters['slot'] );
 
-		$content = self::getSlotContent( $wikiPage, $named['slot'] );
+		$json = $content ? json_decode( $content, false ) : [];
 
-		$obj = $content ? json_decode( $content, false ) : [];
+		if ( !empty( $allParameters['path'] ) ) {
+			$json = SchemaUtils::getValueByPath( $json, $allParameters['path'] );
+		}
 
-		$templateRender = new TemplateRender( $parser, $named );
-		$ret = $templateRender->render( $obj );
+		if ( empty( $json ) ) {
+			$ret = self::printError(
+				$parserOutput,
+				'jsonforms-parserfunction-error-no-data',
+			);
 
-		// echo $ret;
-		// exit;
-		return [ $ret, "noparse" => false, "isHTML" => false ];
+			return [ $ret, 'noparse' => true, 'isHTML' => true ];
+		}
+
+		$slotMetadata = self::getMetadata( $wikiPage, $allParameters['slot'] );
+
+		if ( empty( (array)$slotMetadata ) || empty( $slotMetadata->schema ) ) {
+			$ret = self::printError(
+				$parserOutput,
+				'jsonforms-parserfunction-error-no-metadata',
+			);
+
+			return [ $ret, 'noparse' => true, 'isHTML' => true ];
+		}
+
+		$allParameters['schema'] = $slotMetadata->schema;
+
+		$templateRender = new TemplateRender( $user, $title, $allParameters, $slotMetadata );
+		$templateRender->setParser( $parser );
+
+		$ret = $templateRender->render( $json );
+		return [ $ret, 'noparse' => false, 'isHTML' => false ];
 	}
 
 	/**
@@ -111,92 +178,88 @@ class JsonForms {
 	 */
 	public static function parserFunctionForm( Parser $parser, ...$argv ) {
 		$parserOutput = $parser->getOutput();
-		$parserOutput->setExtensionData( "jsonforms", true );
+		$parserOutput->setExtensionData( 'jsonforms', true );
+
+		$context = RequestContext::getMain();
+		$output = $context->getOutput();
+		$user = $context->getUser();
 
 		$functionReturn = static function ( $value ) {
-			return [ $value, "noparse" => true, "isHTML" => true ];
+			return [ $value, 'noparse' => true, 'isHTML' => true ];
 		};
 
 		if ( empty( $argv[0] ) ) {
 			return $functionReturn(
 				self::printError(
 					$parserOutput,
-					"jsonforms-parserfunction-error-no-form-name",
+					'jsonforms-parserfunction-error-no-form-name',
 				),
 			);
 		}
 
-		$function = "form";
 		$formName = $argv[0];
 		$data = [];
 		$errorMessage = null;
 
 		$formSchema = self::getSourceSchema(
-			"CreatePageForm",
-			"JsonSchema/Core",
+			'CreatePageForm',
+			'JsonSchema/Core',
 		);
 
-		$parameters = new FormParameters( $argv, $formSchema );
+		if ( !$formSchema ) {
+			throw new MWException( 'Cannot load core schema' );
+		}
 
-		$named = $parameters->getOptions();
-		$context = RequestContext::getMain();
-		$output = $context->getOutput();
+		$parametersProcessor = new ParametersProcessor( $argv, $formSchema );
+		$parametersProcessor->buildOptionsSchema();
 
-		if ( empty( $formName ) ) {
+		// default options merged with inline options
+		$allParameters = $parametersProcessor->getOptions();
+
+		$formDescriptor = self::getSourceSchema( $formName, 'JsonForm' );
+
+		if ( !$formDescriptor ) {
 			return $functionReturn(
 				self::printError(
 					$parserOutput,
-					"jsonforms-parserfunction-error-no-form-name",
+					'jsonforms-parserfunction-error-no-form',
 				),
 			);
 		}
 
-		$formDescriptor = self::getSourceSchema( $formName, "JsonForm" );
-		if ( empty( $formDescriptor ) ) {
+		$formDescriptor = $parametersProcessor->mergeFormDescriptor( $formDescriptor );
+
+		if ( empty( $formDescriptor->schema ) ) {
 			return $functionReturn(
 				self::printError(
 					$parserOutput,
-					"jsonforms-parserfunction-error-no-form",
+					'jsonforms-parserfunction-error-no-schema',
 				),
 			);
 		}
 
-		// formDescriptor prevails over default parameters but
-		// inline parameters prevail over formDescriptor
-		foreach ( $named as $k => $v ) {
-			// Check if property exists in the object
-			$propertyExists = property_exists( $formDescriptor, $k );
-
-			if ( !$propertyExists || in_array( $k, $parameters->initialKnown ) ) {
-				$formDescriptor->$k = $v;
-			}
+		if ( empty( $formDescriptor->name ) ) {
+			$formDescriptor->name = $formName;
 		}
 
 		// Handle css_class
 		$css_classes = [];
-		if (
-			property_exists( $formDescriptor, "css_class" ) &&
-			!empty( $formDescriptor->css_class )
-		) {
+		if ( !empty( $formDescriptor->css_class ) ) {
 			$css_classes[] = $formDescriptor->css_class;
 		}
 
-		if (
-			!property_exists( $formDescriptor, "view" ) ||
-			$formDescriptor->view !== 'popup'
-		) {
-			$css_classes[] = "jsonforms-form-inline";
+		if ( $formDescriptor->view !== 'popup' ) {
+			$css_classes[] = 'jsonforms-form-inline';
 
 		} else {
-			unset( $formDescriptor->width );
-			$css_classes[] = "jsonforms-form-popup";
+			$css_classes[] = 'jsonforms-form-popup';
 		}
 
 		$formDescriptor->css_class = implode( ' ', $css_classes );
 
-		$result = self::getPageForm( $output, $formDescriptor );
+		$result = self::getPageForm( $user, $output, $formDescriptor );
 
-		return [ $result, "noparse" => true, "isHTML" => true ];
+		return [ $result, 'noparse' => true, 'isHTML' => true ];
 
 		/*
 		$parser->addTrackingCategory( "jsonforms-trackingcategory-parserfunction-$function" );
@@ -228,177 +291,41 @@ class JsonForms {
 	}
 
 	/**
+	 * @param User $user
 	 * @param Output $output
 	 * @param array $formDescriptor
 	 * @return string
 	 */
-	public static function getPageForm( $output, $formDescriptor ) {
-		$jsonForm = self::getSourceSchema( "PageFormUI", "JsonSchema/Core" );
+	public static function getPageForm( $user, $output, $formDescriptor ) {
+		$builder = new FormBuilder( $user, $output, $formDescriptor );
+		return $builder->build();
+	}
 
-		$startVal = new stdClass();
+	/**
+	 * @param mixed $content
+	 * @param stdClass $titleStr
+	 * @return mixed
+	 */
+	public static function processFormData( $content, $slotMetadata ) {
+		$json = SlotEditor::parseMaybeJSON( $content );
 
-		if ( !empty( $formDescriptor->edit ) ) {
-			$editTitle = TitleClass::newFromText( $formDescriptor->edit );
-
-			if ( $editTitle && $editTitle->isKnown() ) {
-				$wikiPage = self::getWikiPage( $editTitle );
-
-				if ( !empty( $formDescriptor->schema ) ) {
-					$metadata = self::getMetadata( $wikiPage );
-
-					if (
-						$metadata &&
-						isset( $metadata->slots ) &&
-						is_object( $metadata->slots ) &&
-						property_exists( $metadata->slots, $formDescriptor->slot )
-					) {
-						$role = $formDescriptor->slot;
-						$slotData = $metadata->slots->$role;
-
-						$content = self::getSlotContent(
-							$wikiPage,
-							$role,
-						);
-
-						if ( $content ) {
-							$startVal->form = new stdClass();
-
-							if ( empty( $formDescriptor->edit_path ) ) {
-								$startVal->form->editor = $content;
-
-							} else {
-								[
-									$shouldAppend,
-									$_,
-								] = SchemaUtils::parseAppendPath( $formDescriptor->edit_path );
-
-								if ( !$shouldAppend ) {
-									$json = SlotEditor::parseMaybeJSON( $content );
-									$json = SchemaUtils::getValueByPath(
-										$json,
-										$formDescriptor->edit_path,
-									);
-									if ( !empty( $json ) ) {
-										$startVal->form->editor = SlotEditor::stringifyMaybeJSON(
-											$json,
-										);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				if (
-					isset( $formDescriptor->edit_categories ) &&
-					$formDescriptor->edit_categories === true
-				) {
-					$categories = self::getNonAnnotatedCategories( $editTitle );
-					if ( !isset( $startVal->form->options ) ) {
-						$startVal->form->options = new stdClass();
-					}
-					$startVal->form->options->categories = $categories;
-				}
-
-				if (
-					$formDescriptor->slot !== SlotRecord::MAIN &&
-					isset( $formDescriptor->edit_freetext ) &&
-					$formDescriptor->edit_freetext === true
-				) {
-					if ( !isset( $startVal->form->options ) ) {
-						$startVal->form->options = new stdClass();
-					}
-					$startVal->form->options->freetext_content_model = $editTitle->getContentModel();
-					$startVal->form->options->freetext = self::getArticleContent(
-						$editTitle,
-					);
-				}
-			}
-		}
-
-		$schemaName = null;
-		$schema = [];
-		if ( !empty( $formDescriptor->schema ) ) {
-			$schema = self::getSourceSchema(
-				!empty( $formDescriptor->edit_schema ) ? $formDescriptor->edit_schema : $formDescriptor->schema,
-				"JsonSchema",
-			);
-			$schemaName = $formDescriptor->schema;
-
-			// Initialize nested objects for jsonForm
+		$callback = static function ( &$parent, $key, &$value, $pathArr ) use (
+			$slotMetadata
+		) {
+			$path = implode( '.', $pathArr );
 			if (
-				!isset(
-					$jsonForm->properties->form->properties->editor
-						->{'x-input-config'}
-				)
+				$slotMetadata &&
+				isset( $slotMetadata->originalValues )
 			) {
-				if ( !isset( $jsonForm->properties ) ) {
-					$jsonForm->properties = new stdClass();
-				}
-				if ( !isset( $jsonForm->properties->form ) ) {
-					$jsonForm->properties->form = new stdClass();
-				}
-				if ( !isset( $jsonForm->properties->form->properties ) ) {
-					$jsonForm->properties->form->properties = new stdClass();
-				}
-				if ( !isset( $jsonForm->properties->form->properties->editor ) ) {
-					$jsonForm->properties->form->properties->editor = new stdClass();
-				}
-				if (
-					!isset(
-						$jsonForm->properties->form->properties->editor
-							->{'x-input-config'}
-					)
-				) {
-					$jsonForm->properties->form->properties->editor->{'x-input-config'} = new stdClass();
+				$originalValues = (array)$slotMetadata->originalValues;
+
+				if ( isset( $originalValues[$path] ) ) {
+					$parent->{$key} = $originalValues[$path];
 				}
 			}
+		};
 
-			$schema = self::processSchema( $output, $schema );
-			$jsonForm->properties->form->properties->editor->{'x-input-config'}->schema = json_encode(
-				$schema,
-			);
-
-			if ( !empty( $formDescriptor->edit_path ) ) {
-				$jsonForm->properties->form->properties->editor->{'x-input-config'}->edit_path =
-					$formDescriptor->edit_path;
-			}
-
-			if (
-				!empty( $formDescriptor->edit ) &&
-				isset( $formDescriptor->create_only_fields ) &&
-				is_array( $formDescriptor->create_only_fields )
-			) {
-				$jsonForm->properties->form->properties->editor->{'x-input-config'}->disableFields =
-					$formDescriptor->create_only_fields;
-			}
-		}
-
-		$formData = new stdClass();
-		$formData->schema = $jsonForm;
-		$formData->schemaName = "PageForm";
-		$formData->editorOptions =
-			$formDescriptor->editor_options ?? "MediaWiki:DefaultEditorOptions";
-		$formData->formDescriptor = $formDescriptor;
-		$formData->startval = $startVal;
-
-		$formData = self::prepareFormData( $output, $formData );
-
-		$attr = [];
-		if ( !empty( $formDescriptor->width ) ) {
-			$attr["width"] = $formDescriptor->width;
-		}
-		if ( !empty( $formDescriptor->css_class ) ) {
-			$attr["css_class"] = $formDescriptor->css_class;
-		}
-
-		$res_ = self::getJsonFormHtml( $formData, $attr );
-
-		if ( !$res_->ok ) {
-			return $res_->error;
-		}
-
-		return $res_->value;
+		return SchemaUtils::traverseSchema( $json, $callback );
 	}
 
 	/**
@@ -411,7 +338,7 @@ class JsonForms {
 		$title = TitleClass::newFromText( $titleStr );
 		$wikiPage = self::getWikiPage( $title );
 		$parserOutput = $wikiPage->getParserOutput( $parserOptions );
-		return $parserOutput->getExtensionData( "JsonForms" );
+		return $parserOutput->getExtensionData( 'JsonForms' );
 	}
 
 	/**
@@ -427,20 +354,39 @@ class JsonForms {
 			return $formattedNamespaces[$ns];
 		}
 
-		return "";
+		return '';
 	}
 
 	/**
-	 * @param Context $context
 	 * @param WikiPage $wikiPage
+	 * @param string|null $slotKey
 	 * @return mixed
 	 */
-	public static function getMetadata( $wikiPage ) {
+	public static function getMetadata( $wikiPage, $slotKey = null ) {
 		$ret = self::getSlotContent( $wikiPage, SLOT_ROLE_JSONFORMS_METADATA );
 		if ( $ret ) {
-			$ret = json_decode( $ret, false );
+			$metadata = json_decode( $ret, false );
+
+			if ( !$slotKey ) {
+				return $metadata;
+			}
+
+			if ( !$metadata ) {
+				return null;
+			}
+
+			if ( !property_exists( $metadata, 'slots' ) || !is_object( $metadata->slots ) ) {
+				return null;
+			}
+
+			if ( !property_exists( $metadata->slots, $slotKey ) || !is_object( $metadata->slots->$slotKey ) ) {
+				return null;
+			}
+
+			return $metadata->slots->$slotKey;
 		}
-		return $ret ?? [];
+
+		return $metadata ?? new stdClass();
 	}
 
 	/**
@@ -491,7 +437,7 @@ class JsonForms {
 	 * @return bool
 	 */
 	public static function isList( $arr ) {
-		if ( function_exists( "array_is_list" ) ) {
+		if ( function_exists( 'array_is_list' ) ) {
 			return array_is_list( $arr );
 		}
 		if ( $arr === [] ) {
@@ -505,7 +451,7 @@ class JsonForms {
 	 */
 	public static function getDefaultTrackingCategories() {
 		$services = MediaWikiServices::getInstance();
-		if ( method_exists( $services, "getTrackingCategories" ) ) {
+		if ( method_exists( $services, 'getTrackingCategories' ) ) {
 			$trackingCategoriesClass = $services->getTrackingCategories();
 			$trackingCategories = $trackingCategoriesClass->getTrackingCategories();
 		} else {
@@ -516,7 +462,7 @@ class JsonForms {
 
 		$ret = [];
 		foreach ( $trackingCategories as $value ) {
-			foreach ( $value["cats"] as $title_ ) {
+			foreach ( $value['cats'] as $title_ ) {
 				$ret[] = $title_->getText();
 			}
 		}
@@ -563,9 +509,9 @@ class JsonForms {
 			// $jsonData = self::getJsonData( $title );
 			$context = RequestContext::getMain();
 			$data = self::getMetadata( $context, $wikiPage );
-			if ( $data && !empty( $data["categories"] ) ) {
+			if ( $data && !empty( $data['categories'] ) ) {
 				foreach ( $ret as $key => $category ) {
-					if ( !in_array( $category, $data["categories"] ) ) {
+					if ( !in_array( $category, $data['categories'] ) ) {
 						unset( $ret[$key] );
 					}
 				}
@@ -610,8 +556,8 @@ class JsonForms {
 		\OOUI\Theme::setSingleton( new \OOUI\WikimediaUITheme() );
 
 		return new \OOUI\MessageWidget( [
-			"type" => "error",
-			"label" => new \OOUI\HtmlSnippet( wfMessage( $msg )->parse() ),
+			'type' => 'error',
+			'label' => new \OOUI\HtmlSnippet( wfMessage( $msg )->parse() ),
 		] );
 	}
 
@@ -628,133 +574,29 @@ class JsonForms {
 	/**
 	 * @param Output $output
 	 * @param array $formData
-	 * @param array $attr
 	 * @return ResultWrapper
 	 */
-	public static function getJsonForm( $output, $formData = [], $attr = [] ) {
+	public static function getJsonForm( $output, $formData = [] ) {
 		$res = self::prepareFormData( $output, $formData );
 		if ( !$res->ok ) {
 			return ResultWrapper::failure( $res->error );
 		}
 
-		return self::getJsonFormHtml( $res->value, $attr );
+		return self::getJsonFormHtml( $res->value );
 	}
 
 	/**
 	 * @param Output $output
-	 * @param StdClass $schema
-	 * @return array
+	 * @param stdClass $rawSchema
+	 * @return ResultWrapper
 	 */
-	public static function processSchema( $output, $schema ) {
-		if ( empty( $schema ) ) {
-			return [];
-		}
-
-		$wikitextKeys = [
-			"x-title-format" => "title",
-			"x-description-format" => "description",
-			"x-label-format" => "label",
-			"x-enum-titles-format" => "x-enum-titles",
-		];
-
-		$callback = static function ( &$parent, $key, &$value, $pathArr ) use (
-			$output,
-			$wikitextKeys,
-		) {
-			// Handle both array and object
-			$isObject = is_object( $value );
-
-			if ( !$isObject && !is_array( $value ) ) {
-				return;
-			}
-
-			foreach ( $wikitextKeys as $k => $v ) {
-				// Get the value of the property (works for both array and object)
-				$fieldValue = null;
-				if ( $isObject ) {
-					if ( !property_exists( $value, $v ) || is_object( $value->$v ) ) {
-						continue;
-					}
-					$fieldValue = $value->$v;
-				} else {
-					if ( !isset( $value[$v] ) || is_array( $value[$v] ) ) {
-						continue;
-					}
-					$fieldValue = $value[$v];
-				}
-
-				// Get or set the format
-				$format = "text";
-				if ( $isObject ) {
-					if ( property_exists( $value, $k ) ) {
-						$format = $value->$k;
-
-					} else {
-						$value->$k = "text";
-					}
-				} else {
-					if ( isset( $value[$k] ) ) {
-						$format = $value[$k];
-
-					} else {
-						$value[$k] = "text";
-					}
-				}
-
-				switch ( $format ) {
-					case "html":
-						// do not escape
-						break;
-
-					case "wikitext":
-						if ( !is_array( $fieldValue ) ) {
-							$parsed = self::parseWikitext( $output, $fieldValue );
-
-						} else {
-							$parsed = [];
-							foreach ( $fieldValue as $k_ => $v_ ) {
-								$parsed[] = self::parseWikitext( $output, $v_ );
-							}
-						}
-
-						if ( $isObject ) {
-							$value->$v = $parsed;
-
-						} else {
-							$value[$v] = $parsed;
-						}
-						break;
-
-					case "text":
-					default:
-						if ( !is_array( $fieldValue ) ) {
-							$escaped = htmlspecialchars( $fieldValue );
-
-						} else {
-							$escaped = [];
-							foreach ( $fieldValue as $k_ => $v_ ) {
-								$escaped[] = htmlspecialchars( $v_ );
-							}
-						}
-
-						if ( $isObject ) {
-							$value->$v = $escaped;
-
-						} else {
-							$value[$v] = $escaped;
-						}
-						break;
-				}
-			}
-		};
-
-		return SchemaUtils::traverseSchema( $schema, $callback );
+	public static function processSchema( $output, $rawSchema ) {
+		return SchemaProcessor::processSchema( $output, $rawSchema );
 	}
 
 	/**
 	 * @param Output $output
-	 * @param array $formParameters
-	 * @param array $schemaObj
+	 * @param stdClass $data
 	 * @return ResultWrapper
 	 */
 	public static function prepareFormData( $output, $data ) {
@@ -762,23 +604,24 @@ class JsonForms {
 			$data->schema = self::processSchema( $output, $data->schema );
 		}
 
-		if ( !empty( $data->editorOptions ) ) {
-			$title_ = TitleClass::newFromText(
-				$data->editorOptions,
-				NS_MEDIAWIKI,
-			);
-			if ( $title_ && $title_->isKnown() ) {
-				$data->editorOptions = self::getWikipageContent( $title_ );
+		if (
+			property_exists( $data, 'formDescriptor' ) &&
+			property_exists( $data->formDescriptor, 'editor_options' ) &&
+			!empty( (array)$data->formDescriptor->editor_options )
+		) {
+			$options = $data->formDescriptor->editor_options;
+			if ( !empty( (array)$options->base_options ) ) {
+				$pathArr = explode( ':', $options->base_options );
+				$filePath = __DIR__ . '/../data/MediaWiki/' . $pathArr[1] . '.js';
+				$titleText = $options->base_options;
+				$data->editorOptions = self::getLatestResource( $titleText, $filePath, );
 			}
-		}
 
-		if ( !empty( $data->editorScript ) ) {
-			$title_ = TitleClass::newFromText(
-				$data->editorScript,
-				NS_MEDIAWIKI,
-			);
-			if ( $title_ && $title_->isKnown() ) {
-				$data->editorScript = self::getWikipageContent( $title_ );
+			if ( !empty( (array)$options->base_script ) ) {
+				$pathArr = explode( ':', $options->base_script );
+				$filePath = __DIR__ . '/../data/MediaWiki/' . $pathArr[1] . '.js';
+				$titleText = $options->base_script;
+				$data->editorScript = self::getLatestResource( $titleText, $filePath );
 			}
 		}
 
@@ -786,54 +629,48 @@ class JsonForms {
 	}
 
 	/**
-	 * @param array $data
-	 * @param array $attr
+	 * @param array $config
 	 * @return ResultWrapper
 	 */
-	public static function getJsonFormHtml( $data, $attr = [] ) {
-		// $requiredKeys = [ 'schema','schemaName', 'editorOptions' ];
-		// if ( count( array_intersect_key( (array)$data, array_flip( $requiredKeys ) ) ) !== 3 ) {
-		// 	return ResultWrapper::failure('jsonforms-parserfunction-error-invalid-data');
-		// }
-
+	public static function getJsonFormHtml( $config ) {
 		$loadingContainer = HtmlClass::rawElement(
-			"div",
+			'div',
 			[
-				"class" => "rcfilters-head mw-rcfilters-head",
-				"id" => "mw-rcfilters-spinner-wrapper",
-				"style" => "position: relative",
+				'class' => 'rcfilters-head mw-rcfilters-head',
+				'id' => 'mw-rcfilters-spinner-wrapper',
+				'style' => 'position: relative',
 			],
 			HtmlClass::rawElement(
-				"div",
+				'div',
 				[
-					"class" => "initb mw-rcfilters-spinner",
-					"style" => "margin-top: auto; top: 25%",
+					'class' => 'initb mw-rcfilters-spinner',
+					'style' => 'margin-top: auto; top: 25%',
 				],
-				HtmlClass::element( "div", [
-					"class" => "inita mw-rcfilters-spinner-bounce",
+				HtmlClass::element( 'div', [
+					'class' => 'inita mw-rcfilters-spinner-bounce',
 				] ),
 			),
 		);
 
 		$loadingPlaceholder = HtmlClass::rawElement(
-			"div",
-			[ "class" => "jsonforms-form-placeholder" ],
+			'div',
+			[ 'class' => 'jsonforms-form-placeholder' ],
 			// $this->msg( 'jsonforms-loading-placeholder' )->text()
-			wfMessage( "jsonforms-loading-placeholder" )->text(),
+			wfMessage( 'jsonforms-loading-placeholder' )->text(),
 		);
 
 		$ret = HtmlClass::rawElement(
-			"div",
+			'div',
 			[
-				"data-form-data" => json_encode( $data ),
-				"class" =>
-					"jsonforms-form jsonforms-form-wrapper" .
-					( !isset( $attr["css_class"] )
-						? ""
-						: " " . $attr["css_class"] ),
-				"style" => !isset( $attr["width"] )
-					? ""
-					: "width:" . $attr["width"],
+				'data-form-data' => json_encode( $config ),
+				'class' =>
+					'jsonforms-form jsonforms-form-wrapper' .
+					( !isset( $config->formDescriptor->css_class )
+						? ''
+						: ' ' . $config->formDescriptor->css_class ),
+				'style' => !isset( $config->formDescriptor->width )
+					? ''
+					: 'width:' . $config->formDescriptor->width,
 			],
 			$loadingContainer . $loadingPlaceholder,
 		);
@@ -863,16 +700,10 @@ class JsonForms {
 */
 
 		$ql = new QueryLinkParameters( $argv );
-
-		// unnamed
-		$values = $ql->getValues();
-
 		// known named
-		$options = $ql->getOptions();
 
 		// unknown named
 		$query = $ql->getQuery();
-
 		$attributes = $ql->getAttributes();
 		$text = $ql->getText();
 		$title = $ql->getTitle();
@@ -881,7 +712,7 @@ class JsonForms {
 		// or $GLOBALS['wgArticlePath'] and wfAppendQuery
 		$ret = LinkerClass::link( $title, $text, $attributes, $query );
 
-		return [ $ret, "noparse" => true, "isHTML" => true ];
+		return [ $ret, 'noparse' => true, 'isHTML' => true ];
 	}
 
 	/**
@@ -902,178 +733,14 @@ class JsonForms {
 	 * @param OutputPage $outputPage
 	 * @return void
 	 */
-	public static function appendContent( $outputPage ) {
-		$wikiPage = $outputPage->getWikiPage();
-
-		if ( !$wikiPage ) {
-			return;
-		}
-
-		$title = $outputPage->getTitle();
-		$ns = $title->getNamespace();
-		$user = $outputPage->getUser();
-
-		if ( $ns === NS_JSONSCHEMA && $user->isAllowed( "jsonforms-canmanageschemas" ) ) {
-			$outputPage->enableOOUI();
-			$outputPage->addModules( "ext.JsonForms.infobox" );
-
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Schemas" );
-			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
-
-			$html = new \OOUI\MessageWidget( [
-				// success
-				"type" => "info",
-				"icon" => "edit",
-				"label" => new \OOUI\HtmlSnippet(
-					wfMessage(
-						"jsonforms-jsonschema-namespace-schema-message",
-						$url
-					)->text(),
-				),
-			] ) . HtmlClass::rawElement( 'p' );
-
-			$outputPage->prependHTML( $html );
-
-			return;
-		}
-
-		if ( $ns === NS_JSONFORM && $user->isAllowed( "jsonforms-canmanageforms" ) ) {
-			$outputPage->enableOOUI();
-			$outputPage->addModules( "ext.JsonForms.infobox" );
-
-			$specialpage_title = SpecialPage::getTitleFor( "JsonFormsManage", "Forms" );
-			$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pageid' => $title->getID() ] );
-
-			$html = new \OOUI\MessageWidget( [
-				// success
-				"type" => "info",
-				"icon" => "edit",
-				"label" => new \OOUI\HtmlSnippet(
-					wfMessage(
-						"jsonforms-jsonschema-namespace-form-message",
-						$url
-					)->text(),
-				),
-			] ) . HtmlClass::rawElement( 'p' );
-
-			$outputPage->prependHTML( $html );
-
-			return;
-		}
-
-		if ( !in_array( $ns, self::getConfigValue( 'JsonFormsEditSchemaNamespaces' ) ) ) {
-			return;
-		}
-
-		$metadata = self::getMetadata( $wikiPage );
-
-		if ( !$metadata ) {
-			return;
-		}
-
-		// Check if slots exists and is an object, and if SLOT_ROLE_JSONFORMS_DATA exists
-		if (
-			!property_exists( $metadata, "slots" ) ||
-			!is_object( $metadata->slots ) ||
-			!property_exists( $metadata->slots, SLOT_ROLE_JSONFORMS_DATA )
-		) {
-			return;
-		}
-
-		$data = $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA};
-
-		if ( empty( $data->showInfobox ) ) {
-			return;
-		}
-
-		$text = self::getSlotContent( $wikiPage, SLOT_ROLE_JSONFORMS_DATA );
-
-		if ( !$text ) {
-			return;
-		}
-
-		$obj = json_decode( $text, false );
-		$position = $data->infoboxPosition ?? 'right';
-
-		$outputPage->enableOOUI();
-
-		// custom template
-		if ( !empty( $data->infoboxTemplate ) ) {
-			// @see ApiExpandTemplates
-			$parser = MediaWikiServices::getInstance()
-				->getParserFactory()
-				->create();
-			$context = $outputPage->getContext();
-			$parserOptions = ParserOptions::newFromContext( $context );
-
-			$parser->startExternalParse(
-				$title,
-				$parserOptions,
-				Parser::OT_PREPROCESS,
-			);
-
-			$templateRender = new TemplateRender( $parser );
-			$templatePrefix = "Template:" . $data->infoboxTemplate;
-			$ret = $templateRender->render( $obj, $templatePrefix );
-
-		// automatic template
-		} else {
-			$processedSchema = new stdClass();
-			if (
-				!empty(
-					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}
-						->processedSchema
-				)
-			) {
-				// $processedSchema = (array)$obj_->slots->{SLOT_ROLE_JSONFORMS_DATA}->processedSchema;
-				$processedSchema =
-					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}
-						->processedSchema;
-			}
-
-			$schema = $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->schema;
-
-			$infoboxRender = new InfoboxRender( $user, $title, $schema, $processedSchema );
-			$ret = $infoboxRender->render( $obj );
-		}
-
-		$outputPage->addModules( "ext.JsonForms.infobox" );
-
-		switch ( $position ) {
-			case "top":
-			case "right":
-			case "left":
-				$html = HtmlClass::rawElement(
-					"div",
-					// toccolours
-					[
-						"class" => "jsonforms-infobox jsonforms-infobox-$position",
-					],
-					$ret,
-				);
-
-				$outputPage->prependHTML( $html );
-				break;
-
-			case "bottom":
-				$html = HtmlClass::rawElement(
-					"div",
-					// toccolours
-					[
-						"class" => "jsonforms-infobox jsonforms-infobox-$position",
-					],
-					$ret,
-				);
-
-				$outputPage->addHTML( $html );
-				break;
-		}
+	public static function printInfobox( $outputPage ) {
+		BaseRender::printInfobox( $outputPage );
 	}
 
 	/**
 	 * @param string $name
 	 * @param string|null $path
-	 * @return stdClass
+	 * @return stdClass|false
 	 */
 	public static function getSourceSchema( $name, $path = null ) {
 		// JsonSchema:SchemaBuilder/EnumProvider
@@ -1089,55 +756,98 @@ class JsonForms {
 				$path = $formattedNamespaces[$ns];
 			} else {
 				// Fallback: extract path from the name or use default
-				[ $path, $name ] = explode( ":", $name, 2 );
+				[ $path, $name ] = explode( ':', $name, 2 );
 			}
 		}
 
-		$pathArr = explode( "/", $path );
+		$pathArr = explode( '/', $path );
 		$namespace = array_shift( $pathArr );
 		$titleText =
 			$namespace .
-			":" .
-			( count( $pathArr ) ? implode( "/", $pathArr ) . "/" : "" ) .
+			':' .
+			( count( $pathArr ) ? implode( '/', $pathArr ) . '/' : '' ) .
 			$name;
 
-		$pageTimestamp = (int)self::getPageLastRevisionTimestamp(
-			$titleText,
-			TS_UNIX,
-		);
-		$filePath = __DIR__ . "/../data/" . $path . "/" . $name . ".json";
+		$filePath = __DIR__ . '/../data/' . $path . '/' . $name . '.json';
 
-		$fileTimestamp = file_exists( $filePath ) ? filemtime( $filePath ) : 0;
-		if ( !$pageTimestamp && !$fileTimestamp ) {
-			// throw new MWException( "no json '$name' ('$path')");
-			return new stdClass();
+		$content = self::getLatestResource( $titleText, $filePath );
+		if ( $content ) {
+			$ret = json_decode( $content, false );
+			if ( is_object( $ret ) ) {
+				return $ret;
+			}
 		}
 
-		if ( $pageTimestamp === null || $fileTimestamp > $pageTimestamp ) {
-			$contents = file_get_contents( $filePath );
-			return json_decode( $contents, false );
-		}
-
-		return self::getJsonArticle( $titleText );
+		return false;
 	}
 
 	/**
 	 * Get the last revision timestamp of a page
 	 *
 	 * @param string $titleText
-	 * @param string $format Output format
+	 * @param string $filePath
 	 * @return string|null
 	 */
-	public static function getPageLastRevisionTimestamp(
-		$titleText,
-		$format = TS_MW,
-	) {
+	public static function getLatestResource( $titleText, $filePath ) {
 		$title = TitleClass::newFromText( $titleText );
 
-		if ( !$title || !$title->exists() ) {
+		if ( $title && $title->isKnown() ) {
+			$pageTimestamp = (int)self::getPageLastRevisionTimestamp( $title, TS_UNIX );
+		} else {
+			$pageTimestamp = 0;
+		}
+
+		$fileTimestamp = ( file_exists( $filePath ) && is_readable( $filePath ) )
+			? filemtime( $filePath )
+			: 0;
+
+		if ( !$pageTimestamp && !$fileTimestamp ) {
 			return null;
 		}
 
+		if ( $pageTimestamp === 0 || $fileTimestamp > $pageTimestamp ) {
+			$content = file_get_contents( $filePath );
+			if ( !$content ) {
+				return null;
+			}
+
+			// save the revision, otherwise FormBuilder cannot
+			// return the related revision
+			$services = MediaWikiServices::getInstance();
+			$slotRoleRegistry = $services->getSlotRoleRegistry();
+			$modelId = $slotRoleRegistry
+				->getRoleHandler( SlotRecord::MAIN )
+				->getDefaultModel( $title );
+
+			$slots = [
+				[
+					'role' => SlotRecord::MAIN,
+					'model' => $modelId,
+					'text' => $content,
+				]
+			];
+
+			$errors = [];
+			self::importRevision( $title, $slots, $errors );
+			if ( count( $errors ) ) {
+			// "Invalid json:" . implode( PHP_EOL, $errors)
+				throw new ErrorPageError( 'jsonforms-json-error-title', 'jsonforms-json-error', [ $errors[0], $title->getFullText() ] );
+			}
+
+			return $content;
+		}
+
+		return self::getArticleContent( $title );
+	}
+
+	/**
+	 * Get the last revision timestamp of a page
+	 *
+	 * @param Title|MediaWiki\Title\Title $title
+	 * @param string $format Output format
+	 * @return string|null
+	 */
+	public static function getPageLastRevisionTimestamp( $title, $format = TS_MW ) {
 		$wikiPage = MediaWikiServices::getInstance()
 			->getWikiPageFactory()
 			->newFromTitle( $title );
@@ -1165,66 +875,62 @@ class JsonForms {
 		$schemaPath = self::getFullUrlOfNamespace( NS_JSONSCHEMA );
 		$VEForAll = false;
 		if (
-			ExtensionRegistry::getInstance()->isLoaded( "VEForAll" ) &&
+			ExtensionRegistry::getInstance()->isLoaded( 'VEForAll' ) &&
 			self::visualEditorIsEnabled( $user )
 		) {
 			$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
-			$userOptionsManager->setOption( $user, "visualeditor-enable", true );
+			$userOptionsManager->setOption( $user, 'visualeditor-enable', true );
 			$VEForAll = true;
-			$output->addModules( "ext.veforall.main" );
+			$output->addModules( 'ext.veforall.main' );
 		}
 
-		$groups = [ "sysop", "bureaucrat", "jsonforms-admin" ];
+		$groups = [ 'sysop', 'bureaucrat', 'jsonforms-admin' ];
 		$showOutdatedVersion =
-			empty( $GLOBALS["wgJsonFormsDisableVersionCheck"] ) &&
-			( $user->isAllowed( "jsonforms-canmanageschemas" ) ||
+			empty( $GLOBALS['wgJsonFormsDisableVersionCheck'] ) &&
+			( $user->isAllowed( 'jsonforms-canmanageschema' ) ||
 				count( array_intersect( $groups, self::getUserGroups( $user ) ) ) );
 
 		$config = array_merge(
 			[
-				"schemaPath" => $schemaPath,
+				'schemaPath' => $schemaPath,
+				'currentTitle' => $title->getFullText(),
 				// 'actionUrl' => SpecialPage::getTitleFor( 'VisualDataSubmit', $title->getPrefixedDBkey() )->getLocalURL(),
-				"isNewPage" =>
+				'isNewPage' =>
 					$title->getArticleID() === 0 || !$title->isKnown(),
 				// 'allowedMimeTypes' => $allowedMimeTypes,
-				"caneditdata" => $user->isAllowed( "jsonforms-caneditdata" ),
-				"canmanageschemas" => $user->isAllowed(
-					"jsonforms-canmanageschemas",
+				'caneditdata' => $user->isAllowed( 'jsonforms-caneditdata' ),
+				'canmanageschemas' => $user->isAllowed(
+					'jsonforms-canmanageschemas',
 				),
-				"canmanageforms" => $user->isAllowed(
-					"jsonforms-canmanageforms",
+				'canmanageforms' => $user->isAllowed(
+					'jsonforms-canmanageforms',
 				),
-				"contentModels" => array_flip( self::getContentModels() ),
-				"roleContentModelMap" => SlotHelper::getRoleContentModelMap(),
-				"contentModel" => $title->getContentModel(),
-				"VEForAll" => $VEForAll,
-				"captchaSiteKey" => $GLOBALS["wgJsonFormsReCaptchaSiteKey"],
+				'contentModels' => array_flip( self::getContentModels() ),
+				'roleContentModelMap' => SlotHelper::getRoleContentModelMap(),
+				'contentModel' => $title->getContentModel(),
+				'VEForAll' => $VEForAll,
+				'captchaSiteKey' => $GLOBALS['wgJsonFormsReCaptchaSiteKey'],
 
 				// @TODO or move to api
-				"jsonSlots" => SlotHelper::getJsonSlots(),
-				"slotRoles" => SlotHelper::getSlotRoles(),
-				"jsonContentModels" => SlotHelper::getJsonContentModels(),
+				'jsonSlots' => SlotHelper::getJsonSlots(),
+				'slotRoles' => SlotHelper::getSlotRoles(),
+				'jsonContentModels' => SlotHelper::getJsonContentModels(),
 
 				// 'maptiler-apikey' => $GLOBALS['wgJsonFormsMaptilerApiKey']
-				"jsonforms-show-notice-outdated-version" => $showOutdatedVersion,
+				'jsonforms-show-notice-outdated-version' => $showOutdatedVersion,
 			],
 			$config,
 		);
 
-		// if ( isset( $config['context'] ) && $config['context'] === 'parserfunction' ) {
-		// 	$pageFormUI = file_get_contents(  __DIR__ . '/schemas/PageFormUI.json');
-		// 	$config['pageFormUI'] = json_decode( $pageFormUI, true );
-		// 	$config['pageFormUI'] = self::processSchema( $output, $config['pageFormUI'] );
-		// }
-
+		// @TODO alternatively load the outer form here, since can be shared
 		$output->addJsConfigVars( [
 			// @see VEForAll ext.veforall.target.js -> getPageName
-			"wgPageFormsTargetName" => ( $title && $title->canExist()
+			'wgPageFormsTargetName' => ( $title && $title->canExist()
 				? $title
 				: TitleClass::newMainPage()
 			)->getFullText(),
 
-			"jsonforms" => $config,
+			'jsonforms' => $config,
 		] );
 	}
 
@@ -1238,12 +944,12 @@ class JsonForms {
 	public static function checkWritePermissions( $user, $title, &$errors ) {
 		$services = MediaWikiServices::getInstance();
 
-		$actions = [ "edit" ];
+		$actions = [ 'edit' ];
 		if ( !$title->isKnown() ) {
-			$actions[] = "create";
+			$actions[] = 'create';
 		}
 
-		if ( class_exists( "MediaWiki\Permissions\PermissionStatus" ) ) {
+		if ( class_exists( 'MediaWiki\Permissions\PermissionStatus' ) ) {
 			$status = new MediaWiki\Permissions\PermissionStatus();
 			foreach ( $actions as $action ) {
 				$user->authorizeWrite( $action, $title, $status );
@@ -1279,7 +985,7 @@ class JsonForms {
 		$namespace = $formattedNamespaces[$ns];
 
 		$schemaUrl = str_replace( '$1', "$namespace:", $wgArticlePath );
-		if ( method_exists( MediaWikiServices::class, "getUrlUtils" ) ) {
+		if ( method_exists( MediaWikiServices::class, 'getUrlUtils' ) ) {
 			// MW 1.39+
 			return MediaWikiServices::getInstance()
 				->getUrlUtils()
@@ -1295,19 +1001,19 @@ class JsonForms {
 	 */
 	private static function visualEditorIsEnabled( $user ) {
 		$services = MediaWikiServices::getInstance();
-		$veConfig = $services->getConfigFactory()->makeConfig( "visualeditor" );
+		$veConfig = $services->getConfigFactory()->makeConfig( 'visualeditor' );
 		$userOptionsLookup = $services->getUserOptionsLookup();
 		$isBeta =
-			$veConfig->has( "VisualEditorEnableBetaFeature" ) &&
-			$veConfig->get( "VisualEditorEnableBetaFeature" );
+			$veConfig->has( 'VisualEditorEnableBetaFeature' ) &&
+			$veConfig->get( 'VisualEditorEnableBetaFeature' );
 
 		return ( $isBeta
-			? $userOptionsLookup->getOption( $user, "visualeditor-enable" )
+			? $userOptionsLookup->getOption( $user, 'visualeditor-enable' )
 			: !$userOptionsLookup->getOption(
 				$user,
-				"visualeditor-betatempdisable",
+				'visualeditor-betatempdisable',
 			) ) &&
-			!$userOptionsLookup->getOption( $user, "visualeditor-autodisable" );
+			!$userOptionsLookup->getOption( $user, 'visualeditor-autodisable' );
 	}
 
 	/**
@@ -1416,12 +1122,10 @@ class JsonForms {
 	}
 
 	/**
-	 * @param string $titleText
+	 * @param Title $titleText
 	 * @return StdObj
 	 */
-	public static function getJsonArticle( $titleText ) {
-		$title = TitleClass::newFromText( $titleText );
-
+	public static function getJsonArticle( $title ) {
 		if ( !$title || !$title->isKnown() ) {
 			return new stdClass();
 		}
@@ -1437,6 +1141,28 @@ class JsonForms {
 
 	/**
 	 * @param Title|MediaWiki\Title\Title $title
+	 * @param int $revId
+	 * @param string|null $slot
+	 * @return string|null
+	 */
+	public static function getRevisionContent( $title, $revId, $slot = SlotRecord::MAIN ) {
+		$revision = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionByTitle( $title, $revId );
+
+		if ( !$revision ) {
+			return null;
+		}
+
+		$content = $revision->getContent( $slot );
+		if ( !$content ) {
+			return null;
+		}
+		return $content->getText();
+	}
+
+	/**
+	 * @param Title|MediaWiki\Title\Title $title
 	 * @return WikiPage|null
 	 */
 	public static function getWikiPage( $title ) {
@@ -1444,7 +1170,7 @@ class JsonForms {
 			return null;
 		}
 		// MW 1.36+
-		if ( method_exists( MediaWikiServices::class, "getWikiPageFactory" ) ) {
+		if ( method_exists( MediaWikiServices::class, 'getWikiPageFactory' ) ) {
 			return MediaWikiServices::getInstance()
 				->getWikiPageFactory()
 				->newFromTitle( $title );
@@ -1489,26 +1215,26 @@ class JsonForms {
 		$dbr = self::getDB( DB_REPLICA );
 
 		$conds = [
-			"page_namespace" => $namespace,
-			"page_is_redirect" => 0,
+			'page_namespace' => $namespace,
+			'page_is_redirect' => 0,
 		];
 
 		if ( !empty( $prefix ) ) {
 			$conds[] =
-				"page_title " . $dbr->buildLike( $prefix, $dbr->anyString() );
+				'page_title ' . $dbr->buildLike( $prefix, $dbr->anyString() );
 		}
 
 		$options = [
-			"LIMIT" => self::$queryLimit,
-			"ORDER BY" => "page_title",
-			"USE INDEX" => version_compare( MW_VERSION, "1.36", "<" )
-				? "name_title"
-				: "page_name_title",
+			'LIMIT' => self::$queryLimit,
+			'ORDER BY' => 'page_title',
+			'USE INDEX' => version_compare( MW_VERSION, '1.36', '<' )
+				? 'name_title'
+				: 'page_name_title',
 		];
 
 		$res = $dbr->select(
-			"page",
-			[ "page_namespace", "page_title", "page_id" ],
+			'page',
+			[ 'page_namespace', 'page_title', 'page_id' ],
 			$conds,
 			__METHOD__,
 			$options,
@@ -1549,8 +1275,8 @@ class JsonForms {
 		if ( !( $wikiPage instanceof WikiPage ) ) {
 			return;
 		}
-		if ( version_compare( MW_VERSION, "1.35", "<" ) ) {
-			$error = "";
+		if ( version_compare( MW_VERSION, '1.35', '<' ) ) {
+			$error = '';
 			$wikiPage->doDeleteArticle(
 				$reason,
 				false,
@@ -1573,7 +1299,7 @@ class JsonForms {
 			return TitleClass::newFromText( $titleStr );
 		}
 
-		$titleStr = preg_replace( '/#count\s*$/', "", $titleStr );
+		$titleStr = preg_replace( '/#count\s*$/', '', $titleStr );
 		$nsIndex = self::getRegisteredNamespace( $titleStr );
 		$title = TitleClass::newFromText( $titleStr, $nsIndex );
 
@@ -1584,25 +1310,25 @@ class JsonForms {
 		$dbr = self::getDB( DB_REPLICA );
 
 		$conds = [
-			"page_title REGEXP " . $dbr->addQuotes( $title->getDbKey() . "\d+" ),
-			"page_namespace" => $nsIndex,
+			'page_title REGEXP ' . $dbr->addQuotes( $title->getDbKey() . '\d+' ),
+			'page_namespace' => $nsIndex,
 		];
 
 		$options = [
-			"USE INDEX" => version_compare( MW_VERSION, "1.36", "<" )
-				? "name_title"
-				: "page_name_title",
-			"ORDER BY" => "substr_count DESC",
-			"LIMIT" => 1,
+			'USE INDEX' => version_compare( MW_VERSION, '1.36', '<' )
+				? 'name_title'
+				: 'page_name_title',
+			'ORDER BY' => 'substr_count DESC',
+			'LIMIT' => 1,
 		];
 
 		$row = $dbr->selectRow(
-			"page",
+			'page',
 			[
-				"page_title",
-				"SUBSTRING(page_title, " .
+				'page_title',
+				'SUBSTRING(page_title, ' .
 				( strlen( $title->getDbKey() ) + 1 ) .
-				") + 0 as substr_count",
+				') + 0 as substr_count',
 			],
 			$conds,
 			__METHOD__,
@@ -1612,7 +1338,7 @@ class JsonForms {
 		if ( $row !== false ) {
 			$titleStr .= (string)( (int)$row->substr_count + 1 );
 		} else {
-			$titleStr .= "1";
+			$titleStr .= '1';
 		}
 
 		return TitleClass::newFromText( $titleStr, $nsIndex );
@@ -1623,7 +1349,7 @@ class JsonForms {
 	 * @return int
 	 */
 	public static function getRegisteredNamespace( &$titleStr ) {
-		$arr = explode( ":", $titleStr, 2 );
+		$arr = explode( ':', $titleStr, 2 );
 		if ( count( $arr ) < 2 ) {
 			return NS_MAIN;
 		}
@@ -1637,7 +1363,7 @@ class JsonForms {
 		if ( $nsIndex === false ) {
 			return NS_MAIN;
 		}
-		$titleStr = implode( ":", $arr );
+		$titleStr = implode( ':', $arr );
 		return $nsIndex;
 	}
 
@@ -1646,7 +1372,7 @@ class JsonForms {
 	 * @return \Wikimedia\Rdbms\DBConnRef
 	 */
 	public static function getDB( $db ) {
-		if ( !method_exists( MediaWikiServices::class, "getConnectionProvider" ) ) {
+		if ( !method_exists( MediaWikiServices::class, 'getConnectionProvider' ) ) {
 			// @see https://gerrit.wikimedia.org/r/c/mediawiki/extensions/PageEncryption/+/1038754/comment/4ccfc553_58a41db8/
 			return MediaWikiServices::getInstance()
 				->getDBLoadBalancer()
@@ -1723,8 +1449,8 @@ class JsonForms {
 			),
 		);
 
-		if ( !in_array( "*", $userGroups ) ) {
-			$userGroups[] = "*";
+		if ( !in_array( '*', $userGroups ) ) {
+			$userGroups[] = '*';
 		}
 
 		self::$UserGroupsCache[$cacheKey] = $userGroups;
@@ -1738,6 +1464,12 @@ class JsonForms {
 	 */
 	public static function isAuthorized( $user, $refGroups ) {
 		$userGroups = self::getUserGroups( $user );
+
+		$groups = [ 'sysop', 'bureaucrat', 'jsonforms-admin' ];
+		if ( count( array_intersect( $groups, $userGroups ) ) ) {
+			return true;
+		}
+
 		return count( array_intersect( $refGroups, $userGroups ) ) > 0;
 	}
 
@@ -1767,12 +1499,12 @@ class JsonForms {
 		$ret = [];
 
 		$config = $context->getConfig();
-		$groupPermissions = $config->get( "GroupPermissions" );
-		$revokePermissions = $config->get( "RevokePermissions" );
-		$addGroups = $config->get( "AddGroups" );
-		$removeGroups = $config->get( "RemoveGroups" );
-		$groupsAddToSelf = $config->get( "GroupsAddToSelf" );
-		$groupsRemoveFromSelf = $config->get( "GroupsRemoveFromSelf" );
+		$groupPermissions = $config->get( 'GroupPermissions' );
+		$revokePermissions = $config->get( 'RevokePermissions' );
+		$addGroups = $config->get( 'AddGroups' );
+		$removeGroups = $config->get( 'RemoveGroups' );
+		$groupsAddToSelf = $config->get( 'GroupsAddToSelf' );
+		$groupsRemoveFromSelf = $config->get( 'GroupsRemoveFromSelf' );
 		$allGroups = array_unique(
 			array_merge(
 				array_keys( $groupPermissions ),
@@ -1785,7 +1517,7 @@ class JsonForms {
 		);
 		asort( $allGroups );
 
-		$lang = method_exists( Language::class, "getGroupName" )
+		$lang = method_exists( Language::class, 'getGroupName' )
 			// MW 1.38+
 			? $context->getLanguage()
 			: null;
@@ -1801,7 +1533,7 @@ class JsonForms {
 					: UserGroupMembership::getGroupName( $groupname );
 
 			$groupnameLocalized =
-				$groupnameLocalized === "*" ? "all" : $groupnameLocalized;
+				$groupnameLocalized === '*' ? 'all' : $groupnameLocalized;
 
 			$ret[$groupname] = $groupnameLocalized;
 		}
@@ -1844,12 +1576,12 @@ class JsonForms {
 		}
 
 		// Check permissions
-		$permStatus = $mp->authorizeMove( $user, $reason ?? "" );
+		$permStatus = $mp->authorizeMove( $user, $reason ?? '' );
 		if ( !$permStatus->isOK() ) {
 			return false;
 		}
 
-		$status = $mp->move( $user, $reason ?? "", $createRedirect, $changeTags );
+		$status = $mp->move( $user, $reason ?? '', $createRedirect, $changeTags );
 
 		return $status->isOK();
 	}
@@ -1866,21 +1598,21 @@ class JsonForms {
 
 		$wikiPage = new WikiPage( $title );
 		if ( !$wikiPage ) {
-			$errors[] = "cannot create wikipage";
+			$errors[] = 'cannot create wikipage';
 			return false;
 		}
 
 		$slotsData = [];
 		foreach ( $slots as $value ) {
-			$slotsData[$value["role"]] = $value;
+			$slotsData[$value['role']] = $value;
 		}
 
 		if ( !array_key_exists( SlotRecord::MAIN, $slotsData ) ) {
 			$slotsData = array_merge(
 				[
 					SlotRecord::MAIN => [
-						"model" => "wikitext",
-						"text" => "",
+						'model' => 'wikitext',
+						'text' => '',
 					],
 				],
 				$slotsData,
@@ -1898,15 +1630,15 @@ class JsonForms {
 		// $content = $this->makeContent( $title, $revId, $revisionInfo );
 		// $revision->setContent( SlotRecord::MAIN, $content );
 		foreach ( $slotsData as $role => $value ) {
-			if ( empty( $value["text"] ) && $role !== SlotRecord::MAIN ) {
+			if ( empty( $value['text'] ) && $role !== SlotRecord::MAIN ) {
 				continue;
 			}
 
 			if (
-				!empty( $value["model"] ) &&
-				in_array( $value["model"], $contentModels )
+				!empty( $value['model'] ) &&
+				in_array( $value['model'], $contentModels )
 			) {
-				$modelId = $value["model"];
+				$modelId = $value['model'];
 			} elseif ( $slotRoleRegistry->getRoleHandler( $role ) ) {
 				$modelId = $slotRoleRegistry
 					->getRoleHandler( $role )
@@ -1925,12 +1657,23 @@ class JsonForms {
 			}
 
 			if ( !isset( $modelId ) ) {
-				$errors[] = "cannot determine content model for role $role";
+				$errors[] = 'cannot determine content model for role $role';
 				continue;
 			}
 
+			if ( $modelId === 'json' ) {
+				$validator = new JsonValidator();
+				if ( !$validator->validate( $value['text'] ) ) {
+					$errors[] = $validator->getError();
+					if ( $role === SlotRecord::MAIN ) {
+						return;
+					}
+					continue;
+				}
+			}
+
 			$content = ContentHandler::makeContent(
-				$value["text"],
+				$value['text'],
 				$title,
 				$modelId,
 			);

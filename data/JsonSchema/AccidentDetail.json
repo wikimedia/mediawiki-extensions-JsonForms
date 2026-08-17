@@ -1,5 +1,5 @@
 {
-	"$id": "AccidentDetail",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:AccidentDetail",
 	"type": "object",
 	"x-layout": "paged",
 	"title": "AccidentDetail",

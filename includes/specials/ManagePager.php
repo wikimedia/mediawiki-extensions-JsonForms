@@ -143,9 +143,22 @@ class ManagePager extends TablePager {
 
 			case 'actions':
 				// if ( $this->parentClass->par === 'Forms' ) {
-					$link = '<span class="mw-ui-button mw-ui-progressive">edit</span>';
+					// $link = '<span class="mw-ui-button mw-ui-progressive">edit</span>';
 					$query = [ 'action' => 'edit', 'pageid' => $row->page_id ];
-					$formatted = LinkerClass::link( $this->parentClass->localTitle, $link, [], $query );
+					// $formatted = LinkerClass::link( $this->parentClass->localTitle, $link, [], $query );
+
+					$formatted = new \OOUI\ButtonWidget( [
+						'href' => wfAppendQuery(
+							$this->parentClass->localTitle->getLocalURL(),
+							$query,
+						),
+						'label' => $this->msg(
+							'jsonforms-manage-form-button-edit',
+						)->text(),
+						'icon' => 'edit',
+						'infusable' => true,
+						'flags' => [ 'progressive' ],
+					] );
 				// }
 				break;
 
@@ -170,6 +183,12 @@ class ManagePager extends TablePager {
 		$tables['page_alias'] = 'page';
 		$fields = [ 'page_namespace', 'page_title', 'page_id' ];
 		$conds['page_namespace'] = $this->parentClass->namespace;
+
+		$search = $this->request->getVal( 'search' );
+		if ( !empty( $search ) ) {
+			$any = $dbr->anyString();
+			$conds[] = 'page_title ' . $dbr->buildLike( $any, str_replace( ' ', '_', $search ), $any );
+		}
 
 		$ret['tables'] = $tables;
 		$ret['fields'] = $fields;

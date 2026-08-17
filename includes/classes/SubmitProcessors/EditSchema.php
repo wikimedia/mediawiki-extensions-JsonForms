@@ -24,211 +24,105 @@
 
 namespace MediaWiki\Extension\JsonForms\SubmitProcessors;
 
-use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\Extension\JsonForms\ResultWrapper;
 use MediaWiki\Extension\JsonForms\SubmitForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
-use stdClass;
 
 class EditSchema extends SubmitForm {
+
 	/**
 	 * @param array $data
 	 * @return array
 	 */
 	public function processData( $data ) {
 		$services = MediaWikiServices::getInstance();
-
 		$errors = [];
 
-		// Convert array access ($data['key']) to object access ($data->key)
-
-		if ( empty( $data->options->title ) ) {
-			return ResultWrapper::failure(
-				$this->context->msg( "jsonforms-special-submit-notitle" ),
-			);
+		$targetTitle = $this->getTargetTitleFromData( $data, $errors );
+		if ( !$targetTitle ) {
+			return ResultWrapper::failure( $errors[0] );
 		}
 
-		$titleStr = $data->options->title;
-		$targetTitle = TitleClass::newFromText( $titleStr );
-
-		if ( empty( $targetTitle ) ) {
-			return ResultWrapper::failure(
-				$this->context->msg( "jsonforms-special-submit-notitle" )->text(),
-			);
+		if ( !$this->validatePageAccess( $targetTitle, $data, $errors ) ) {
+			return ResultWrapper::failure( $errors[0] );
 		}
 
-		if (
-			!\JsonForms::checkWritePermissions(
-				$this->user,
-				$targetTitle,
-				$errors,
-			)
-		) {
-			return ResultWrapper::failure(
-				$this->context
-					->msg( "jsonforms-special-submit-permission-error" )
-					->text(),
-			);
-		}
-
-		if ( !$targetTitle->isKnown() ) {
-			return ResultWrapper::failure(
-				$this->context
-					->msg(
-						"jsonforms-special-edit-title-unknown",
-						$targetTitle->getDBKey(),
-					)
-					->parse(),
-			);
-		}
-
-		$deleteSchema = empty( $data->metadata->schemaName );
+		$schemaName = $data->metadata->schemaName;
+		$deleteSchema = empty( $schemaName );
 
 		$wikiPage = \JsonForms::getWikiPage( $targetTitle );
 
-		$metadataPrevious = \JsonForms::getMetadata( $wikiPage );
-		$targetSlot = null;
-
-		if (
-			$metadataPrevious &&
-			isset( $metadataPrevious->slots ) &&
-			is_object( $metadataPrevious->slots )
-		) {
-			$metadataPreviousSlots = $metadataPrevious->slots;
-
-			if ( property_exists( $metadataPreviousSlots, SLOT_ROLE_JSONFORMS_DATA ) ) {
-				$targetSlot = SLOT_ROLE_JSONFORMS_DATA;
-
-			} elseif (
-				property_exists( $metadataPreviousSlots, SlotRecord::MAIN ) &&
-				( $metadataPreviousSlots->{SlotRecord::MAIN}->schema ?? null ) !== null
-			) {
-				$targetSlot = SlotRecord::MAIN;
-
-			} else {
-				$targetSlot = null;
-			}
-		}
-
-		if ( !$targetSlot ) {
-			$targetSlot = SLOT_ROLE_JSONFORMS_DATA;
-		}
-
-		$isDataOnly = $targetSlot === SlotRecord::MAIN;
-
 		if ( !$wikiPage ) {
 			return ResultWrapper::failure(
-				$this->context
-					->msg( "jsonforms-special-submit-cannot-create-wikipage" )
-					->text(),
+				$this->context->msg( 'jsonforms-special-submit-cannot-create-wikipage' )->text()
 			);
 		}
 
-		// @set title for further use of parseWikitext
 		$this->context->setTitle( $targetTitle );
 		$this->setOutput( $this->context->getOutput() );
 
-		$slots = [];
-		$slots_ = \JsonForms::getSlots( $wikiPage );
-		foreach ( $slots_ as $role => $slot ) {
-			if ( $role === SLOT_ROLE_JSONFORMS_METADATA ) {
-				continue;
-			}
-			$content = \JsonForms::getSlotContent( $wikiPage, $role );
+		$previousMetadata = \JsonForms::getMetadata( $wikiPage );
 
-			$slots[$role] = [
-				"model" => $slot->getModel(),
-				"content" => $content,
-			];
-		}
+		$targetSlot = $this->getTargetSlotFromMetadata( $previousMetadata );
 
-		// Initialize metadata as object
-		$metadata = $metadataPrevious
-			? clone $metadataPrevious
-			: new stdClass();
+		$isDataOnly = $targetSlot === SlotRecord::MAIN;
+
+		$contentModelMainSlot = $this->getContentModel( $data, $targetTitle );
+		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata, $deleteSchema );
 
 		if ( $deleteSchema ) {
-			unset( $slots[$targetSlot] );
+			$slots[$targetSlot] = [
+				'content' => null,
+			];
 			if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
 				unset( $metadata->slots->{$targetSlot} );
 			}
 		}
 
+		$dataToSave = null;
 		if ( !$deleteSchema ) {
-			$slots[$targetSlot] = [
-				"model" => "json",
-				"content" => json_encode( $data->value ),
-			];
-		}
+			$slotMetadata = &$metadata->slots->{$targetSlot};
+			$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
 
-		// Ensure slots property exists as an object
-		if ( !isset( $metadata->slots ) || !is_object( $metadata->slots ) ) {
-			$metadata->slots = new stdClass();
-		}
-
-		if ( !$deleteSchema ) {
-			// Ensure the target slot exists
-			if ( !isset( $metadata->slots->{$targetSlot} ) ) {
-				$metadata->slots->{$targetSlot} = new stdClass();
-			}
-			$metadata->slots->{$targetSlot}->model = "json";
-			$metadata->slots->{$targetSlot}->schema = $data->metadata->schemaName;
-		}
-
-		if (
-			!empty( $data->options->categories ) &&
-			is_array( $data->options->categories )
-		) {
-			$metadata->categories = $data->options->categories;
-		}
-
-		if ( !$deleteSchema && !$isDataOnly ) {
-			// Ensure the data slot exists
-			if ( !isset( $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA} ) ) {
-				$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA} = new stdClass();
+			if ( count( $errors ) ) {
+				return ResultWrapper::failure( $errors[0] );
 			}
 
-			$metadataKeys = [
-				"show_infobox" => "showInfobox",
-				"infobox_position" => "infoboxPosition",
-				"infobox_template" => "infoboxTemplate",
-			];
+			$dataToSave = $this->postProcessJsonData(
+				$data->value,
+				$data->structuredValue,
+				$slotMetadata,
+				$targetSlot,
+				$wikiPage,
+				$errors
+			);
 
-			foreach ( $metadataKeys as $key => $value ) {
-				if ( property_exists( $data->metadata, $key ) ) {
-					$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$value =
-						$data->metadata->$key;
-				} else {
-					unset( $metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->$value );
-				}
+			if ( count( $errors ) ) {
+				return ResultWrapper::failure( $errors[0] );
 			}
-
-			$metadata->slots->{SLOT_ROLE_JSONFORMS_DATA}->processedSchema =
-				$data->processedSchema;
 		}
+
+		$mainSlotContent = null;
+		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema );
 
 		if ( empty( (array)$metadata->slots ) ) {
 			unset( $metadata->slots );
 		}
 
-		if ( !empty( (array)$metadata ) ) {
-			$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
-				"model" => "json",
-				"content" => json_encode( $metadata ),
-			];
-		}
+		$isNewPage = !$wikiPage->exists();
 
 		$processedData = [
-			"slots" => $slots,
-			"targetTitle" => $targetTitle,
-			"isNewPage" => false,
-			"metadata" => $metadata,
+			'slots' => $slots,
+			'targetTitle' => $targetTitle,
+			'isNewPage' => $isNewPage,
+			'metadata' => $metadata,
+			'updateStrategy' => 'merge',
 		];
 
 		$returnData = [
-			"targetTitle" => $targetTitle->getFullText(),
-			"returnUrl" => $targetTitle->getLocalURL(),
+			'targetTitle' => $targetTitle->getFullText(),
+			'returnUrl' => $targetTitle->getLocalURL(),
 		];
 
 		return ResultWrapper::success( [ $processedData, $returnData ] );

@@ -1,5 +1,5 @@
 {
-	"$id": "Person",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Pets",
 	"type": "object",
 	"properties": {
 		"has_pet": {

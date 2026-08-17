@@ -1,5 +1,5 @@
 {
-	"$id": "Delivery",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Delivery",
 	"type": "object",
 	"properties": {
 		"has_delivery": {

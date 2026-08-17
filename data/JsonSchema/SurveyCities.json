@@ -1,5 +1,5 @@
 {
-	"$id": "SurveyCities",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SurveyCities",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "European Countries Statistics Data",
 	"description": "Nested statistical data per country, main city, and employment status",
@@ -17,7 +17,7 @@
 		},
 		"leaf": {
 			"type": "object",
-			"layout": "column",
+			"x-layout": "column",
 			"properties": {
 				"population": {
 					"type": "number",
@@ -40,7 +40,7 @@
 		},
 		"employmentGroup": {
 			"type": "object",
-			"layout": "row",
+			"x-layout": "row",
 			"properties": {
 				"employed": {
 					"$ref": "#/definitions/leaf",
@@ -58,7 +58,7 @@
 		},
 		"countryRow": {
 			"type": "object",
-			"layout": "row",
+			"x-layout": "row",
 			"properties": {},
 			"required": []
 		}

@@ -1,7 +1,7 @@
 {
-	"$id": "Payment",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Payment",
 	"title": "Payment Method",
-	"x-input": "OO.ui.ButtonSelectWidget",
+	"x-switch": "OO.ui.ButtonSelectWidget",
 	"oneOf": [
 		{
 			"title": "None",

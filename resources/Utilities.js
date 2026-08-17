@@ -72,6 +72,10 @@
 		);
 	};
 
+	Utilities.prototype.clone = function ( val ) {
+		return JSON.parse( JSON.stringify( val ) );
+	};
+
 	// attach instance
 	JsonForms.Utilities = new Utilities();
 }() );

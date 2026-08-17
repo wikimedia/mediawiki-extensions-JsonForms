@@ -53,7 +53,13 @@ JsonFormsSlotManager.prototype.onFormButton = function ( action, editor ) {
 				JsonForms.Alert( 'there are errors' );
 				return;
 			} else {
-				this.submitForm().catch( ( err ) => console.error( 'API error:', err ) );
+				editor.disable();
+				this.submitForm()
+					.then( () => editor.enable() )
+					.catch( ( err ) => {
+						console.error( 'API error:', err );
+						editor.enable();
+					} );
 			} }
 			break;
 	}
@@ -98,24 +104,21 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 	const formEditor = this.editor.getEditor( 'root.editor' );
 
 	const innerEditor = formEditor.input.editor;
-	console.log( 'innerEditor', innerEditor );
+	// console.log( 'innerEditor', innerEditor );
 
-	const vars = {};
 	const structuredValue = innerEditor.getStructuredValue();
-	// console.log('structuredValue', structuredValue);
 
-	for ( const path in structuredValue ) {
-		vars[ path ] = structuredValue[ path ].value;
-	}
+	const formDescriptor = { edit: this.editPage };
 
 	// *** submission data are arbitrary and depend on the
 	// SubmitProcessor
 	const data = {
 		value: innerEditor.getValue(),
 		structuredValue,
+		formDescriptor,
 		options: {
-			...this.editor.getEditor( 'root.footer' ).getValue(),
-			edit: this.editPage
+			// summary, minor
+			...this.editor.getEditor( 'root.footer' ).getValue()
 		},
 		config: mw.config.get( 'jsonforms' ),
 
@@ -123,7 +126,7 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 		processor: 'SlotManager'
 	};
 
-	console.log( 'data', data );
+	// console.log( 'data', data );
 
 	const payload = {
 		data: JSON.stringify( data ),
@@ -146,7 +149,7 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 						),
 						type: 'error'
 					};
-					resolve( result );
+					resolve( false );
 					const nonModalDialog = new JsonForms.NonModalDialog();
 					nonModalDialog.open( config );
 				} else {
@@ -155,6 +158,7 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 					} else {
 						window.location.href = result.returnUrl;
 					}
+					resolve( result );
 				}
 			} )
 			.fail( ( thisRes ) => {
@@ -173,13 +177,12 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 			this.el = el;
 			const data = $( el ).data().formData;
 
-			console.log( 'data', data );
+			// console.log( 'data', data );
 
-			const jsonForms = new JsonFormsSlotManager( el, data );
+			const jsonFormsSlotManager = new JsonFormsSlotManager( el, data );
+			await jsonFormsSlotManager.initialize();
+			const editor = jsonFormsSlotManager.createDefaultEditor();
 
-			await jsonForms.initialize();
-
-			const editor = jsonForms.createDefaultEditor();
 			const editorOnChange = async ( editor ) => {
 			// console.log('editorOnChange');
 
@@ -224,7 +227,7 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 								// @TODO replace with setValue
 								// after updating the editor's setValue method
 								roleEditor.setStateValue( role );
-								roleEditor.input.setValue( role );
+								// roleEditor.input.setValue( role );
 
 								watching.push( path );
 							}

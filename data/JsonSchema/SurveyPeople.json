@@ -1,5 +1,5 @@
 {
-	"$id": "SurveyPeople",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SurveyPeople",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "People Statistics Table",
 	"description": "Data schema with districts as top-level rows, gender as row subgroups, and education × employment as columns",
@@ -17,7 +17,7 @@
 		},
 		"columnGroup": {
 			"type": "object",
-			"layout": "column",
+			"x-layout": "column",
 			"properties": {
 				"employed": {
 					"$ref": "#/definitions/input",
@@ -32,7 +32,7 @@
 		},
 		"rowGroup": {
 			"type": "object",
-			"layout": "row",
+			"x-layout": "row",
 			"properties": {
 				"male": {
 					"$ref": "#/definitions/rowSubgroup",
@@ -55,7 +55,7 @@
 		},
 		"rowSubgroup": {
 			"type": "object",
-			"layout": "row",
+			"x-layout": "row",
 			"properties": {
 				"with university degree": {
 					"$ref": "#/definitions/columnGroup",

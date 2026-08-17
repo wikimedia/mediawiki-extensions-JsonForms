@@ -22,81 +22,122 @@
 
 /* stylelint-disable block-no-empty */
 /* stylelint-disable declaration-no-important */
-/* stylelint-disable no-descending-specificity */
-.jsonforms-form {
+.jsonforms-form {}
+
+.jsonforms-editor .jsonforms-optionslist-container {
+	display: flex !important;
+	align-items: stretch;
+	gap: 2px;
+}
+
+.jsonforms-debug-input {
+	font-size: 12px;
+	font-family: monospace;
+}
+
+/* with move handler */
+.jsonforms-editor .jsonforms-optionslist-container :nth-child(2) {
+	flex-grow: 1;
+	max-width: 50em;
+}
+
+.jsonforms-editor .jsonforms-field-removable > .oo-ui-widget:first-child  {
+	flex-grow: 1;
+	max-width: 50em;
+}
+
+.jsonforms-editor .jsonforms-optionslist-move {
+	cursor: grab;
+	width: 32px;
+	display: flex;
+	align-items: center;
+}
+
+.jsonforms-editor .jsonforms-list-errors {
+	margin-left: 3em;
+	margin-top: .5em;
 }
 
 /* pageforms */
 .jsonforms-form.jsonforms-form-inline {
 	width: 600px;
-	background: #fff;
-	box-shadow: 0 1px 5px rgba( 0, 0, 0, 0.2 ), 0 2px 2px rgba( 0, 0, 0, 0.14 ), 0 3px 1px -2px rgba( 0, 0, 0, 0.12 );
+	background: white;
+	box-shadow: 0 1px 5px rgba(0,0,0,0.2),0 2px 2px rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12);
 }
 
 /* special pages, etc. */
-.jsonforms-form:not( .jsonforms-form-inline ):not( .jsonforms-form-popup ) {
-	background: #fff;
+.jsonforms-form:not(.jsonforms-form-inline):not(.jsonforms-form-popup) {
+	background: white;
 	border: 1px solid #ccc;
 }
 
-.jsonforms-form .jsonforms-innerform {
-	/* padding: 0; */
-}
-
-.jsonforms-form .jsonforms-innerform-options,
-.jsonforms-form-dialog .jsonforms-innerform-options {
-	/* padding: 12px; */
-}
-
-/* @TODO find a better solution */
-.jsonforms-form .jsonforms-innerform > div > .oo-ui-widget > .oo-ui-layout > .oo-ui-menuLayout-content > .oo-ui-layout > .oo-ui-layout {
+.jsonforms-editor .oo-ui-menuLayout-hideMenu:not(.jsonforms-treewidget)
+	> .oo-ui-menuLayout-content
+	> .oo-ui-bookletLayout-stackLayout
+	> .oo-ui-panelLayout {
 	padding: 0;
 }
 
-/* @TODO find a better solution */
-.jsonforms-form .oo-ui-menuLayout-content > .oo-ui-bookletLayout-stackLayout > .oo-ui-panelLayout:has( > .compact ) {
-	padding-top: 0;
-}
-
-.jsonforms-form .jsonforms-outerform-footer-buttons {
-	border: 0;
-	padding-left: 0;
-}
-
-.jsonforms-form .jsonforms-outerform-captcha {
-	margin-top: 8px;
+.jsonforms-editor .oo-ui-menuLayout-hideMenu.jsonforms-treewidget
+	> .oo-ui-menuLayout-content
+	> .oo-ui-bookletLayout-stackLayout
+	> .oo-ui-panelLayout {
+	padding: 12px;
 }
 
 .jsonforms-form .jsonforms-outerform-buttons {
-	border: 0;
+	border: none;
 	padding-left: 0;
 	padding-right: 0;
 }
 
+.jsonforms-form .jsonforms-outerform-buttons .oo-ui-fieldsetLayout-group {
+	display: flex;
+	gap: 10px;
+}
+
+.jsonforms-editor .oojsplus-ui-expandable-panel .expander-button {
+	background-color: #00184907;
+}
+
+.jsonforms-editor .oojsplus-ui-expandable-panel {
+	margin: 12px 0;
+    border: 1px solid #ccc;
+}
+
+.jsonforms-editor .jsonforms-expandable-panel-area {
+	padding: 12px;
+}
+
+.jsonforms-editor .expander-button {
+	margin-top: 0 !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
 .jsonforms-form .jsonforms-innerform-editor {
-	border: 0;
+	/* border: none; */
 }
 
 .jsonforms-form .jsonforms-outerform-header {
 	font-weight: bold;
-	border-top: 0;
+	border-top: none;
 	padding: 0.8em;
-	border: 0;
-	background: linear-gradient( #efefef, #fff, #fff );
+	/* border: none; */
+	/* background: linear-gradient( #efefef, white,  white ); */
+	background: #eaeeff;
+	border-bottom: 1px solid #a2a9b1;
 }
 
 .jsonforms-form .jsonforms-outerform-header .jsonforms-header {
 }
 
-.jsonforms-form .jsonforms-outerform-header .jsonforms-description {
-	color: #808080;
-	font-style: italic;
-	font-size: smaller;
-}
-
-.jsonforms-form .jsonforms-outerform-header .jsonforms-description a {
-	color: #808080;
-	text-decoration: underline;
+.jsonforms-enum-value-container {
+	font-family: monospace;
+	white-space: pre;
+	background: #eee;
+	padding: 12px;
+	border: 1px solid #ccc;
 }
 
 .jsonforms-button-white-color a {
@@ -105,13 +146,8 @@
 
 .jsonforms-form .jsonforms-outerform-footer {
 	background: #eaecf0;
-	border-top: 0;
+	border-top: none;
 	padding: 1em 1em 1.5em 1em;
-}
-
-.jsonforms-form .jsonforms-outerform-buttons .oo-ui-fieldsetLayout-group {
-	display: flex;
-	gap: 10px;
 }
 
 .jsonforms-dialogs-non-modal {
@@ -124,87 +160,95 @@
 }
 
 .jsonforms-editdata-preview {
-	position: relative;
-	padding: 1rem;
-	margin: 1rem 0;
-
-	/* Visual */
-	background: #fff;
-	border: 1px solid #e0e0e0;
-	border-radius: 8px;
-	box-shadow: 0 2px 4px rgba( 0, 0, 0, 0.1 );
-
-	/* Interaction */
-	cursor: pointer;
-	transition: all 0.2s ease;
-
-	/* Disable selection */
-	user-select: none;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
+  position: relative;
+  padding: 1rem;
+  margin: 1rem 0;
+  
+  /* Visual */
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  /* Interaction */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* Disable selection */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .jsonforms-editdata-preview:hover {
-	transform: translateY( -2px );
-	box-shadow: 0 4px 12px rgba( 0, 0, 0, 0.15 );
-	border-color: #c0c0c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: #c0c0c0;
 }
 
 /* Blurred overlay - always present */
 .jsonforms-editdata-preview::after {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba( 255, 255, 255, 0.2 );
-	backdrop-filter: blur( 1px );
-	border-radius: 8px;
-	z-index: 1;
-	pointer-events: none;
-	content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(1px);
+  border-radius: 8px;
+  z-index: 1;
+  pointer-events: none;
+  content: "";
 }
 
 /* Text appears only on hover - DOES NOT cover entire container */
 .jsonforms-editdata-preview:hover::before {
-	content: 'This is a preview, edit data after insert';
-	white-space: pre;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate( -50%, -50% );
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 1rem;
-	font-weight: bold;
-	text-align: center;
-	color: #fff;
-	background: rgba( 0, 0, 0, 0.85 );
-	padding: 24px;
-	border-radius: 8px;
-	z-index: 2;
-	pointer-events: none;
-	font-family: system-ui, -apple-system, sans-serif;
-	max-width: 80%;
-	box-shadow: 0 4px 12px rgba( 0, 0, 0, 0.2 );
+  content: "This is a preview, edit data after insert";
+  white-space: pre;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 24px;
+  border-radius: 8px;
+  z-index: 2;
+  pointer-events: none;
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 80%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .jsonforms-dialogs-non-modal .oo-ui-window {
 	border: 1px solid #a2a9b1;
-	box-shadow: 0 0 4px 0 rgba( 0, 0, 0, 0.25 );
+	box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
 }
 
-.jsonforms-editor .oo-ui-menuLayout.oo-ui-menuLayout-hideMenu > .oo-ui-menuLayout-menu {
+.jsonforms-editor
+	.oo-ui-menuLayout.oo-ui-menuLayout-hideMenu
+	> .oo-ui-menuLayout-menu {
 	display: none;
+}
+
+.jsonforms-editor .jsonforms-formcontrol,
+.jsonforms-editor .jsonforms-formcontrol-compact
+{
+	text-align: left;
 }
 
 .jsonforms-editor .jsonforms-formcontrol {
 	padding: 10px 0;
 }
 
-.jsonforms-editor .jsonforms-formcontrol .jsonforms-field-container {
+.jsonforms-editor .jsonforms-formcontrol .jsonforms-field-removable {
 	display: flex !important;
 	align-items: stretch;
 	gap: 2px;
@@ -256,7 +300,12 @@
 	justify-content: space-between;
 }
 
-.jsonforms-container-scroll {
+.json-editor-table-cell {
+	text-align: center;
+}
+
+.jsonforms-editor-container {
+	overflow: auto;
 }
 
 .jsonforms-editor .oo-ui-selectWidget {
@@ -288,7 +337,15 @@
 }
 
 .oo-ui-indicator-subtract {
-	background-image: url( ./subtract.svg );
+	background-image: url(./icons/subtract.svg);
+}
+
+.oo-ui-icon-update {
+	background-image: url(./icons/update.svg);
+}
+
+.oo-ui-icon-configure {
+	background-image: url(./icons/configure.svg);
 }
 
 .jsonforms-overview_holder {
@@ -305,6 +362,10 @@
   text-decoration: underline !important;
 }
 */
+
+.jsonforms-array-default-container > div {
+	margin-bottom: 20px;
+}
 
 .jsonforms-controls h3 {
 	margin: 0;
@@ -374,7 +435,6 @@
 	padding: 0;
 }
 
-/* stylelint-disable-next-line selector-max-id */
 #jsonforms-schemabuilder-treewidget > .oo-ui-menuLayout-content {
 	min-width: 280px;
 }
@@ -403,6 +463,11 @@
 	border-collapse: collapse;
 	width: 100%;
 	background-color: #f7f7f7;
+}
+
+.jsonforms-editor .jsonforms-survey-table th,
+.jsonforms-editor .jsonforms-survey-table td {
+	text-align: center;
 }
 
 .jsonforms-editor .jsonforms-survey-header-cell {
@@ -482,207 +547,207 @@
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-0 {
-	padding-left: calc( 0 * var( --oo-outline-indent ) );
+	padding-left: calc(0 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-0.oo-ui-iconElement {
-	padding-left: calc( 0 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(0 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-0.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 0 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-0.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(0 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-1 {
-	padding-left: calc( 1 * var( --oo-outline-indent ) );
+	padding-left: calc(1 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-1.oo-ui-iconElement {
-	padding-left: calc( 1 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(1 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-1.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 1 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-1.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(1 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-2 {
-	padding-left: calc( 2 * var( --oo-outline-indent ) );
+	padding-left: calc(2 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-2.oo-ui-iconElement {
-	padding-left: calc( 2 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(2 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-2.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 2 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-2.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(2 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-3 {
-	padding-left: calc( 3 * var( --oo-outline-indent ) );
+	padding-left: calc(3 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-3.oo-ui-iconElement {
-	padding-left: calc( 3 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(3 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-3.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 3 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-3.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(3 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-4 {
-	padding-left: calc( 4 * var( --oo-outline-indent ) );
+	padding-left: calc(4 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-4.oo-ui-iconElement {
-	padding-left: calc( 4 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(4 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-4.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 4 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-4.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(4 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-5 {
-	padding-left: calc( 5 * var( --oo-outline-indent ) );
+	padding-left: calc(5 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-5.oo-ui-iconElement {
-	padding-left: calc( 5 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(5 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-5.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 5 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-5.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(5 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-6 {
-	padding-left: calc( 6 * var( --oo-outline-indent ) );
+	padding-left: calc(6 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-6.oo-ui-iconElement {
-	padding-left: calc( 6 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(6 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-6.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 6 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-6.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(6 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-7 {
-	padding-left: calc( 7 * var( --oo-outline-indent ) );
+	padding-left: calc(7 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-7.oo-ui-iconElement {
-	padding-left: calc( 7 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(7 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-7.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 7 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-7.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(7 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-8 {
-	padding-left: calc( 8 * var( --oo-outline-indent ) );
+	padding-left: calc(8 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-8.oo-ui-iconElement {
-	padding-left: calc( 8 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(8 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-8.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 8 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-8.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(8 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-9 {
-	padding-left: calc( 9 * var( --oo-outline-indent ) );
+	padding-left: calc(9 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-9.oo-ui-iconElement {
-	padding-left: calc( 9 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(9 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-9.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 9 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-9.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(9 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-10 {
-	padding-left: calc( 10 * var( --oo-outline-indent ) );
+	padding-left: calc(10 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-10.oo-ui-iconElement {
-	padding-left: calc( 10 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(10 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-10.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 10 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-10.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(10 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-11 {
-	padding-left: calc( 11 * var( --oo-outline-indent ) );
+	padding-left: calc(11 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-11.oo-ui-iconElement {
-	padding-left: calc( 11 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(11 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-11.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 11 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-11.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(11 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-12 {
-	padding-left: calc( 12 * var( --oo-outline-indent ) );
+	padding-left: calc(12 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-12.oo-ui-iconElement {
-	padding-left: calc( 12 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(12 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-12.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 12 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-12.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(12 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-13 {
-	padding-left: calc( 13 * var( --oo-outline-indent ) );
+	padding-left: calc(13 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-13.oo-ui-iconElement {
-	padding-left: calc( 13 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(13 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-13.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 13 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-13.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(13 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-14 {
-	padding-left: calc( 14 * var( --oo-outline-indent ) );
+	padding-left: calc(14 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-14.oo-ui-iconElement {
-	padding-left: calc( 14 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(14 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-14.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 14 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-14.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(14 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-15 {
-	padding-left: calc( 15 * var( --oo-outline-indent ) );
+	padding-left: calc(15 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-15.oo-ui-iconElement {
-	padding-left: calc( 15 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(15 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-15.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 15 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-15.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(15 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-16 {
-	padding-left: calc( 16 * var( --oo-outline-indent ) );
+	padding-left: calc(16 * var(--oo-outline-indent));
 }
-
 .jsonforms-editor .oo-ui-outlineOptionWidget-level-16.oo-ui-iconElement {
-	padding-left: calc( 16 * var( --oo-outline-indent ) + var( --oo-icon-extra ) );
+	padding-left: calc(16 * var(--oo-outline-indent) + var(--oo-icon-extra));
 }
-
-.jsonforms-editor .oo-ui-outlineOptionWidget-level-16.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: calc( 16 * var( --oo-outline-indent ) );
+.jsonforms-editor
+	.oo-ui-outlineOptionWidget-level-16.oo-ui-iconElement
+	.oo-ui-iconElement-icon {
+	left: calc(16 * var(--oo-outline-indent));
 }
 
 .jsonforms-editor .jsonforms-rating {
@@ -702,16 +767,20 @@
 	margin: 0;
 	overflow: hidden;
 	cursor: pointer;
-	background: url( ./rating-stars.svg ) no-repeat top left;
+	background: url(./icons/rating-stars.svg) no-repeat top left;
 }
 
-.jsonforms-editor .jsonforms-rating:not( :hover ) input:indeterminate + label,
-.jsonforms-editor .jsonforms-rating:not( :hover ) input:checked ~ input + label,
+.jsonforms-editor .jsonforms-rating.disabled label {
+	background-position: -48px 0 !important;
+}
+
+.jsonforms-editor .jsonforms-rating:not(:hover) input:indeterminate + label,
+.jsonforms-editor .jsonforms-rating:not(:hover) input:checked ~ input + label,
 .jsonforms-editor .jsonforms-rating input:hover ~ input + label {
 	background-position: -48px 0;
 }
 
-.jsonforms-editor .jsonforms-rating:not( :hover ) input:focus-visible + label {
+.jsonforms-editor .jsonforms-rating:not(:hover) input:focus-visible + label {
 	background-position: -96px 0;
 }
 
@@ -731,3 +800,4 @@
 	padding-left: 0.9375em;
 	line-height: 1;
 }
+

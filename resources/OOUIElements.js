@@ -58,6 +58,7 @@
 			flags: 'destructive',
 			modes: [ 'validate-delete', 'submit-single-delete' ]
 		},
+		// { action: 'help',icon: 'help', modes: ['validate', 'validate-delete',  'submit', 'submit-delete','submit-single', 'submit-single-delete' ], label: 'Help' },
 		{
 			action: 'validate',
 			modes: [ 'validate', 'validate-delete' ],
@@ -84,7 +85,6 @@
 		},
 
 		// https://gerrit.wikimedia.org/r/plugins/gitiles/oojs/ui/+/refs/heads/master/demos/classes/BookletDialog.js
-
 		{
 			label: 'close',
 			flags: [ 'safe', 'close' ],
@@ -92,7 +92,8 @@
 				'validate',
 				'submit-single',
 				'validate-delete',
-				'submit-single-delete'
+				'submit-single-delete',
+				'none'
 			]
 		}
 	];
@@ -214,6 +215,8 @@ SimpleDialog.prototype.getSetupProcess = function (data) {
 	function NonModalDialog( config ) {}
 
 	NonModalDialog.prototype.open = function ( dialogConfig ) {
+		$( '.jsonforms-dialogs-non-modal' ).remove();
+
 		const manager = new OO.ui.WindowManager( {
 			modal: false,
 			forceTrapFocus: true,
@@ -231,12 +234,10 @@ SimpleDialog.prototype.getSetupProcess = function (data) {
 		windows[ name ] = new SimpleDialog( dialogConfig );
 
 		manager.addWindows( windows );
-
 		manager.openWindow( name );
 	};
 
 	// ALERT
-
 	function Alert( text, options, callback ) {
 		const windowManager = createWindowManager();
 

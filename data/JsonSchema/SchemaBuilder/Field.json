@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "SchemaBuilder/Field",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/Field",
 	"title": "Field",
 	"type": "object",
 	"properties": {

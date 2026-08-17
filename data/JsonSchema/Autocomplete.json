@@ -1,5 +1,5 @@
 {
-	"$id": "Autocomplete",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Autocomplete",
 	"type": "object",
 	"title": "Autocomplete example",
 	"properties": {

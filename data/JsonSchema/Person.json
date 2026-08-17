@@ -1,5 +1,5 @@
 {
-	"$id": "Person",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Person",
 	"$ref": "JsonSchema:BasicPerson",
 	"type": "object",
 	"x-layout": "booklet",
@@ -64,10 +64,12 @@
 				"type": "object",
 				"title": "Car",
 				"additionalProperties": true,
-				"x-additional-properties-ui": {
-					"label": "New property",
-					"schema": "JsonSchema:MetaSchema/NewProperty"
-				},
+				"x-additional-properties-ui": [
+					{
+						"label": "New property",
+						"schema": "JsonSchema:SchemaBuilder/NewPropertyWithOptions"
+					}
+				],
 				"properties": {
 					"manufacturer": {
 						"type": "string"

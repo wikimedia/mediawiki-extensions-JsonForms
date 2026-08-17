@@ -1,5 +1,5 @@
 {
-	"$id": "BasicPerson",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:BasicPerson",
 	"title": "Person",
 	"type": "object",
 	"properties": {

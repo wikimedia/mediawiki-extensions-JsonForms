@@ -1,7 +1,6 @@
 {
 	"type": "object",
-	"$id": "Core/NewArticleRegular",
-	"@type": "JsonForms default schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/NewArticleRegular",
 	"x-compact": true,
 	"x-css-class": "jsonforms-outerform",
 	"required": [],
@@ -35,17 +34,49 @@
 				"autosize": true,
 				"rows": 6
 			}
+		},
+		"editor_suneditor": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "html",
+					"x-input": "SunEditor"
+				}
+			}			
+		},
+		"editor_easymde": {
+			"type": "string",
+			"x-compact": true,
+			"x-format": "textarea",
+			"x-input": "jsonforms",
+			"x-input-config": {
+				"schema": {
+					"type": "string",
+					"x-format": "markdown",
+					"x-input": "EasyMDE"
+				}
+			}
 		}
 	},
 	"properties": {
 		"form": {
-			"title": "",
+			"x-no-title": true,
 			"description": "Regular wiki article (only main slot)",
+			"x-default-properties": ["title","content_model", "editor", "content", "categories"],
 			"properties": {
 				"title": {
 					"type": "string",
 					"minLength": 1,
 					"x-input": "mw.widgets.TitleInputWidget"
+				},
+				"role": {
+					"type": "string",
+					"x-hidden": true,
+					"default": "main"
 				},
 				"content_model": {
 					"type": "string",
@@ -84,13 +115,14 @@
 		"footer": {
 			"x-compact": true,
 			"x-css-class": "jsonforms-outerform-footer",
+			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
 					"type": "string"
 				},
 				"minor": {
 					"type": "boolean",
-					"title": "",
+					"x-no-title": true,
 					"description": "",
 					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
 					"x-description-format": "wikitext",
@@ -103,7 +135,6 @@
 					"type": "object",
 					"x-layout": "horizontal",
 					"x-compact": true,
-					"x-css-class": "jsonforms-outerform-footer-buttons",
 					"properties": {
 						"submit": {
 							"type": "null",

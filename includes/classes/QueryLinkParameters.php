@@ -7,7 +7,15 @@ use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 /**
  * QueryLink-specific parameter processor
  */
-class QueryLinkParameters extends ProcessParameters {
+class QueryLinkParameters extends ParametersProcessor {
+
+	protected ?object $titleObject = null;
+	protected string $text = '';
+	protected array $options = [];
+	protected array $attributes = [];
+	protected bool $isButtonLink = false;
+	protected array $values = [];
+
 	protected array $defaultParameters = [
 		'class-attr-name' => [
 			'label' => 'jsonforms-parserfunction-querylink-class-attr-name-label',
@@ -27,26 +35,17 @@ class QueryLinkParameters extends ProcessParameters {
 		],
 	];
 
-	protected ?object $titleObject = null;
-	protected string $text = '';
-	protected array $attributes = [];
-	protected bool $isButtonLink = false;
-
 	public function __construct( array $argv = [], bool $isButtonLink = false ) {
 		$this->isButtonLink = $isButtonLink;
 		parent::__construct( $argv );
-		$this->assignKnownAttributes();
+
+		$this->buildOptionsSchema();
+
+		$this->values = $this->getValues();
+		$this->options = $this->getOptions();
+
 		$this->resolveLinkInfo();
 		$this->applyExtraAttributes();
-	}
-
-	protected function assignKnownAttributes(): void {
-		foreach ( [ 'class-attr-name', 'target-attr-name' ] as $key ) {
-			if ( isset( $this->query[$this->options[$key]] ) ) {
-				$this->options[$this->options[$key]] = $this->query[$this->options[$key]];
-				unset( $this->query[$this->options[$key]] );
-			}
-		}
 	}
 
 	protected function resolveLinkInfo(): void {
@@ -64,16 +63,12 @@ class QueryLinkParameters extends ProcessParameters {
 			$this->text = $this->values[0];
 		}
 
-		$this->attributes = [];
-		$classAttrKey = $this->options['class-attr-name'] ?? null;
-		if ( $classAttrKey && !empty( $this->options[$classAttrKey] ) ) {
-			$this->attributes['class'] = $this->options[$classAttrKey];
-		}
+		$this->attributes = array_filter( [
+			'class' => $this->options[$this->options['class-attr-name']] ?? null,
+			'target' => $this->options[$this->options['target-attr-name']] ?? null,
+		], static fn ( $value ) => $value !== null );
 
-		$targetAttrKey = $this->options['target-attr-name'] ?? null;
-		if ( $targetAttrKey && !empty( $this->options[$targetAttrKey] ) ) {
-			$this->attributes['target'] = $this->options[$targetAttrKey];
-		}
+		unset( $this->options['class-attr-name'], $this->options['target-attr-name'] );
 	}
 
 	protected function applyExtraAttributes(): void {
@@ -81,7 +76,11 @@ class QueryLinkParameters extends ProcessParameters {
 			$this->attributes['class'] = 'mw-ui-button mw-ui-progressive mw-ui-small';
 		}
 
-		if ( !$this->isButtonLink && !empty( $this->attributes['target'] ) && $this->attributes['target'] === '_blank' ) {
+		if (
+			!$this->isButtonLink &&
+			!empty( $this->attributes['target'] ) &&
+			$this->attributes['target'] === '_blank'
+		) {
 			$existing = $this->attributes['class'] ?? '';
 			$this->attributes['class'] = trim( $existing . ' external text' );
 		}

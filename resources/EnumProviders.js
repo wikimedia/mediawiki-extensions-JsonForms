@@ -6,15 +6,103 @@
 ( function () {
 	function EnumProviders() {}
 
+	EnumProviders.prototype.sameLevelProperties = function () {
+		return {
+			source: ( jseditor, { item, watched } ) => {
+				if ( jseditor.isMetaSchema ) {
+					const levelEditor = jseditor.parentEditor.parentEditor;
+					const value = levelEditor.getValue();
+					return Object.keys( value.properties || {} );
+				}
+			}
+		};
+	};
+
+	EnumProviders.prototype.allProperties = function () {
+		return {
+			source: ( jseditor, { item, watched } ) => {
+			}
+		};
+	};
+
+	EnumProviders.prototype.metaSchemaArrayFormatToInput = function () {
+		return {
+			source: ( jseditor, { item, watched } ) => {
+				const format = watched[ 'x-format' ] || watched.format;
+
+				// called before watch is aailable, return null
+				// to keep the default value
+				if ( !format ) {
+					return null;
+				}
+
+				switch ( format ) {
+					case 'text':
+					case 'strings':
+						return [ 'OO.ui.TagMultiselectWidget', 'OO.ui.MenuTagMultiselectWidget', 'OO.ui.CheckboxMultiselectInputWidget', 'ButtonMultiselectWidget' ];
+
+					case 'title':
+					case 'titles':
+						return [ 'mw.widgets.TitlesMultiselectWidget' ];
+
+					case 'user':
+					case 'users':
+						return [ 'mw.widgets.UsersMultiselectWidget' ];
+
+					case 'category':
+					case 'categories':
+						return [ 'mw.widgets.CategoryMultiselectWidget' ];
+
+				}
+			},
+			filter: ( jseditor, { item, watched } ) => true,
+			title: ( jseditor, { item, watched } ) => item.text,
+			value: ( jseditor, { item, watched } ) => item.value
+		};
+	};
+
+	EnumProviders.prototype.metaSchemaIntegerFormatToInput = function () {
+		return {
+			source: ( jseditor, { item, watched } ) => {
+				const format = watched[ 'x-format' ] || watched.format;
+
+				// called before watch is aailable, return null
+				// to keep the default value
+				if ( !format ) {
+					return null;
+				}
+
+				switch ( format ) {
+					case 'number':
+						return [ 'OO.ui.NumberInputWidget' ];
+
+					case 'range':
+						return [ 'RangeWidget' ];
+
+					case 'rating':
+						return [ 'RatingWidget' ];
+				}
+			},
+			filter: ( jseditor, { item, watched } ) => true,
+			title: ( jseditor, { item, watched } ) => item.text,
+			value: ( jseditor, { item, watched } ) => item.value
+		};
+	};
+
 	EnumProviders.prototype.metaSchemaFormatToInput = function () {
 		return {
 			source: ( jseditor, { item, watched } ) => {
 				const format = watched[ 'x-format' ] || watched.format;
-				// console.log('watched', watched);
+
+				// called before watch is aailable, return null
+				// to keep the default value
+				if ( !format ) {
+					return null;
+				}
 
 				switch ( format ) {
 					case 'autocomplete':
-						return [ 'autocomplete', 'LookupElement' ];
+						return [ 'Autocomplete', 'LookupElement' ];
 
 					case 'captcha':
 						return [ 'captcha' ];
@@ -23,8 +111,6 @@
 						return [ 'ColorPicker' ];
 
 					case 'date-time':
-						return [ 'mw.widgets.DateTimeInputWidget' ];
-
 					case 'time':
 						return [ 'mw.widgets.DateTimeInputWidget' ];
 
@@ -32,10 +118,13 @@
 						return [ 'mw.widgets.DateInputWidget' ];
 
 					case 'json':
-						return [ 'JsonEditor', 'jsonForms' ];
+						return [ 'JsonEditor', 'JsonForms' ];
 
 					case 'hidden':
 						return [ 'OO.ui.HiddenInputWidget' ];
+
+					case 'file':
+						return [ 'OO.ui.SelectFileWidget' ];
 
 					case 'month':
 						return [ 'month' ];
@@ -51,13 +140,11 @@
 
 					case 'text':
 						return [
-							'mw.widgets.TitleInputWidget',
-							'mw.widgets.UserInputWidget',
-							'OO.ui.ButtonSelectWidget',
-							'OO.ui.ComboBoxInputWidget',
+							'OO.ui.TextInputWidget',
 							'OO.ui.DropdownInputWidget',
 							'OO.ui.RadioSelectInputWidget',
-							'OO.ui.TextInputWidget'
+							'OO.ui.ButtonSelectWidget',
+							'OO.ui.ComboBoxInputWidget'
 						];
 
 					case 'email':
@@ -78,11 +165,29 @@
 					case 'textarea':
 						return [ 'OO.ui.MultilineTextInputWidget' ];
 
+					case 'html':
+						return [ 'SunEditor' ];
+
+					case 'markdown':
+						return [ 'EasyMDE' ];
+
 					case 'url':
 						return [ 'OO.ui.TextInputWidget' ];
 
+					case 'title':
+					case 'pagename':
+						return [
+							'mw.widgets.TitleInputWidget'
+						];
+
+					case 'user':
+						return [
+							'mw.widgets.UserInputWidget'
+						];
+
 					case 'uuid':
 						return [ 'uuid' ];
+
 					case 'week':
 						return [ 'week' ];
 
@@ -131,6 +236,7 @@
 		return {
 			source: ( jseditor, { item, watched } ) => {
 				const role = ( watched && watched.role ) || 'main';
+				// console.log('contentModelByRole role',role,roleContentModelMap)
 
 				switch ( role ) {
 					case 'main':
@@ -175,33 +281,32 @@
 		// key/value object, this is also supported
 		return {
 			source: ( editor, { item, watched } ) => {
-				// console.log('editorByContentModelSource',editor)
-				// console.log('watched',watched)
-
+				// console.log('editorByContentModel watched',editor.path, watched)
 				const jsonformsConfig = mw.config.get( 'jsonforms' );
-
 				const contentModel = ( watched && ( watched.content_model || watched.freetext_content_model ) ) || 'wikitext';
+
+				// console.log('editorByContentModel contentModel',editor.path, contentModel)
 
 				let options = [ 'source' ];
 				switch ( contentModel ) {
 					case 'wikitext':
-						options = {
+						return {
 							wikieditor: 'WikiEditor',
 							visualeditor: 'VisualEditor'
 						};
-						break;
 
-					/*
-		case 'css':
-		case 'javascript':
-				options = { codeeditor: 'codeEditor' };
-			break;
+					case 'html':
+						return {
+							suneditor: 'SunEditor',
+							source: 'source'
+						};
 
-		case 'json':
-			// , 'JsonForms'
-			options = { codeeditor: 'codeEditor', jsoneditor: 'JSON Editor' };
-			break;
-*/
+					case 'markdown':
+						return {
+							easymde: 'EasyMDE',
+							source: 'source'
+						};
+
 					default:
 						if ( jsonformsConfig.jsonContentModels.includes( contentModel ) ) {
 							// , jsonforms: 'JsonForms',  codeeditor: 'codeEditor',
@@ -211,8 +316,6 @@
 
 				// @TODO complete codeEditor widget
 				// delete options.codeeditor;
-
-				// console.log('options', options);
 				return options;
 			}
 		};

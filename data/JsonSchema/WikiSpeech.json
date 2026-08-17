@@ -14,7 +14,7 @@
 					"title": "",
 					"description": "",
 					"x-format": "text",
-					"x-input": "OO.ui.TextInputWidget",
+					"x-input": "OO.ui.DropdownInputWidget",
 					"x-control-config": {
 						"align": "left",
 						"classes": [],
@@ -24,6 +24,7 @@
 						"invisibleLabel": false
 					},
 					"x-padding": true,
+					"default": "",
 					"x-enum-provider": "wikiList",
 					"x-data": {
 						"article": "Template:Languages"
@@ -34,7 +35,7 @@
 					"title": "",
 					"description": "",
 					"x-format": "text",
-					"x-input": "OO.ui.TextInputWidget",
+					"x-input": "OO.ui.DropdownInputWidget",
 					"x-input-config": {},
 					"x-control-config": {
 						"align": "left",
@@ -46,6 +47,7 @@
 					},
 					"x-padding": true,
 					"x-enum-provider": "wikiList",
+					"default": "",
 					"x-data": {
 						"article": "Template:TTS models"
 					}

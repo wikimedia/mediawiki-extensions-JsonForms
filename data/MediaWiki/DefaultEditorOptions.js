@@ -16,7 +16,7 @@ export default {
 				let pending = null;
 
 				function parseBulletList(content) {
-					const regex = /^\*\s+(.+)$/gm;
+					const regex = /^\*\s*(.+)$/gm;
 					const items = [];
 					let match;
 

@@ -119,7 +119,7 @@ class SchemaUtils {
 	public static function parseAppendPath( $path ) {
 		foreach ( self::$appendSymbols as $symbol ) {
 			$symbolLen = strlen( $symbol );
-			if ( substr( $path, -symbolLen ) === $symbol ) {
+			if ( substr( $path, -$symbolLen ) === $symbol ) {
 				return [ true, substr( $path, 0, -$symbolLen ) ];
 			}
 		}

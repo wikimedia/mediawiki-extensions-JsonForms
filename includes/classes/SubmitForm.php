@@ -1165,6 +1165,14 @@ class SubmitForm {
 			// a dot shouldn't be appended here, so it's a safe check
 			[ $_, $edit_jsonpath ] = SchemaUtils::parseAppendPath( $edit_jsonpath );
 
+			$stringEndsWith = static function ( $str, $suffix ) {
+				return substr( $str, -strlen( $suffix ) ) === $suffix;
+			};
+
+			if ( $shouldAppend && !$stringEndsWith( $edit_jsonpath, '.items' ) ) {
+				$edit_jsonpath = $edit_jsonpath . '.items';
+			}
+
 			$schemas = new stdClass();
 			foreach ( $data->structuredValue->schemas as $jsonPath => $schema ) {
 				$schemas->{$edit_jsonpath . ( $jsonPath ? '.' . $jsonPath : '' )} = $schema;
@@ -1177,6 +1185,10 @@ class SubmitForm {
 			}
 
 			$slotMetadata->jsonPaths = $slotMetadata->jsonPaths ?? new stdClass();
+
+			// add base path
+			$slotMetadata->jsonPaths->$editPath = $edit_jsonpath;
+
 			foreach ( $data->structuredValue->jsonPaths as $path => $jsonPath ) {
 				$appendJsonPath = $edit_jsonpath . ( $jsonPath ? '.' . $jsonPath : '' );
 				$newPath = $editPath . ( $path ? '.' . $path : '' );

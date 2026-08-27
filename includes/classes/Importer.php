@@ -165,16 +165,15 @@ class Importer {
 
 		$parts[] = $baseName;
 
-		$parts = implode( '/', $parts );
+		$pagename = implode( '/', $parts );
+		$pagename = ( $this->callbackPagename )( $pagename );
 
-		$parts = ( $this->callbackPagename )( $parts );
-
-		$ret = $namespace . ':' . $parts;
+		$ret = $namespace . ':' . $pagename;
 
 		$title = TitleClass::newFromText( $ret );
 
 		// $title->getLocalURL( [ 'action' => 'raw' ] );
-		$this->filenameMap[$parts] = $this->makeTitle( $title );
+		$this->filenameMap[$pagename] = $this->makeTitle( $title );
 
 		return $ret;
 	}
@@ -189,34 +188,61 @@ class Importer {
 	}
 
 	/**
-	 * @param string $filename
+	 * @param string $currentPath
+	 * @param string $value
+	 * @return string
+	 */
+	private function resolvePath( $currentPath, $value ) {
+		$currentParts = $currentPath === '.' ? [] : explode( '/', rtrim( $currentPath, '/' ) );
+		$valueParts = explode( '/', $value );
+
+		foreach ( $valueParts as $part ) {
+			if ( $part === '..' ) {
+				if ( !empty( $currentParts ) ) {
+					array_pop( $currentParts );
+				}
+			} elseif ( $part !== '' && $part !== '.' ) {
+				$dotPos = strrpos( $part, '.' );
+				if ( $dotPos !== false ) {
+					$part = substr( $part, 0, $dotPos );
+				}
+				$currentParts[] = $part;
+			}
+		}
+
+		return implode( '/', $currentParts );
+	}
+
+	/**
+	 * @param string $titleStr
 	 * @param string $text
 	 * @return array
 	 */
-	private function updateRefs( $filename, $text ) {
+	private function updateRefs( $titleStr, $text ) {
 		$schema = json_decode( $text, false );
 
 		if ( $schema === false ) {
-			$this->errors[] = "cannot decode '$filename'";
+			$this->errors[] = "cannot decode '$titleStr'";
 			return $text;
 		}
 
-		$thisClass = $this;
+		$parts = explode( ':', $titleStr, 2 );
+		$titleStr = isset( $parts[1] ) ? $parts[1] : '';
+		$currentPath = dirname( $titleStr );
 
-		$callback = static function ( &$parent, $key, $value, $pathArr ) use ( $thisClass ) {
+		$thisClass = $this;
+		$callback = static function ( &$parent, $key, $value, $pathArr ) use ( $thisClass, $currentPath ) {
 			if ( $key !== '$ref' || !is_string( $value ) ) {
 				return;
 			}
 
-			$filename_ = explode( '.', $value, 2 );
-			$value = $filename_[0];
-
 			$value = ( $thisClass->callbackRefs )( $value );
+			$mapKey = $thisClass->resolvePath( $currentPath, $value );
 
 			if ( !empty( $value ) &&
-				array_key_exists( $value, $thisClass->filenameMap )
+				array_key_exists( $mapKey, $thisClass->filenameMap )
 			) {
-				$parent->$key = $thisClass->filenameMap[$value];
+				$parent->{'$ref'} = $thisClass->filenameMap[$mapKey];
 			}
 		};
 

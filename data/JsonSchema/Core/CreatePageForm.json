@@ -452,6 +452,12 @@
 					"default": true,
 					"description": "Remove empty properties from the data"
 				},
+				"required_evaluates_non_empty": {
+					"title": "required evaluates non empty",
+					"type": "boolean",
+					"default": false,
+					"description": "Considers required properties with empty values as missing properties"
+				},
 				"remove_false_properties": {
 					"title": "remove false properties",
 					"type": "boolean",

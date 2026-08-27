@@ -54,12 +54,10 @@ class ImportData extends Maintenance {
 		$prefix = '';
 
 		$callbackRefs = static function ( $value ) {
-			$value = str_replace( '../', '', $value );
 			return str_replace( '.schema', '', $value );
 		};
 
 		$callbackPagename = static function ( $value ) {
-			$value = str_replace( '../', '', $value );
 			return str_replace( '.schema', '', $value );
 		};
 

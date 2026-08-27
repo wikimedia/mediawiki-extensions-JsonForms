@@ -8,6 +8,7 @@ export default {
 	lazy_properties_threshold: 6,
 	remove_empty_properties: false,
 	remove_false_properties: false,
+	required_evaluates_non_empty: false,
 	debug: false,
 	callbacks: {
 		enum_providers: {

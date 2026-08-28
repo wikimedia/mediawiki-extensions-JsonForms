@@ -181,7 +181,26 @@ export default {
 			},
 		},
 		template: {},
-		button: {},
+		button: {
+			submit: function (editor) {
+				const jsonEditor = editor.jsoneditor;
+				const jsonForm = jsonEditor.options.jsonFormsInstance;
+				const validation = jsonEditor.validate();
+				if (!validation.length) {
+					editor.disable();
+					const optionsEditor = jsonForm.getEditor('root.form.options');
+					jsonForm
+						.submitForm(jsonEditor, optionsEditor)
+						.then(() => editor.enable())
+						.catch((err) => {
+							console.error('API error:', err);
+							editor.enable();
+						});
+				} else {
+					JsonForms.Alert('there are errors');
+				}
+			},
+		},
 		upload: {},
 		converters: {},
 	},

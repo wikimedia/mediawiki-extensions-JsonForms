@@ -99,6 +99,7 @@ class FormBuilder {
 		}
 
 		$editTitle = $this->getEditTitle();
+
 		if ( !$editTitle || !$editTitle->isKnown() ) {
 			return;
 		}
@@ -123,6 +124,10 @@ class FormBuilder {
 		$isCreateAction = property_exists( $this->formDescriptor, 'action' ) &&
 			$this->formDescriptor->action === 'create';
 
+		if ( $isCreateAction ) {
+			$this->formDescriptor->edit = null;
+		}
+
 		return !empty( $this->formDescriptor->edit ) && !$isCreateAction;
 	}
 
@@ -132,6 +137,9 @@ class FormBuilder {
 	 * @return Title|null
 	 */
 	private function getEditTitle() {
+		if ( !$this->formDescriptor->edit ) {
+			return null;
+		}
 		return TitleClass::newFromText( $this->formDescriptor->edit );
 	}
 

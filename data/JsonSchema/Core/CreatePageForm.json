@@ -15,7 +15,8 @@
 			"width",
 			"title",
 			"hide_title"
-		]
+		],
+		"infobox": ["show_infobox", "infobox_position", "infobox_template"]
 	},
 	"properties": {
 		"name": {
@@ -39,7 +40,7 @@
 			"default": "",
 			"enum": ["create", "edit", "none"],
 			"description": "\"none\" should only be used when the submitted data is handled by a callback declared in [[MediaWiki:DefaultEditorOptions]]",
-			"x-description-format": "wikitext"	
+			"x-description-format": "wikitext"
 		},
 		"edit": {
 			"type": "string",
@@ -258,47 +259,41 @@
 				"value": ""
 			}
 		},
-		"infobox": {
-			"type": "object",
-			"x-show": true,
+		"show_infobox": {
+			"type": "boolean",
+			"title": "Show Infobox",
+			"description": "Whether to show an infobox on the target page",
+			"default": true,
 			"x-dependency": {
 				"path": "slot",
 				"op": "!=",
 				"value": "main"
+			}
+		},
+		"infobox_position": {
+			"type": "string",
+			"title": "Infobox position",
+			"enum": ["right", "left", "top", "bottom"],
+			"default": "right",
+			"x-dependency": {
+				"path": "show_infobox",
+				"op": "==",
+				"value": true
+			}
+		},
+		"infobox_template": {
+			"type": "string",
+			"title": "Infobox template",
+			"description": "Template to use (leave empty for automatic generation)",
+			"default": "",
+			"x-input": "mw.widgets.TitleInputWidget",
+			"x-input-config": {
+				"namespace": 10
 			},
-			"properties": {
-				"show_infobox": {
-					"type": "boolean",
-					"title": "Show Infobox",
-					"description": "Whether to show an infobox on the target page",
-					"default": true
-				},
-				"infobox_position": {
-					"type": "string",
-					"title": "Infobox position",
-					"enum": ["right", "left", "top", "bottom"],
-					"default": "right",
-					"x-dependency": {
-						"path": "show_infobox",
-						"op": "==",
-						"value": true
-					}
-				},
-				"infobox_template": {
-					"type": "string",
-					"title": "Infobox template",
-					"description": "Template to use (leave empty for automatic generation)",
-					"default": "",
-					"x-input": "mw.widgets.TitleInputWidget",
-					"x-input-config": {
-						"namespace": 10
-					},
-					"x-dependency": {
-						"path": "show_infobox",
-						"op": "==",
-						"value": true
-					}
-				}
+			"x-dependency": {
+				"path": "show_infobox",
+				"op": "==",
+				"value": true
 			}
 		},
 		"display_path": {
@@ -323,9 +318,27 @@
 				"view": "inline"
 			}
 		},
-		"hide_title": {
+		"hide_header": {
 			"type": "boolean",
-			"title": "Hide form title",
+			"title": "Hide form header",
+			"description": "",
+			"default": false,
+			"x-dependency": {
+				"view": "inline"
+			}
+		},
+		"hide_footer": {
+			"type": "boolean",
+			"title": "Hide form footer",
+			"description": "",
+			"default": false,
+			"x-dependency": {
+				"view": "inline"
+			}
+		},
+		"no_frame": {
+			"type": "boolean",
+			"title": "Hide form frame",
 			"description": "",
 			"default": false,
 			"x-dependency": {

@@ -249,7 +249,11 @@ class JsonForms {
 		}
 
 		if ( $formDescriptor->view !== 'popup' ) {
-			$css_classes[] = 'jsonforms-form-inline';
+			if ( $formDescriptor->no_frame !== true ) {
+				$css_classes[] = 'jsonforms-form-inline';
+			} else {
+				$css_classes[] = 'jsonforms-form-no-frame';
+			}
 
 		} else {
 			$css_classes[] = 'jsonforms-form-popup';
@@ -506,12 +510,10 @@ class JsonForms {
 		// necessary only if content model is wikitext
 		$wikiPage = self::getWikiPage( $title );
 		if ( $wikiPage->getContentModel() === CONTENT_MODEL_WIKITEXT ) {
-			// $jsonData = self::getJsonData( $title );
-			$context = RequestContext::getMain();
-			$data = self::getMetadata( $context, $wikiPage );
-			if ( $data && !empty( $data['categories'] ) ) {
+			$data = self::getMetadata( $wikiPage );
+			if ( $data && !empty( $data->categories ) ) {
 				foreach ( $ret as $key => $category ) {
-					if ( !in_array( $category, $data['categories'] ) ) {
+					if ( !in_array( $category, $data->categories ) ) {
 						unset( $ret[$key] );
 					}
 				}

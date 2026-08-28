@@ -108,6 +108,11 @@ JsonFormsPageForm.prototype.adjustFormSchema = function () {
 		JsonForms.Utilities.removeArrayItem( required, 'title' );
 	} else {
 		required.push( 'title' );
+		if ( this.formDescriptor.hide_header === true || this.formDescriptor.no_frame === true ) {
+			this.formDescriptor.hide_header = false;
+			this.formDescriptor.no_frame = false;
+			console.warn( '"hide_header" and "no_frame" options in formDescriptor require a known title' );
+		}
 	}
 
 	if ( !formDescriptor.captcha ) {
@@ -136,20 +141,22 @@ JsonFormsPageForm.prototype.adjustFormSchema = function () {
 		delete buttons.goback;
 	}
 
-	if ( formDescriptor.hide_title === true ) {
-		delete ret.properties.header.title;
-	}
-
 	return ret;
 };
 
-JsonFormsPageForm.prototype.addPopupButtonInfo = function ( jsonEditor ) {
+JsonFormsPageForm.prototype.handleFooter = function ( jsonEditor ) {
+	const footerEditor = jsonEditor.getEditor( 'root.footer' );
+	if ( this.formDescriptor.hide_footer === true || this.formDescriptor.no_frame === true ) {
+		$( footerEditor.container ).remove();
+	}
+};
+
+JsonFormsPageForm.prototype.handleHeader = function ( jsonEditor ) {
 	const headerEditor = jsonEditor.getEditor( 'root.header' );
 
-	$header = $( headerEditor.container ).find( '.jsonforms-header:first' );
-	if ( this.formDescriptor.hide_title === true ) {
-		$header.remove();
-		$( headerEditor.container ).removeClass( [ 'jsonforms-outerform-header', 'jsonforms-panel-border' ] );
+	if ( this.formDescriptor.hide_header === true || this.formDescriptor.no_frame === true ) {
+		$( headerEditor.container ).remove();
+		return;
 	}
 
 	const popupButtonInfo = this.createPopupButtonInfo();
@@ -170,7 +177,9 @@ JsonFormsPageForm.prototype.addPopupButtonInfo = function ( jsonEditor ) {
 };
 
 JsonFormsPageForm.prototype.initButtons = function ( jsonEditor ) {
-	this.addPopupButtonInfo( jsonEditor );
+	if ( this.formDescriptor.no_frame === true ) {
+		return;
+	}
 
 	const optionsEditor = jsonEditor.getEditor( 'root.form.options' );
 	const validateButton = jsonEditor.getEditor( 'root.footer.buttons.validate' );
@@ -239,7 +248,11 @@ JsonFormsPageForm.prototype.createDefaultEditor = async function ( config = {} )
 		// this is returned as resolved promise
 		// return JsonFormsPageForm.super.prototype.createDefaultEditor.call(this);
 		const editor = this.createEditor( this.el, config );
-		editor.on( 'ready', this.initButtons.bind( this ) );
+		editor.on( 'ready', ( editor ) => {
+			this.handleHeader( editor );
+			this.handleFooter( editor );
+			this.initButtons( editor );
+		} );
 		return editor;
 	}
 
@@ -622,14 +635,10 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 	const metadata = {};
 	const metadataKeys = [ 'show_infobox', 'infobox_position', 'infobox_template' ];
 
-	if ( !formDescriptor.infobox ) {
-		formDescriptor.infobox = {};
-	}
-
-	for ( const i of metadataKeys ) {
-		if ( formDescriptor.infobox[ i ] ) {
-			metadata[ i ] = formDescriptor.infobox[ i ];
-			delete formDescriptor.infobox[ i ];
+	for ( const key of metadataKeys ) {
+		if ( formDescriptor[ key ] ) {
+			metadata[ key ] = formDescriptor[ key ];
+			delete formDescriptor[ key ];
 		}
 	}
 
@@ -693,9 +702,16 @@ resolve()
 						JsonForms.Alert( config.htmlMessage );
 					}
 				} else {
-					if ( !formDescriptor.return ) {
+					if ( formDescriptor.return_url ) {
+						formDescriptor.return = 'url';
+
+					} else if ( formDescriptor.return_page ) {
+						formDescriptor.return = 'article';
+
+					} else if ( !formDescriptor.return ) {
 						formDescriptor.return = 'target';
 					}
+
 					switch ( formDescriptor.return ) {
 						case 'none':
 							{
@@ -715,6 +731,7 @@ resolve()
 						case 'target':
 						case 'article':
 						case 'url':
+						default:
 							if ( result.returnUrl === window.location.href ) {
 								window.location.reload();
 							} else {

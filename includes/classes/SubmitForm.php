@@ -465,8 +465,8 @@ class SubmitForm {
 		// Edit/update modes
 		if ( $targetTitle->isKnown() &&
 			isset( $data->formDescriptor ) &&
-			 empty( $data->formDescriptor->edit ) &&
-			 $data->formDescriptor->overwrite_existing_article_on_create !== true
+			empty( $data->formDescriptor->edit ) &&
+			$data->formDescriptor->overwrite_existing_article_on_create !== true
 		) {
 			$errors[] = $this->context->msg(
 				'jsonforms-special-submit-article-exists',
@@ -914,6 +914,11 @@ class SubmitForm {
 					$title_ = TitleClass::newFromText( $data->formDescriptor->return_page );
 					if ( $title_ && $title_->isKnown() ) {
 						$localUrl = $title_->getLocalURL();
+
+						if ( $targetTitle->getFullText() !== $title_->getFullText() ) {
+							$wikiPage_ = \JsonForms::getWikiPage( $title_ );
+							$wikiPage_->doPurge();
+						}
 						break;
 					}
 				}

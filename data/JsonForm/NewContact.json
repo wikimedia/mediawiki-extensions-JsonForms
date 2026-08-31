@@ -25,7 +25,7 @@
 		"infobox_template": ""
 	},
 	"display_path": "",
-	"width": "600px",
+	"inline_css": "width: 600px;",
 	"title": "",
 	"hide_title": false,
 	"editor_options": {

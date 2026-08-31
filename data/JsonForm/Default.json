@@ -30,7 +30,7 @@
 	},
 	"popup_size": "medium",
 	"css_class": "",
-	"width": "600px",
+	"inline_css": "width: 600px;",
 	"editor_options": {
 		"base_options": "MediaWiki:DefaultEditorOptions",
 		"base_script": "MediaWiki:DefaultEditorScript",

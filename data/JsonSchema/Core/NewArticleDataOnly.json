@@ -15,6 +15,11 @@
 					"minLength": 1,
 					"x-input": "mw.widgets.TitleInputWidget"
 				},
+				"content_model": {
+					"type": "string",
+					"default": "json",
+					"x-hidden": true
+				},
 				"schema": {
 					"type": "string",
 					"title": "JSON Schema",

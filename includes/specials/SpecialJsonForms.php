@@ -95,7 +95,7 @@ class SpecialJsonForms extends QueryPage {
 		$formDescriptor = $parametersProcessor->mergeFormDescriptor( $formDescriptor );
 
 		$formDescriptor->view = 'inline';
-		unset( $formDescriptor->width );
+		unset( $formDescriptor->inline_css );
 
 		$html = \JsonForms::getPageForm( $user, $out, $formDescriptor );
 

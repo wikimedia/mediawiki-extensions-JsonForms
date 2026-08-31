@@ -52,7 +52,6 @@ class EditSchema extends SubmitForm {
 		$deleteSchema = empty( $schemaName );
 
 		$wikiPage = \JsonForms::getWikiPage( $targetTitle );
-
 		if ( !$wikiPage ) {
 			return ResultWrapper::failure(
 				$this->context->msg( 'jsonforms-special-submit-cannot-create-wikipage' )->text()
@@ -72,9 +71,6 @@ class EditSchema extends SubmitForm {
 		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata, $deleteSchema );
 
 		if ( $deleteSchema ) {
-			$slots[$targetSlot] = [
-				'content' => null,
-			];
 			if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
 				unset( $metadata->slots->{$targetSlot} );
 			}
@@ -105,6 +101,12 @@ class EditSchema extends SubmitForm {
 
 		$mainSlotContent = null;
 		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema );
+
+		if ( $deleteSchema ) {
+			$slots[$targetSlot] = [
+				'content' => null,
+			];
+		}
 
 		if ( empty( (array)$metadata->slots ) ) {
 			unset( $metadata->slots );

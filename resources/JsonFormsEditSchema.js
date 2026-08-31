@@ -133,8 +133,6 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 		processor: 'EditSchema'
 	};
 
-	console.log( 'data', data );
-
 	const payload = {
 		data: JSON.stringify( data ),
 		action: 'jsonforms-submit-form'

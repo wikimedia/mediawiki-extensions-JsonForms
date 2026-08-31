@@ -59,9 +59,18 @@ class NewArticle extends SubmitForm {
 		$isDataOnly = !property_exists( $data->options, 'content' );
 
 		$contentModelMainSlot = $this->getContentModel( $data, $targetTitle );
+
 		$targetSlot = $isDataOnly ? SlotRecord::MAIN : SLOT_ROLE_JSONFORMS_DATA;
 
 		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot );
+
+		$slotMetadata = &$metadata->slots->{$targetSlot};
+
+		$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
+
+		if ( count( $errors ) ) {
+			return ResultWrapper::failure( $errors[0] );
+		}
 
 		$dataToSave = $this->postProcessJsonData(
 			$data->value,

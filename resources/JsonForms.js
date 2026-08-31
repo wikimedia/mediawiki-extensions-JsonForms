@@ -216,12 +216,18 @@ JsonForms.prototype.notifyRefFetchFailed = function (uri, options) {
 };
 
 JsonForms.prototype.fetchSchema = function (schemaName) {
-	if (this._schemaCache[schemaName]) {
-		return Promise.resolve(this._schemaCache[schemaName]);
+	// @IMPORTANT !! otherwise the processed schema could
+	// be returned instead of the original schema
+	const returnClone = ( schema ) => {
+		return Promise.resolve( JsonForms.Utilities.clone( schema ) );
 	}
 
-	if (this._pendingRequests[schemaName]) {
-		return this._pendingRequests[schemaName];
+	if ( this._schemaCache[ schemaName ] ) {
+		return returnClone( this._schemaCache[ schemaName ] );
+	}
+
+	if ( this._pendingRequests[ schemaName ] ) {
+		return this._pendingRequests[ schemaName ].then( returnClone );
 	}
 
 	const payload = {
@@ -238,13 +244,9 @@ JsonForms.prototype.fetchSchema = function (schemaName) {
 					reject(thisRes[payload.action].error);
 				} else {
 					let result = thisRes[payload.action].result;
-					result = JSON.parse(result);
-					this._schemaCache[schemaName] = result;
+					const schema = JSON.parse(result);
+					this._schemaCache[schemaName] = schema;
 					delete this._pendingRequests[schemaName];
-
-					// @IMPORTANT !! otherwise the processed schema could
-					// be returned instead of the original schema
-					const schema = JsonForms.Utilities.clone(result);
 					resolve(schema);
 				}
 			})
@@ -256,7 +258,7 @@ JsonForms.prototype.fetchSchema = function (schemaName) {
 			});
 	});
 
-	return this._pendingRequests[schemaName];
+	return this._pendingRequests[ schemaName ].then( returnClone );
 };
 
 JsonForms.prototype.getEditor = function () {
@@ -300,8 +302,6 @@ window.JsonForms = JsonForms;
 (function ($) {
 	$(() => {
 		function resizeTreeSidePanel() {
-			// const actualHeight = secondColumnContent.scrollHeight;
-
 			const leftSelector =
 				'.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu';
 			const rightSelector =

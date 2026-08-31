@@ -199,8 +199,6 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 		processor: 'NewArticle'
 	};
 
-	console.log( 'data', data );
-
 	const payload = {
 		data: JSON.stringify( data ),
 		action: 'jsonforms-submit-form'

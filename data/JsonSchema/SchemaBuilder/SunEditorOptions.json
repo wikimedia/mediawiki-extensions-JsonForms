@@ -1,69 +1,1073 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/SunEditorOptions",
+  "title": "SunEditor Configuration Schema",
+  "description": "Schema for SunEditor rich text editor configuration options",
   "type": "object",
-	"x-default-properties": [],
+  "additionalProperties": false,
   "properties": {
-    "buttonList": {
+    "plugins": {
       "type": "array",
+      "description": "Array of plugin names to enable",
       "items": {
-        "anyOf": [
-          {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "undo", "redo", "bold", "italic", "underline", "strike",
-                "blockStyle", "font", "fontSize", "fontColor", "backgroundColor",
-                "removeFormat", "outdent", "indent", "align", "list",
-                "table", "link", "image", "video", "fullScreen", "codeView",
-                "subscript", "superscript", "preview", "print", "save",
-                "template", "layout", "lineHeight", "paragraphStyle", "textStyle",
-                "blockquote", "hr", "showBlocks", "markdownView", "dir_ltr", "dir_rtl",
-                "copy", "cut", "paste", "selectAll", "newDocument", "pageBreak",
-                "pageUp", "pageDown", "pageNavigator", "finder",
-                ":Format-default.more_paragraph",
-                ":Text-default.more_text",
-                ":Insert-default.more_plus"
-              ]
+        "type": "string",
+        "enum": [
+          "blockquote",
+          "align",
+          "font",
+          "fontColor",
+          "fontSize",
+          "formatBlock",
+          "hiliteColor",
+          "horizontalRule",
+          "lineHeight",
+          "list",
+          "paragraphStyle",
+          "table",
+          "template",
+          "textStyle",
+          "image",
+          "link",
+          "video",
+          "audio",
+          "math",
+          "imageGallery"
+        ]
+      },
+      "default": null
+    },
+    "lang": {
+      "type": "object",
+      "description": "Language object for localization",
+      "additionalProperties": true,
+      "default": {}
+    },
+    "defaultTag": {
+      "type": "string",
+      "description": "Default tag name for the editor",
+      "default": "p"
+    },
+    "textTags": {
+      "type": "object",
+      "description": "Custom tags for text formatting buttons",
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "bold": { "type": "string", "default": "STRONG" },
+        "underline": { "type": "string", "default": "U" },
+        "italic": { "type": "string", "default": "EM" },
+        "strike": { "type": "string", "default": "DEL" }
+      },
+      "default": {
+        "bold": "STRONG",
+        "underline": "U",
+        "italic": "EM",
+        "strike": "DEL"
+      }
+    },
+    "value": {
+      "type": "string",
+      "description": "Initial HTML value of the editor",
+      "default": null
+    },
+    "historyStackDelayTime": {
+      "type": "number",
+      "description": "Delay time in milliseconds for recording history stack",
+      "default": 400
+    },
+    "addTagsWhitelist": {
+      "type": "string",
+      "description": "Additional tags to whitelist",
+      "default": ""
+    },
+    "tagsBlacklist": {
+      "type": "string",
+      "description": "Tags to blacklist",
+      "default": null
+    },
+    "pasteTagsWhitelist": {
+      "type": "string",
+      "description": "Tags whitelist for pasting",
+      "default": null
+    },
+    "pasteTagsBlacklist": {
+      "type": "string",
+      "description": "Tags blacklist for pasting",
+      "default": null
+    },
+    "attributesWhitelist": {
+      "type": "object",
+      "description": "Attributes whitelist to keep in editor",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": null
+    },
+    "attributesBlacklist": {
+      "type": "object",
+      "description": "Attributes blacklist to remove from editor",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": null
+    },
+    "mode": {
+      "type": "string",
+      "description": "Editor mode",
+      "enum": ["classic", "inline", "balloon", "balloon-always"],
+      "default": "classic"
+    },
+    "rtl": {
+      "type": "boolean",
+      "description": "Right to Left mode",
+      "default": false
+    },
+    "lineAttrReset": {
+      "type": "string",
+      "description": "Attributes to delete at line break",
+      "default": ""
+    },
+    "toolbarWidth": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" }
+      ],
+      "description": "Width of toolbar for inline/balloon modes",
+      "default": "auto"
+    },
+    "toolbarContainer": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Custom container for toolbar",
+      "default": null
+    },
+    "stickyToolbar": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "boolean" },
+        { "type": "null" }
+      ],
+      "description": "Top offset for sticky toolbar (-1, false, or null to turn off)",
+      "default": 0
+    },
+    "fullScreenOffset": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ],
+      "description": "Top offset for fullscreen mode",
+      "default": 0
+    },
+    "iframe": {
+      "type": "boolean",
+      "description": "Use iframe to isolate content",
+      "default": false
+    },
+    "fullPage": {
+      "type": "boolean",
+      "description": "Allow HTML, HEAD, BODY tags and DOCTYPE",
+      "default": false
+    },
+    "iframeAttributes": {
+      "type": "object",
+      "description": "Attributes for iframe element",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "iframeCSSFileName": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ],
+      "description": "CSS filename for iframe",
+      "default": "suneditor"
+    },
+    "previewTemplate": {
+      "type": "string",
+      "description": "Template for preview (use {{contents}} placeholder)",
+      "default": null
+    },
+    "printTemplate": {
+      "type": "string",
+      "description": "Template for print (use {{contents}} placeholder)",
+      "default": null
+    },
+    "codeMirror": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "src": { "type": "object" },
+            "options": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "mode": { "type": "string", "default": "htmlmixed" },
+                "htmlMode": { "type": "boolean", "default": true },
+                "lineNumbers": { "type": "boolean", "default": true },
+                "lineWrapping": { "type": "boolean", "default": true }
+              }
             }
-          },
+          }
+        },
+        { "type": "null" }
+      ],
+      "description": "CodeMirror configuration for code view",
+      "default": null
+    },
+    "katex": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "src": { "type": "object" },
+            "options": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "throwOnError": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        },
+        { "type": "null" }
+      ],
+      "description": "KaTeX configuration for math plugin",
+      "default": null
+    },
+    "mathFontSize": {
+      "type": "array",
+      "description": "Font size list for math plugin",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string" },
+          "value": { "type": "string" },
+          "default": { "type": "boolean" }
+        },
+        "required": ["text", "value"]
+      },
+      "default": [
+        { "text": "1", "value": "1em", "default": true },
+        { "text": "1.5", "value": "1.5em" },
+        { "text": "2", "value": "2em" },
+        { "text": "2.5", "value": "2.5em" }
+      ]
+    },
+    "position": {
+      "type": "string",
+      "description": "CSS position property",
+      "default": null
+    },
+    "display": {
+      "type": "string",
+      "description": "CSS display property",
+      "default": "block"
+    },
+    "popupDisplay": {
+      "type": "string",
+      "description": "Dialog window display mode",
+      "enum": ["full", "local"],
+      "default": "full"
+    },
+    "resizingBar": {
+      "type": "boolean",
+      "description": "Show bottom resizing bar",
+      "default": true
+    },
+    "showPathLabel": {
+      "type": "boolean",
+      "description": "Show node structure in resizing bar",
+      "default": true
+    },
+    "resizeEnable": {
+      "type": "boolean",
+      "description": "Enable resizing",
+      "default": true
+    },
+    "resizingBarContainer": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Custom container for resizing bar",
+      "default": null
+    },
+    "charCounter": {
+      "type": "boolean",
+      "description": "Show character counter (auto-enabled if maxCharCount is set)",
+      "default": false
+    },
+    "charCounterType": {
+      "type": "string",
+      "description": "Character counting method",
+      "enum": ["char", "byte", "byte-html"],
+      "default": "char"
+    },
+    "charCounterLabel": {
+      "type": "string",
+      "description": "Label for character counter",
+      "default": null
+    },
+    "maxCharCount": {
+      "type": "number",
+      "description": "Maximum allowed characters",
+      "default": null
+    },
+    "width": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ],
+      "description": "Editor width",
+      "default": "100%"
+    },
+    "minWidth": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Minimum width (used when width is 'auto' or '~%')",
+      "default": null
+    },
+    "maxWidth": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Maximum width (used when width is 'auto' or '~%')",
+      "default": null
+    },
+    "height": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ],
+      "description": "Editor height",
+      "default": "auto"
+    },
+    "minHeight": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Minimum height (used when height is 'auto')",
+      "default": null
+    },
+    "maxHeight": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Maximum height (used when height is 'auto')",
+      "default": null
+    },
+    "defaultStyle": {
+      "type": "string",
+      "description": "Default CSS styles for editing area",
+      "default": ""
+    },
+    "font": {
+      "type": "array",
+      "description": "Font family list",
+      "items": { "type": "string" },
+      "default": [
+        "Arial",
+        "Comic Sans MS",
+        "Courier New",
+        "Impact",
+        "Georgia",
+        "tahoma",
+        "Trebuchet MS",
+        "Verdana"
+      ]
+    },
+    "fontSize": {
+      "type": "array",
+      "description": "Font size list",
+      "items": { "type": "number" },
+      "default": [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72]
+    },
+    "fontSizeUnit": {
+      "type": "string",
+      "description": "Font size unit",
+      "default": "px"
+    },
+    "alignItems": {
+      "type": "array",
+      "description": "Alignment options (rtl-sensitive)",
+      "items": {
+        "type": "string",
+        "enum": ["left", "center", "right", "justify"]
+      },
+      "default": ["left", "center", "right", "justify"]
+    },
+    "formats": {
+      "type": "array",
+      "description": "Format block list",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
           {
-            "type": "string",
-            "enum": ["|", "/", "-right"]
-          },
-          {
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "pattern": "^%[0-9]{3,4}$"
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "type": "string",
-                        "enum": ["|", "/"]
-                      }
-                    ]
-                  }
-                }
-              ]
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "tag": { "type": "string" },
+              "name": { "type": "string" },
+              "command": {
+                "type": "string",
+                "enum": ["replace", "range", "free"]
+              },
+              "class": { "type": "string" }
             },
-            "minItems": 2,
-            "maxItems": 2
+            "required": ["tag"]
           }
         ]
-      }
+      },
+      "default": [
+        "p",
+        "div",
+        "blockquote",
+        "pre",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6"
+      ]
+    },
+    "colorList": {
+      "type": "array",
+      "description": "Color list for color picker",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "array", "items": { "type": "string" } }
+        ]
+      },
+      "default": [
+        "#ff0000",
+        "#ff5e00",
+        "#ffe400",
+        "#abf200",
+        "#00d8ff",
+        "#0055ff",
+        "#6600ff",
+        "#ff00dd",
+        "#000000",
+        "#ffd8d8",
+        "#fae0d4",
+        "#faf4c0",
+        "#e4f7ba",
+        "#d4f4fa",
+        "#d9e5ff",
+        "#e8d9ff",
+        "#ffd9fa",
+        "#f1f1f1",
+        "#ffa7a7",
+        "#ffc19e",
+        "#faed7d",
+        "#cef279",
+        "#b2ebf4",
+        "#b2ccff",
+        "#d1b2ff",
+        "#ffb2f5",
+        "#bdbdbd",
+        "#f15f5f",
+        "#f29661",
+        "#e5d85c",
+        "#bce55c",
+        "#5cd1e5",
+        "#6699ff",
+        "#a366ff",
+        "#f261df",
+        "#8c8c8c",
+        "#980000",
+        "#993800",
+        "#998a00",
+        "#6b9900",
+        "#008299",
+        "#003399",
+        "#3d0099",
+        "#990085",
+        "#353535",
+        "#670000",
+        "#662500",
+        "#665c00",
+        "#476600",
+        "#005766",
+        "#002266",
+        "#290066",
+        "#660058",
+        "#222222"
+      ]
+    },
+    "lineHeights": {
+      "type": "array",
+      "description": "Line height options",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string" },
+          "value": { "oneOf": [{ "type": "number" }, { "type": "string" }] }
+        },
+        "required": ["value"]
+      },
+      "default": [
+        { "text": "1", "value": 1 },
+        { "text": "1.15", "value": 1.15 },
+        { "text": "1.5", "value": 1.5 },
+        { "text": "2", "value": 2 }
+      ]
+    },
+    "paragraphStyles": {
+      "type": "array",
+      "description": "Custom paragraph styles",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "class": { "type": "string" },
+              "_class": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        ]
+      },
+      "default": [
+        { "name": "Spaced", "class": "__se__p-spaced", "_class": "" },
+        { "name": "Bordered", "class": "__se__p-bordered" },
+        { "name": "Neon", "class": "__se__p-neon" }
+      ]
+    },
+    "textStyles": {
+      "type": "array",
+      "description": "Custom text styles",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "class": { "type": "string" },
+              "style": { "type": "string" },
+              "tag": { "type": "string", "default": "span" },
+              "_class": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        ]
+      },
+      "default": [
+        { "name": "Code", "class": "__se__t-code", "tag": "code" },
+        {
+          "name": "Translucent",
+          "style": "opacity: 0.5;",
+          "tag": "span",
+          "_class": ""
+        },
+        { "name": "Shadow", "class": "__se__t-shadow", "tag": "span" }
+      ]
+    },
+    "imageResizing": {
+      "type": "boolean",
+      "description": "Enable image resizing",
+      "default": true
+    },
+    "imageHeightShow": {
+      "type": "boolean",
+      "description": "Show image height input",
+      "default": true
+    },
+    "imageAlignShow": {
+      "type": "boolean",
+      "description": "Show image alignment options",
+      "default": true
+    },
+    "imageWidth": {
+      "type": "string",
+      "description": "Default image width",
+      "default": "auto"
+    },
+    "imageHeight": {
+      "type": "string",
+      "description": "Default image height",
+      "default": "auto"
+    },
+    "imageSizeOnlyPercentage": {
+      "type": "boolean",
+      "description": "Allow only percentage scaling for images",
+      "default": false
+    },
+    "imageRotation": {
+      "type": "boolean",
+      "description": "Show image rotation buttons",
+      "default": true
+    },
+    "imageFileInput": {
+      "type": "boolean",
+      "description": "Show file input in image upload",
+      "default": true
+    },
+    "imageUrlInput": {
+      "type": "boolean",
+      "description": "Show URL input in image upload",
+      "default": true
+    },
+    "imageUploadHeader": {
+      "type": "object",
+      "description": "HTTP headers for image upload",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "imageUploadUrl": {
+      "type": "string",
+      "description": "URL for image upload endpoint",
+      "default": null
+    },
+    "imageUploadSizeLimit": {
+      "type": "number",
+      "description": "Maximum total image upload size in bytes",
+      "default": null
+    },
+    "imageMultipleFile": {
+      "type": "boolean",
+      "description": "Allow multiple image selection",
+      "default": false
+    },
+    "imageAccept": {
+      "type": "string",
+      "description": "Accepted image file types",
+      "default": "*"
+    },
+    "imageGalleryUrl": {
+      "type": "string",
+      "description": "URL for image gallery endpoint",
+      "default": null
+    },
+    "imageGalleryHeader": {
+      "type": "object",
+      "description": "HTTP headers for image gallery",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "videoResizing": {
+      "type": "boolean",
+      "description": "Enable video resizing",
+      "default": true
+    },
+    "videoHeightShow": {
+      "type": "boolean",
+      "description": "Show video height input",
+      "default": true
+    },
+    "videoAlignShow": {
+      "type": "boolean",
+      "description": "Show video alignment options",
+      "default": true
+    },
+    "videoRatioShow": {
+      "type": "boolean",
+      "description": "Show video ratio options",
+      "default": true
+    },
+    "videoWidth": {
+      "type": "string",
+      "description": "Default video width",
+      "default": "100%"
+    },
+    "videoHeight": {
+      "type": "string",
+      "description": "Default video height",
+      "default": "56.25%"
+    },
+    "videoSizeOnlyPercentage": {
+      "type": "boolean",
+      "description": "Allow only percentage scaling for videos",
+      "default": false
+    },
+    "videoRotation": {
+      "type": "boolean",
+      "description": "Show video rotation buttons",
+      "default": true
+    },
+    "videoRatio": {
+      "type": "number",
+      "description": "Default video aspect ratio (16:9 = 0.5625)",
+      "default": 0.5625
+    },
+    "videoRatioList": {
+      "type": "array",
+      "description": "Video ratio options",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "number" }
+        },
+        "required": ["name", "value"]
+      },
+      "default": [
+        { "name": "16:9", "value": 0.5625 },
+        { "name": "4:3", "value": 0.75 },
+        { "name": "21:9", "value": 0.4285 }
+      ]
+    },
+    "youtubeQuery": {
+      "type": "string",
+      "description": "YouTube embed query parameters",
+      "default": ""
+    },
+    "videoFileInput": {
+      "type": "boolean",
+      "description": "Show file input in video upload",
+      "default": false
+    },
+    "videoUrlInput": {
+      "type": "boolean",
+      "description": "Show URL input in video upload",
+      "default": true
+    },
+    "videoUploadHeader": {
+      "type": "object",
+      "description": "HTTP headers for video upload",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "videoUploadUrl": {
+      "type": "string",
+      "description": "URL for video upload endpoint",
+      "default": null
+    },
+    "videoUploadSizeLimit": {
+      "type": "number",
+      "description": "Maximum total video upload size in bytes",
+      "default": null
+    },
+    "videoMultipleFile": {
+      "type": "boolean",
+      "description": "Allow multiple video selection",
+      "default": false
+    },
+    "videoTagAttrs": {
+      "type": "object",
+      "description": "Attributes for video tag",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "videoIframeAttrs": {
+      "type": "object",
+      "description": "Attributes for iframe (YouTube, Vimeo)",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "videoAccept": {
+      "type": "string",
+      "description": "Accepted video file types",
+      "default": "*"
+    },
+    "audioWidth": {
+      "type": "string",
+      "description": "Default audio width",
+      "default": "300px"
+    },
+    "audioHeight": {
+      "type": "string",
+      "description": "Default audio height",
+      "default": "54px"
+    },
+    "audioFileInput": {
+      "type": "boolean",
+      "description": "Show file input in audio upload",
+      "default": false
+    },
+    "audioUrlInput": {
+      "type": "boolean",
+      "description": "Show URL input in audio upload",
+      "default": true
+    },
+    "audioUploadHeader": {
+      "type": "object",
+      "description": "HTTP headers for audio upload",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "audioUploadUrl": {
+      "type": "string",
+      "description": "URL for audio upload endpoint",
+      "default": null
+    },
+    "audioUploadSizeLimit": {
+      "type": "number",
+      "description": "Maximum total audio upload size in bytes",
+      "default": null
+    },
+    "audioMultipleFile": {
+      "type": "boolean",
+      "description": "Allow multiple audio selection",
+      "default": false
+    },
+    "audioTagAttrs": {
+      "type": "object",
+      "description": "Attributes for audio tag",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "audioAccept": {
+      "type": "string",
+      "description": "Accepted audio file types",
+      "default": "*"
+    },
+    "tableCellControllerPosition": {
+      "type": "string",
+      "description": "Table cell controller position",
+      "enum": ["cell", "top"],
+      "default": "cell"
+    },
+    "linkTargetNewWindow": {
+      "type": "boolean",
+      "description": "Default checked state for new window checkbox",
+      "default": false
+    },
+    "linkProtocol": {
+      "type": "string",
+      "description": "Default protocol for links",
+      "default": null
+    },
+    "linkRel": {
+      "type": "array",
+      "description": "Available rel attributes for links",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "linkRelDefault": {
+      "type": "object",
+      "description": "Default rel attributes for links",
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "default": { "type": "string" },
+        "check_new_window": { "type": "string" },
+        "check_bookmark": { "type": "string" }
+      },
+      "default": {}
+    },
+    "linkNoPrefix": {
+      "type": "boolean",
+      "description": "Disable automatic URL prefixing",
+      "default": false
+    },
+    "hrItems": {
+      "type": "array",
+      "description": "HR style options",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "class": { "type": "string" },
+          "style": { "type": "string" }
+        },
+        "required": ["name"],
+        "oneOf": [
+          { "required": ["class"] },
+          { "required": ["style"] }
+        ]
+      },
+      "default": [
+        { "name": "Solid", "class": "__se__solid" },
+        { "name": "Dashed", "class": "__se__dashed" },
+        { "name": "Dotted", "class": "__se__dotted" }
+      ]
+    },
+    "tabDisable": {
+      "type": "boolean",
+      "description": "Disable tab key interaction",
+      "default": false
+    },
+    "shortcutsDisable": {
+      "type": "array",
+      "description": "Disable specific keyboard shortcuts",
+      "items": {
+        "type": "string",
+        "enum": [
+          "bold",
+          "strike",
+          "underline",
+          "italic",
+          "undo",
+          "indent",
+          "save"
+        ]
+      },
+      "default": []
+    },
+    "shortcutsHint": {
+      "type": "boolean",
+      "description": "Show shortcuts hint",
+      "default": true
+    },
+    "callBackSave": {
+      "description": "Callback for save button (contents, isChanged)",
+      "default": null
+    },
+    "templates": {
+      "type": "array",
+      "description": "Template definitions",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "html": { "type": "string" }
+        },
+        "required": ["name", "html"]
+      },
+      "default": null
+    },
+    "placeholder": {
+      "type": "string",
+      "description": "Placeholder text",
+      "default": null
+    },
+    "mediaAutoSelect": {
+      "type": "boolean",
+      "description": "Auto-select media after insertion",
+      "default": true
+    },
+    "icons": {
+      "type": "object",
+      "description": "Custom icon definitions",
+      "additionalProperties": { "type": "string" },
+      "default": null
+    },
+    "buttonList": {
+      "type": "array",
+      "description": "Defines button list configuration",
+      "definitions": {
+        "buttonName": {
+          "type": "string",
+          "enum": [
+            "undo",
+            "redo",
+            "bold",
+            "italic",
+            "underline",
+            "strike",
+            "blockStyle",
+            "font",
+            "fontSize",
+            "fontColor",
+            "backgroundColor",
+            "removeFormat",
+            "outdent",
+            "indent",
+            "align",
+            "list",
+            "table",
+            "link",
+            "image",
+            "video",
+            "fullScreen",
+            "codeView",
+            "subscript",
+            "superscript",
+            "preview",
+            "print",
+            "save",
+            "template",
+            "layout",
+            "lineHeight",
+            "paragraphStyle",
+            "textStyle",
+            "blockquote",
+            "hr",
+            "showBlocks",
+            "markdownView",
+            "dir_ltr",
+            "dir_rtl",
+            "copy",
+            "cut",
+            "paste",
+            "selectAll",
+            "newDocument",
+            "pageBreak",
+            "pageUp",
+            "pageDown",
+            "pageNavigator",
+            "finder",
+            "/",
+            "-left",
+            "-right",
+            "#fix",
+            ":Format-default.more_paragraph",
+            ":Text-default.more_text",
+            ":Insert-default.more_plus"
+          ]
+        },
+        "buttonGroup": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/buttonList/definitions/buttonName"
+          }
+        }
+      },
+      "items": {
+        "anyOf": [
+          { "$ref": "#/properties/buttonList/definitions/buttonGroup" },
+          {
+            "type": "string",
+            "pattern": "^%[0-9]{3,4}$"
+          },
+          {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "type": "string",
+                "pattern": "^%[0-9]{3,4}$"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/properties/buttonList/definitions/buttonGroup"
+                    },
+                    { "$ref": "#/properties/buttonList/definitions/buttonName" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "default": [
+        ["undo", "redo"],
+        ["bold", "underline", "italic", "strike", "subscript", "superscript"],
+        ["removeFormat"],
+        ["outdent", "indent"],
+        ["fullScreen", "showBlocks", "codeView"],
+        ["preview", "print"]
+      ]
     }
-  },
-  "required": []
+  }
 }

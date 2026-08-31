@@ -670,9 +670,9 @@ class JsonForms {
 					( !isset( $config->formDescriptor->css_class )
 						? ''
 						: ' ' . $config->formDescriptor->css_class ),
-				'style' => !isset( $config->formDescriptor->width )
+				'style' => !isset( $config->formDescriptor->inline_css )
 					? ''
-					: 'width:' . $config->formDescriptor->width,
+					: $config->formDescriptor->inline_css,
 			],
 			$loadingContainer . $loadingPlaceholder,
 		);

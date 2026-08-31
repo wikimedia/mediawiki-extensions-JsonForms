@@ -661,16 +661,11 @@ class SubmitForm {
 	 * @return stdClass The built metadata object
 	 */
 	protected function buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata = null, $isDeleteSchema = false ) {
-		$metadata = $previousMetadata ? clone $previousMetadata : new stdClass();
+		$metadata = $this->initializeMetadata( $previousMetadata, $contentModelMainSlot );
 
-		if ( !isset( $metadata->slots ) || !is_object( $metadata->slots ) ) {
-			$metadata->slots = new stdClass();
+		if ( !isset( $metadata->slots->{SlotRecord::MAIN}->editor ) ) {
+			$metadata->slots->{SlotRecord::MAIN}->editor = $this->defaultEditorForContentModel( $contentModelMainSlot );
 		}
-
-		// Set main slot metadata
-		$metadata->slots->{SlotRecord::MAIN} = new stdClass();
-		$metadata->slots->{SlotRecord::MAIN}->model = $contentModelMainSlot;
-		$metadata->slots->{SlotRecord::MAIN}->editor = $this->defaultEditorForContentModel( $contentModelMainSlot );
 
 		// Set target slot metadata (if not main and not deleting schema)
 		if ( $targetSlot !== SlotRecord::MAIN && !$isDeleteSchema ) {
@@ -680,7 +675,7 @@ class SubmitForm {
 			$this->setMainSlotSchema( $metadata, $data );
 		}
 
-		// Add categories if present
+		// Add categories if provided
 		if ( !empty( $data->options->categories ) && is_array( $data->options->categories ) ) {
 			$metadata->categories = $data->options->categories;
 		}
@@ -998,18 +993,21 @@ class SubmitForm {
 	/**
 	 * Initialize metadata object
 	 *
-	 * @param stdClass|null $metadataPrevious
+	 * @param stdClass|null $previousMetadata
 	 * @param string $contentModelMainSlot
 	 * @return stdClass
 	 */
-	protected function initializeMetadata( $metadataPrevious, $contentModelMainSlot ) {
-		$metadata = $metadataPrevious ? clone $metadataPrevious : new stdClass();
+	protected function initializeMetadata( $previousMetadata, $contentModelMainSlot ) {
+		$metadata = $previousMetadata ? clone $previousMetadata : new stdClass();
 
 		if ( !isset( $metadata->slots ) || !is_object( $metadata->slots ) ) {
 			$metadata->slots = new stdClass();
 		}
 
-		$metadata->slots->{SlotRecord::MAIN} = new stdClass();
+		if ( !isset( $metadata->slots->{SlotRecord::MAIN} ) || !is_object( $metadata->slots->{SlotRecord::MAIN} ) ) {
+			$metadata->slots->{SlotRecord::MAIN} = new stdClass();
+		}
+
 		$metadata->slots->{SlotRecord::MAIN}->model = $contentModelMainSlot;
 
 		return $metadata;
@@ -1219,16 +1217,16 @@ class SubmitForm {
 	 * Preserve main slot schema
 	 *
 	 * @param stdClass $metadata
-	 * @param stdClass|null $metadataPrevious
+	 * @param stdClass|null $previousMetadata
 	 * @param string $contentModelMainSlot
 	 * @return void
 	 */
-	protected function preserveMainSlotSchema( $metadata, $metadataPrevious, $contentModelMainSlot ) {
+	protected function preserveMainSlotSchema( $metadata, $previousMetadata, $contentModelMainSlot ) {
 		if (
 			$contentModelMainSlot === 'json' &&
-			$metadataPrevious &&
-			isset( $metadataPrevious->slots->{SlotRecord::MAIN}->schema ) &&
-			!empty( $metadataPrevious->slots->{SlotRecord::MAIN}->schema )
+			$previousMetadata &&
+			isset( $previousMetadata->slots->{SlotRecord::MAIN}->schema ) &&
+			!empty( $previousMetadata->slots->{SlotRecord::MAIN}->schema )
 		) {
 			$metadata->slots->{SlotRecord::MAIN}->schema = $metadataPrevious->slots->{SlotRecord::MAIN}->schema;
 		}

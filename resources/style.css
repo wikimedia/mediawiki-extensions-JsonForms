@@ -258,6 +258,7 @@
 .jsonforms-editor .jsonforms-remove-object {
 	text-align: right;
 	display: block;
+	float: right;
 }
 
 .jsonforms-editor .jsonforms-header {
@@ -323,17 +324,42 @@
 	min-height: 0;
 }
 
+/*
 .jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
 	display: block !important;
 	min-height: 0;
 	overflow-y: auto;
-	flex: 0 0 230px; /* ~14em */
+	flex: 0 0 230px; // ~14em
 }
 
 .jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
 	display: block !important;
 	flex: 1;
 	overflow: auto;
+}
+*/
+
+.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
+	display: block !important;
+	overflow-y: auto;
+	transition-property: height, width, top, left, right, bottom;
+	transition-duration: 0ms;
+}
+
+.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
+	display: block !important;
+	flex: 1;
+	overflow-y: auto;
+	transition-property: height, width, top, left, right, bottom;
+	transition-duration: 0ms;
+}
+
+.jsonforms-editor .gutter:hover {
+	cursor: col-resize;
+}
+
+.jsonforms-editor .oo-ui-bookletLayout-stackLayout > .oo-ui-panelLayout {
+	padding: 20px 20px 20px 10px;
 }
 
 .oo-ui-indicator-subtract {
@@ -420,7 +446,8 @@
 }
 
 .jsonforms-schemabuilder-resizable {
-	min-width: 400px;
+	width: 400px;
+	box-shadow: -4px 0 8px -4px rgba( 0,0,0,0.3 );
 }
 
 .jsonforms-message-widget {
@@ -521,10 +548,6 @@
 
 .jsonforms-editor .oo-ui-buttonSelectWidget {
 	margin: 6px 0;
-}
-
-.jsonforms-editor .jsonforms-tree-page-header-top .jsonforms-remove-object {
-	float: right;
 }
 
 .jsonforms-page-nav-left {

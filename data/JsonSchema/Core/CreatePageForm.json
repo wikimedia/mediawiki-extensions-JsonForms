@@ -12,7 +12,7 @@
 			"popup_button_config",
 			"popup_size",
 			"css_class",
-			"width",
+			"inline_css",
 			"title",
 			"hide_title"
 		],
@@ -369,11 +369,11 @@
 			"description": "CSS class applied to the rendered view",
 			"default": ""
 		},
-		"width": {
+		"inline_css": {
 			"type": "string",
-			"title": "width",
-			"description": "",
-			"default": "600px",
+			"title": "inline css",
+			"description": "inline css applied to the form container",
+			"default": "width: 600px;",
 			"x-dependency": {
 				"view": "inline"
 			}

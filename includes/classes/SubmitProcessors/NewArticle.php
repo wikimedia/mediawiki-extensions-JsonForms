@@ -66,10 +66,16 @@ class NewArticle extends SubmitForm {
 
 		$slotMetadata = &$metadata->slots->{$targetSlot};
 
-		$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
+		// eg. https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
+		$parsedId = explode( 'JsonSchema:', $data->schemaId )[ 1 ];
 
-		if ( count( $errors ) ) {
-			return ResultWrapper::failure( $errors[0] );
+		$hasSchema = $parsedId !== 'Core/NewArticleRegular';
+		if ( $hasSchema ) {
+			$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
+
+			if ( count( $errors ) ) {
+				return ResultWrapper::failure( $errors[0] );
+			}
 		}
 
 		$dataToSave = $this->postProcessJsonData(

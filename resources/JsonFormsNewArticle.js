@@ -195,6 +195,8 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 		config: mw.config.get( 'jsonforms' ),
 		structuredValue,
 
+		schemaId: this.editor.schema.$id,
+
 		// submit processor
 		processor: 'NewArticle'
 	};

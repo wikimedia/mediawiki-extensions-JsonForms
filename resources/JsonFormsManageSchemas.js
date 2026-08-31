@@ -167,6 +167,7 @@ JsonFormsManageSchemas.prototype.submitForm = function ( innerEditor ) {
 
 		// used to redirect to the current schema or form
 		schemaId: innerEditor.schema.$id,
+
 		// submit processor
 		processor: 'ManageSchemas'
 	};

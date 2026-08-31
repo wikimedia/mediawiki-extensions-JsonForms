@@ -402,6 +402,14 @@ class SubmitForm {
 		$titleStr = null;
 		$targetTitle = null;
 
+		// slot manager
+		if (
+			$data->processor === 'SlotManager' &&
+			isset( $data->value->title )
+		) {
+			$titleStr = $data->value->title;
+		}
+
 		if ( !empty( $data->options->title ) ) {
 			$titleStr = $data->options->title;
 		} elseif ( !empty( $data->formDescriptor->edit ) ) {
@@ -1148,9 +1156,7 @@ class SubmitForm {
 			$errors[] = $this->context->msg( 'jsonforms-special-submit-cannot-load-schema' )->text();
 			return;
 		}
-		// trigger_error('^^$data ' . print_r($data,1));
 
-		// trigger_error('^^$slotMetadata brefore' . print_r($slotMetadata,1));
 		$editPath = $data->formDescriptor->edit_path ?? '';
 		if ( empty( $editPath ) ) {
 			$schemas = $data->structuredValue->schemas;
@@ -1199,8 +1205,6 @@ class SubmitForm {
 			}
 		}
 
-		// trigger_error('^^$slotMetadata ' . print_r($slotMetadata,1));
-
 		$thisClass = $this;
 		foreach ( $schemas as $jsonPath => $schema ) {
 			$schemaMetadata->processedSchema[ $jsonPath ] =	(object)array_filter( (array)$schema,
@@ -1209,7 +1213,6 @@ class SubmitForm {
 				} );
 		}
 
-		// trigger_error('^^$schemaMetadata ' . print_r($schemaMetadata,1));
 		return $this->saveSchemaMetadata( $this->user, $schemaWikiPage, $schemaMetadata, $errors );
 	}
 

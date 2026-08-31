@@ -147,7 +147,7 @@ class ManageSchemas extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
-		// https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
+		// eg. https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
 		$parsedId = explode( 'JsonSchema:', $data->schemaId )[ 1 ];
 
 		$metadata = [];

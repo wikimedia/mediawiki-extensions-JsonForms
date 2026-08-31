@@ -81,7 +81,7 @@ class ImportData extends Maintenance {
 				return $content;
 			}
 
-			$parsedId = end( explode( '/', $parts[1] ) );
+			$parsedId = basename( $parts[1] );
 			if ( empty( $parsedId ) ) {
 				return $content;
 			}

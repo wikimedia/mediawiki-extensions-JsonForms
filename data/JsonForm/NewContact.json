@@ -13,7 +13,6 @@
 		"Contact"
 	],
 	"view": "inline",
-	"create_only_fields": [],
 	"edit_freetext": false,
 	"preload": "none",
 	"return": "target",

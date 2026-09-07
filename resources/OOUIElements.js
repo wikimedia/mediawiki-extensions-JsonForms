@@ -267,4 +267,8 @@ SimpleDialog.prototype.getSetupProcess = function (data) {
 	JsonForms.Dialog = Dialog;
 	JsonForms.Alert = Alert;
 	JsonForms.NonModalDialog = NonModalDialog;
+
+	// @ATTENTION, ensure this is placed in the last loaded file
+	window.dispatchEvent( new Event( 'jsonforms-loaded' ) );
+
 }( jQuery ) );

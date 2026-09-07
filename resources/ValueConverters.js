@@ -25,15 +25,7 @@
 /* global JsonForms */
 ( function () {
 	function Converters() {
-		// key is lower case
-		this.converters = {
-			survey: new JsonForms.ValueConverters.Survey(),
-			newPropertyWithOptions: this.newPropertyWithOptions.bind( this )(),
-			newProperty: this.newProperty.bind( this )(),
-			newPropertyMeta: this.newPropertyMeta.bind( this )(),
-			newSlot: this.newSlot.bind( this )(),
-			newSchema: this.newSchema.bind( this )()
-		};
+		this.survey = new JsonForms.ValueConverters.Survey();
 	}
 
 	Converters.prototype.parseTargetSchema = function ( value ) {

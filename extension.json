@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -166,6 +166,7 @@
 				"libs/datatables/datatables.min.css",
 				"libs/autocomplete.min.css",
 				"style.css",
+				"libs/split.css",
 				"libs/intl-tel-input/css/intlTelInput.min.css",
 				"OOJSPlus/widgets/ColorPicker.css",
 				"OOJSPlus/widgets/ExpandablePanel.css"

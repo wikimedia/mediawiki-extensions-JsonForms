@@ -350,16 +350,6 @@ class FormBuilder {
 			$this->outerFormSchema->properties->form->properties->editor->{'x-input-config'}->edit_path =
 				$this->formDescriptor->edit_path;
 		}
-
-		// create only fields
-		$isEditing = !empty( $this->formDescriptor->edit );
-		$hasCreateOnlyFields = isset( $this->formDescriptor->create_only_fields ) &&
-			is_array( $this->formDescriptor->create_only_fields );
-
-		if ( $isEditing && $hasCreateOnlyFields ) {
-			$this->outerFormSchema->properties->form->properties->editor->{'x-input-config'}->disableFields =
-				$this->formDescriptor->create_only_fields;
-		}
 	}
 
 	/**

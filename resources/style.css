@@ -17,7 +17,7 @@
  * @file
  * @ingroup extensions
  * @author thomas-topway-it <support@topway.it>
- * @copyright Copyright ©2021-2024, https://wikisphere.org
+ * @copyright Copyright ©2025-2026, https://wikisphere.org
  */
 
 /* stylelint-disable block-no-empty */
@@ -61,6 +61,7 @@
 /* pageforms */
 .jsonforms-form.jsonforms-form-inline {
 	width: 600px;
+	overflow: auto;
 	background: white;
 	box-shadow: 0 1px 5px rgba(0,0,0,0.2),0 2px 2px rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12);
 }
@@ -69,6 +70,10 @@
 .jsonforms-form:not(.jsonforms-form-inline):not(.jsonforms-form-popup):not(.jsonforms-form-no-frame) {
 	background: white;
 	border: 1px solid #ccc;
+}
+
+.jsonforms-form:not(.jsonforms-form-popup) {
+	overflow: auto;
 }
 
 .jsonforms-editor .oo-ui-menuLayout-hideMenu:not(.jsonforms-treewidget)
@@ -270,16 +275,6 @@
 	display: none;
 }
 
-/*
-.jsonforms-switcher {
-	float: right;
-	width: auto;
-	margin-right: 0;
-	margin-left: 0 !important;
-	z-index: 100;
-}
-*/
-
 .oo-ui-menuSelectWidget {
 }
 
@@ -317,14 +312,8 @@
 	z-index: 100;
 }
 
-.jsonforms-treewidget.oo-ui-menuLayout-showMenu {
-	display: flex !important;
-	align-items: stretch;
-	height: auto;
-	min-height: 0;
-}
-
 /*
+// @TODO no-splitter version
 .jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
 	display: block !important;
 	min-height: 0;
@@ -332,6 +321,7 @@
 	flex: 0 0 230px; // ~14em
 }
 
+// @TODO no-splitter version
 .jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
 	display: block !important;
 	flex: 1;
@@ -339,15 +329,15 @@
 }
 */
 
-.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
-	display: block !important;
+.jsonforms-treewidget .oo-ui-menuLayout-menu {
+	display: block;
 	overflow-y: auto;
 	transition-property: height, width, top, left, right, bottom;
 	transition-duration: 0ms;
 }
 
-.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
-	display: block !important;
+.jsonforms-treewidget .oo-ui-menuLayout-content {
+	display: block;
 	flex: 1;
 	overflow-y: auto;
 	transition-property: height, width, top, left, right, bottom;
@@ -445,18 +435,22 @@
 	max-width: 380px;
 }
 
+/*
 .jsonforms-schemabuilder-resizable {
 	width: 400px;
 	box-shadow: -4px 0 8px -4px rgba( 0,0,0,0.3 );
 }
+*/
 
 .jsonforms-message-widget {
 	margin: 12px;
 }
 
+/*
 .jsonforms-build-container {
 	display: flex;
 }
+*/
 
 .jsonforms-popup-editjson {
 	padding: 0;

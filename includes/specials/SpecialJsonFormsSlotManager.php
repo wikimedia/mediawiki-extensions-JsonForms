@@ -82,6 +82,11 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 			throw new MWException( 'Cannot load core schema' );
 		}
 
+		$editTitle = null;
+		if ( !empty( $par ) ) {
+			$editTitle = TitleClass::newFromText( $par );
+		}
+
 		$innerSchema = \JsonForms::processSchema( $out, $innerSchema );
 
 		// ***important, encode schema otherwise $refs can mess with
@@ -106,30 +111,12 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 			$innerSchema,
 		);
 
-		$editTitle = null;
-		if ( !empty( $par ) ) {
-			$editTitle = TitleClass::newFromText( $par );
-		}
-
 		$startValInnerForm = new stdClass();
 		$editPage = null;
 		$metadata = null;
 
 		if ( $editTitle ) {
 			$startValInnerForm->title = $par;
-
-			// Initialize disableFields as array
-			if (
-				!isset(
-					$jsonForm->properties->editor->{'x-input-config'}
-						->disableFields
-				)
-			) {
-				$jsonForm->properties->editor->{'x-input-config'}->disableFields = [];
-			}
-			$jsonForm->properties->editor->{'x-input-config'}->disableFields = [
-				'title',
-			];
 
 			if ( $editTitle->isKnown() ) {
 				$editPage = $editTitle->getFullText();
@@ -196,6 +183,7 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 		$formData = new stdClass();
 		$formData->schema = $jsonForm;
 		$formData->formDescriptor = (object)[
+			'action' => !$editTitle ? 'create' : 'edit',
 			'editor_options' => (object)[
 				'base_options' => 'MediaWiki:DefaultEditorOptions',
 				'base_script' => 'MediaWiki:DefaultEditorScript',

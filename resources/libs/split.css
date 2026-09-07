@@ -1,0 +1,51 @@
+.split {
+	position: relative;
+	overflow: hidden;
+	min-width: 0;
+	min-height: 0;
+}
+
+.split-pane {
+	position: absolute;
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: 0;
+	overflow: auto;
+}
+
+.split-horizontal .split-pane {
+	top: 0;
+	bottom: 0;
+}
+
+.split-vertical .split-pane {
+	left: 0;
+	right: 0;
+}
+
+.split-gutter {
+	position: absolute;
+	z-index: 10;
+	user-select: none;
+	touch-action: none;
+}
+
+.split-horizontal .split-gutter {
+	top: 0;
+	bottom: 0;
+	cursor: col-resize;
+}
+
+.split-vertical .split-gutter {
+	left: 0;
+	right: 0;
+	cursor: row-resize;
+}
+
+.split-dragging {
+	user-select: none !important;
+}
+
+.split-dragging .split-pane {
+	user-select: none;
+}

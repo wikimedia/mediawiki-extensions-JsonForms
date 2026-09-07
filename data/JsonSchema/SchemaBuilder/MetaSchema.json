@@ -281,6 +281,19 @@
 					"type": "boolean",
 					"description": "Force border to the container"
 				},
+				"x-create-only": {
+					"type": "boolean",
+					"description": "Property only rendered when creating the form data"
+				},
+				"x-render-template": {
+					"type": "string",
+					"description": "Template name to be used by the parser function <code>jsonformsrender</code> instead of the computed name",
+					"x-description-format": "wikitext",
+					"x-input": "mw.widgets.TitleInputWidget",
+					"x-input-config": {
+						"namespace": 10
+					}
+				},
 				"x-data": {
 					"type": "object",
 					"description": "Data object to be used in conjunction with converters or enum providers",
@@ -1412,15 +1425,6 @@
 							"x-description-format": "wikitext"
 						}
 					}
-				},
-				"x-render-template": {
-					"type": "string",
-					"description": "Template name to be used by the parser function <code>jsonformsrender</code> instead of the computed name",
-					"x-description-format": "wikitext",
-					"x-input": "mw.widgets.TitleInputWidget",
-					"x-input-config": {
-						"namespace": 10
-					}
 				}
 			}
 		},
@@ -1534,7 +1538,8 @@
 					"x-additional-properties-ui_": [
 						{
 							"label": "field",
-							"schema": "JsonSchema:SchemaBuilder/Field"						},
+							"schema": "JsonSchema:SchemaBuilder/Field"
+						},
 						{
 							"label": "subitem",
 							"schema": "JsonSchema:SchemaBuilder/Subitem"
@@ -1679,14 +1684,16 @@
 						}
 					]
 				},
-				"x-render-template": {
-					"type": "string",
-					"description": "Template name to be used by the parser function <code>jsonformsrender</code> instead of the computed name",
-					"x-description-format": "wikitext",
-					"x-input": "mw.widgets.TitleInputWidget",
-					"x-input-config": {
-						"namespace": 10
-					}
+				"x-hidden-properties": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"x-input": "OO.ui.TagMultiselectWidget",
+						"x-input-config": {
+							"inputPosition": "outline"
+						}
+					},
+					"description": "Hidden properties: they can also be properties not declared in the schema but allowed by \"patternProperties\" or \"additionalProperties\""
 				}
 			},
 			"required": []
@@ -2084,3 +2091,4 @@
 		}
 	}
 }
+

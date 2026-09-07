@@ -171,7 +171,8 @@
 		};
 	}
 
-	function Survey( el, data ) {}
+	function Survey() {
+	}
 
 	Survey.prototype.convertFrom = function ( key, value ) {
 		// console.log('convertFrom', key, value);

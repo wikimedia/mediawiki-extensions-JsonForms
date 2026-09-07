@@ -14,7 +14,9 @@
 			"css_class",
 			"inline_css",
 			"title",
-			"hide_title"
+			"hide_footer",
+			"hide_header",
+			"no_frame"
 		],
 		"infobox": ["show_infobox", "infobox_position", "infobox_template"]
 	},
@@ -79,21 +81,6 @@
 			"default": "",
 			"x-dependency": {
 				"action": "create"
-			}
-		},
-		"create_only_fields": {
-			"type": "array",
-			"title": "Create-only fields",
-			"description": "Add properties (usually used in the pagename formula) that must be shown only on data creation",
-			"default": [],
-			"items": {
-				"type": "string"
-			},
-			"x-input": "OO.ui.TagMultiselectWidget",
-			"x-dependency": {
-				"path": "pagename_formula",
-				"op": "!=",
-				"value": ""
 			}
 		},
 		"overwrite_existing_article_on_create": {
@@ -235,7 +222,7 @@
 			"type": "string",
 			"format": "text",
 			"title": "Edit path",
-			"description": "Target path for form data (dot separated &ndash; array items can be added with &lt;path&gt;.[])",
+			"description": "Target path for form data (dot separated &ndash; array items can be added by adding a dot to the path)",
 			"x-description-format": "html",
 			"default": ""
 		},

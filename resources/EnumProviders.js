@@ -322,5 +322,5 @@
 	};
 
 	// eslint-disable-next-line no-undef
-	JsonForms.enumProviders = new EnumProviders();
+	JsonForms.EnumProviders = EnumProviders;
 }() );

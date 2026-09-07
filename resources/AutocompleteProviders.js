@@ -219,5 +219,5 @@
 	};
 
 	// eslint-disable-next-line no-undef
-	JsonForms.autocompleteProviders = new AutocompleteProviders();
+	JsonForms.AutocompleteProviders = AutocompleteProviders;
 }() );

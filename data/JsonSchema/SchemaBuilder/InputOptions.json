@@ -73,7 +73,8 @@
 			"properties": {
 				"icon": {
 					"type": "string",
-					"description": "The symbolic name of the icon (e.g., 'remove' or 'menu'), or a map of symbolic names."
+					"description": "The symbolic name of the icon, see [https://doc.wikimedia.org/oojs-ui/master/demos/?page=icons&theme=wikimediaui&direction=ltr&platform=desktop here]",
+					"x-description-format": "wikitext"
 				}
 			}
 		},

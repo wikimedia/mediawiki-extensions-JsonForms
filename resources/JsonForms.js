@@ -41,9 +41,9 @@ function JsonForms(el, data) {
 JsonForms.prototype.initialize = async function () {
 	this.editorOptions = await this.getModule(this.data.editorOptions);
 
-	this.enumProviders = JsonForms.enumProviders;
-	this.autocompleteProviders = JsonForms.autocompleteProviders;
-	const ValueConverters = new JsonForms.ValueConverters();
+	this.enumProviders = new JsonForms.EnumProviders();
+	this.autocompleteProviders = new JsonForms.AutocompleteProviders();
+	this.valueConverters = new JsonForms.ValueConverters();
 
 	const defaultOptions = {
 		...JFEditor.defaults.options,
@@ -66,13 +66,25 @@ JsonForms.prototype.initialize = async function () {
 	};
 
 	defaultOptions.callbacks.converters = {
-		...ValueConverters.converters,
+		...this.valueConverters,
 		...((defaultOptions.callbacks && defaultOptions.callbacks.converters) ||
 			{}),
 	};
 
 	this.defaultOptions = defaultOptions;
 };
+
+JsonForms.prototype.registerConverter = function ( name, fn ) {
+	JsonForms.ValueConverters.prototype[name] = fn;
+}
+
+JsonForms.prototype.registerAutocompleteProviders = function ( name, fn ) {
+	JsonForms.AutocompleteProviders.prototype[name] = fn;
+}
+
+JsonForms.prototype.registerEnumProviders = function ( name, fn ) {
+	JsonForms.EnumProviders.prototype[name] = fn;
+}
 
 JsonForms.prototype.createDefaultEditor = function (config = {}) {
 	config = {

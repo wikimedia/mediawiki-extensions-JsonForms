@@ -46,6 +46,7 @@
 						"Male",
 						"Female"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -60,6 +61,7 @@
 						"Minor",
 						"Not injured"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -95,6 +97,7 @@
 						"Passenger",
 						"Driver"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -109,6 +112,7 @@
 						"Bad turning",
 						"Using cell phone"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -117,6 +121,7 @@
 						"Alcohol suspected",
 						"Drugs suspected"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -130,6 +135,7 @@
 						"Not worn",
 						"Not worn correctly"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				}
@@ -162,6 +168,7 @@
 						"Roof",
 						"Multiple"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -174,6 +181,7 @@
 						"Tires",
 						"Multiple"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -183,6 +191,7 @@
 						"Over loaded",
 						"Unsafe load"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -202,6 +211,7 @@
 						"Parked off road",
 						"Parked on road"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -218,6 +228,7 @@
 						"East",
 						"West"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -239,6 +250,7 @@
 						"Van",
 						"Animal"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -272,6 +284,7 @@
 						"Injury",
 						"Property"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"isSearchable": true,
 					"default": ""
@@ -288,6 +301,7 @@
 						"Road defect",
 						"Human error"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"isSearchable": true,
 					"default": ""
@@ -306,6 +320,7 @@
 						"Gravel",
 						"Earth"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -314,6 +329,7 @@
 						"Lit",
 						"Unlit"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string"
 				},
 				"Collision type": {
@@ -329,6 +345,7 @@
 						"Hit pedestrian",
 						"Hit animal"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"isSearchable": true,
 					"default": ""
@@ -344,6 +361,7 @@
 						"Stop sign",
 						"Give way"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},
@@ -354,6 +372,7 @@
 						"Muddy",
 						"Flooded"
 					],
+					"input": "OO.ui.DropdownInputWidget",
 					"type": "string",
 					"default": ""
 				},

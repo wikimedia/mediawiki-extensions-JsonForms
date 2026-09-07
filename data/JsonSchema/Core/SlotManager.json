@@ -136,7 +136,8 @@
 					"type": "string",
 					"minLength": 1,
 					"title": "Title",
-					"x-input": "title"
+					"x-input": "title",
+					"x-create-only": true
 				}
 			},
 			"required": ["title"]

@@ -312,22 +312,25 @@
 	z-index: 100;
 }
 
-/*
-// @TODO no-splitter version
-.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
+.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu {
+	display: flex !important;
+	align-items: stretch;
+	height: auto;
+	min-height: 0;
+}
+
+.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu {
 	display: block !important;
 	min-height: 0;
 	overflow-y: auto;
-	flex: 0 0 230px; // ~14em
+	flex: 0 0 230px; /* ~14em */
 }
 
-// @TODO no-splitter version
-.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
+.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content {
 	display: block !important;
 	flex: 1;
 	overflow: auto;
 }
-*/
 
 .jsonforms-treewidget .oo-ui-menuLayout-menu {
 	display: block;

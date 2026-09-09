@@ -315,9 +315,9 @@ window.JsonForms = JsonForms;
 	$(() => {
 		function resizeTreeSidePanel() {
 			const leftSelector =
-				'.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu';
+				'.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu';
 			const rightSelector =
-				'.jsonforms-treewidget.oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content';
+				'.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content';
 
 			const $left = $(leftSelector);
 			const $right = $(rightSelector);

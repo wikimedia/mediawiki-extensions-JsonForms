@@ -3,9 +3,9 @@
  * * @name JSON Editor
  * * @description JSON Schema Based Editor
  * * Refactor of https://github.com/json-editor/json-editor
- * * @version "0.5"
- * * @author https://github.com/json-editor/json-editor/graphs/contributors
+ * * @version "1.2.1"
  * * @author thomas-topway-it support@topway.it
+ * * @author https://github.com/json-editor/json-editor/graphs/contributors
  * * @license MIT
  * * @example see README.md and docs/ for requirements, examples and usage info
  * * /

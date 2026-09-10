@@ -24,7 +24,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
-function JsonForms(el, data) {
+function JsonForms( el, data ) {
 	this.moduleCache = new Map();
 	this.el = el;
 	this.schema = data.schema;
@@ -39,7 +39,7 @@ function JsonForms(el, data) {
 }
 
 JsonForms.prototype.initialize = async function () {
-	this.editorOptions = await this.getModule(this.data.editorOptions);
+	this.editorOptions = await this.getModule( this.data.editorOptions );
 
 	this.enumProviders = new JsonForms.EnumProviders();
 	this.autocompleteProviders = new JsonForms.AutocompleteProviders();
@@ -47,56 +47,56 @@ JsonForms.prototype.initialize = async function () {
 
 	const defaultOptions = {
 		...JFEditor.defaults.options,
-		...(this.editorOptions || {}),
+		...( this.editorOptions || {} )
 	};
 
 	defaultOptions.callbacks = defaultOptions.callbacks || {};
 
 	defaultOptions.callbacks.enum_providers = {
 		...this.enumProviders,
-		...((defaultOptions.callbacks && defaultOptions.callbacks.enum_providers) ||
-			{}),
+		...( ( defaultOptions.callbacks && defaultOptions.callbacks.enum_providers ) ||
+			{} )
 	};
 
 	defaultOptions.callbacks.autocomplete_providers = {
 		...this.autocompleteProviders,
-		...((defaultOptions.callbacks &&
-			defaultOptions.callbacks.autocomplete_providers) ||
-			{}),
+		...( ( defaultOptions.callbacks &&
+			defaultOptions.callbacks.autocomplete_providers ) ||
+			{} )
 	};
 
 	defaultOptions.callbacks.converters = {
 		...this.valueConverters,
-		...((defaultOptions.callbacks && defaultOptions.callbacks.converters) ||
-			{}),
+		...( ( defaultOptions.callbacks && defaultOptions.callbacks.converters ) ||
+			{} )
 	};
 
 	this.defaultOptions = defaultOptions;
 };
 
 JsonForms.prototype.registerConverter = function ( name, fn ) {
-	JsonForms.ValueConverters.prototype[name] = fn;
-}
+	JsonForms.ValueConverters.prototype[ name ] = fn;
+};
 
 JsonForms.prototype.registerAutocompleteProviders = function ( name, fn ) {
-	JsonForms.AutocompleteProviders.prototype[name] = fn;
-}
+	JsonForms.AutocompleteProviders.prototype[ name ] = fn;
+};
 
 JsonForms.prototype.registerEnumProviders = function ( name, fn ) {
-	JsonForms.EnumProviders.prototype[name] = fn;
-}
+	JsonForms.EnumProviders.prototype[ name ] = fn;
+};
 
-JsonForms.prototype.createDefaultEditor = function (config = {}) {
+JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
 	config = {
 		jsonFormsInstance: this,
 		schema: this.schema,
 		schemaName: this.schemaName,
 		startval: this.startval,
-		...((this.data.formDescriptor || {}).editor_options || {}),
-		...config,
+		...( ( this.data.formDescriptor || {} ).editor_options || {} ),
+		...config
 	};
 
-	this.createEditor(this.el, config);
+	this.createEditor( this.el, config );
 	return this.editor;
 };
 
@@ -118,121 +118,122 @@ JsonForms.prototype.getModule = async function (str) {
 	}
 }
 */
-JsonForms.prototype.getModule = async function (str) {
-	const cacheKey = typeof str === 'string' ? str.slice(0, 100) : str;
+JsonForms.prototype.getModule = async function ( str ) {
+	const cacheKey = typeof str === 'string' ? str.slice( 0, 100 ) : str;
 
-	if (this.moduleCache.has(cacheKey)) {
-		return this.moduleCache.get(cacheKey);
+	if ( this.moduleCache.has( cacheKey ) ) {
+		return this.moduleCache.get( cacheKey );
 	}
 
-	if (typeof str !== 'string') {
+	if ( typeof str !== 'string' ) {
 		return str;
 	}
 
 	let url = null;
 	try {
-		const blob = new Blob([str], { type: 'application/javascript' });
-		url = URL.createObjectURL(blob);
+		const blob = new Blob( [ str ], { type: 'application/javascript' } );
+		url = URL.createObjectURL( blob );
 
 		// eslint-disable-next-line es-x/no-dynamic-import
-		const module = await import(url);
+		const module = await import( url );
 		const result = module.default || null;
-		this.moduleCache.set(cacheKey, result);
+		this.moduleCache.set( cacheKey, result );
 		return result;
-	} catch (err) {
-		console.error('Failed to load module:', err);
+	} catch ( err ) {
+		console.error( 'Failed to load module:', err );
 		return null;
 	} finally {
-		if (url) {
-			URL.revokeObjectURL(url);
+		if ( url ) {
+			URL.revokeObjectURL( url );
 		}
 	}
 };
 
 // use as schema loader - location
 JsonForms.prototype.getBasePath = function () {
-	const server = mw.config.get('wgServer');
+	const server = mw.config.get( 'wgServer' );
 
 	// "/wiki/$1" or "/index.php/$1"
-	const articlePath = mw.config.get('wgArticlePath');
+	const articlePath = mw.config.get( 'wgArticlePath' );
 
 	// "/wiki/" or "/index.php/"
-	const basePath = articlePath.replace('$1', '');
+	const basePath = articlePath.replace( '$1', '' );
 	return server + basePath;
 };
 
 // use as schema loader - fetchUrl
-JsonForms.prototype.MWSchemaUrl = function (schemaName) {
-	if (schemaName.indexOf('#') === -1) {
-		schemaName = schemaName.split('#')[0];
+JsonForms.prototype.MWSchemaUrl = function ( schemaName ) {
+	if ( schemaName.includes( '#' ) ) {
+		schemaName = schemaName.split( '#' )[ 0 ];
 	}
 
 	// OR
 	// return mw.config.get('jsonforms.schemaPath') + schemaName;
-	const mwBaseUrl = mw.config.get('wgServer') + mw.config.get('wgScript');
-	return `${mwBaseUrl}?title=${schemaName}&action=raw`;
+	const mwBaseUrl = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' );
+	return `${ mwBaseUrl }?title=${ schemaName }&action=raw`;
 };
 
-JsonForms.prototype.isMWSchema = function (maybeUrl, fileBase) {
+JsonForms.prototype.isMWSchema = function ( maybeUrl, fileBase ) {
 	// filebase is from core -> location
 
-	if (JsonForms.Utilities.hasProtocol(maybeUrl)) {
+	if ( JsonForms.Utilities.hasProtocol( maybeUrl ) ) {
 		return false;
 	}
-	if (!fileBase) {
+	if ( !fileBase ) {
 		return true;
 	}
 
 	const basePath = this.getBasePath();
-	return fileBase.startsWith(basePath) || basePath.startsWith(fileBase);
+	return fileBase.startsWith( basePath ) || basePath.startsWith( fileBase );
 };
 
-JsonForms.prototype.processSchema = function (schema) {
+JsonForms.prototype.processSchema = function ( schema ) {
 	const payload = {
 		action: 'jsonforms-process-schema',
 		format: 'json',
-		schema: JSON.stringify(schema),
+		schema: JSON.stringify( schema )
 	};
 
-	return new Promise((resolve, reject) => {
+	return new Promise( ( resolve, reject ) => {
 		new mw.Api()
-			.post(payload)
-			.done((thisRes) => {
-				let result = thisRes[payload.action].result;
-				result = JSON.parse(result);
-				resolve(result);
-			})
-			.fail((error, errorCode) => {
-				console.error('API call failed - error:', error);
-				console.error('Error code:', errorCode);
-				reject(error);
-			});
-	}).catch((err) => {
-		console.error('API call failed:', err);
+			.post( payload )
+			.done( ( thisRes ) => {
+				let result = thisRes[ payload.action ].result;
+				result = JSON.parse( result );
+				resolve( result );
+			} )
+			.fail( ( error, errorCode ) => {
+				console.error( 'API call failed - error:', error );
+				console.error( 'Error code:', errorCode );
+				reject( error );
+			} );
+	} ).catch( ( err ) => {
+		console.error( 'API call failed:', err );
 		throw err;
-	});
+	} );
 };
 
-JsonForms.prototype.notifyRefFetchFailed = function (uri, options) {
+JsonForms.prototype.notifyRefFetchFailed = function ( uri, options ) {
 	const external = options.external === true;
 	const config = {
 		type: 'error',
-		htmlMessage: mw.msg('jsonforms-jsmodule-fetch-ref-error', uri),
+		htmlMessage: mw.msg( 'jsonforms-jsmodule-fetch-ref-error', uri )
 	};
-	if (!this.isPopup) {
+	if ( !this.isPopup ) {
 		const nonModalDialog = new JsonForms.NonModalDialog();
-		nonModalDialog.open(config);
+		nonModalDialog.open( config );
 	} else {
-		JsonForms.Alert(config.htmlMessage);
+		JsonForms.Alert( config.htmlMessage );
 	}
 };
 
-JsonForms.prototype.fetchSchema = function (schemaName) {
+JsonForms.prototype.fetchSchema = function ( schemaName ) {
 	// @IMPORTANT !! otherwise the processed schema could
 	// be returned instead of the original schema
+	/* eslint-disable arrow-body-style */
 	const returnClone = ( schema ) => {
 		return Promise.resolve( JsonForms.Utilities.clone( schema ) );
-	}
+	};
 
 	if ( this._schemaCache[ schemaName ] ) {
 		return returnClone( this._schemaCache[ schemaName ] );
@@ -245,30 +246,30 @@ JsonForms.prototype.fetchSchema = function (schemaName) {
 	const payload = {
 		action: 'jsonforms-fetch-schema',
 		format: 'json',
-		schema: schemaName,
+		schema: schemaName
 	};
 
-	this._pendingRequests[schemaName] = new Promise((resolve, reject) => {
+	this._pendingRequests[ schemaName ] = new Promise( ( resolve, reject ) => {
 		new mw.Api()
-			.get(payload)
-			.done((thisRes) => {
-				if ( 'error' in thisRes[payload.action] ) {
-					reject(thisRes[payload.action].error);
+			.get( payload )
+			.done( ( thisRes ) => {
+				if ( 'error' in thisRes[ payload.action ] ) {
+					reject( thisRes[ payload.action ].error );
 				} else {
-					let result = thisRes[payload.action].result;
-					const schema = JSON.parse(result);
-					this._schemaCache[schemaName] = schema;
-					delete this._pendingRequests[schemaName];
-					resolve(schema);
+					let result = thisRes[ payload.action ].result;
+					const schema = JSON.parse( result );
+					this._schemaCache[ schemaName ] = schema;
+					delete this._pendingRequests[ schemaName ];
+					resolve( schema );
 				}
-			})
-			.fail((error, errorCode) => {
-				delete this._pendingRequests[schemaName];
-				console.error('API call failed - error:', error);
-				console.error('Error code:', errorCode);
-				reject(error);
-			});
-	});
+			} )
+			.fail( ( error, errorCode ) => {
+				delete this._pendingRequests[ schemaName ];
+				console.error( 'API call failed - error:', error );
+				console.error( 'Error code:', errorCode );
+				reject( error );
+			} );
+	} );
 
 	return this._pendingRequests[ schemaName ].then( returnClone );
 };
@@ -277,70 +278,70 @@ JsonForms.prototype.getEditor = function () {
 	return this.editor;
 };
 
-JsonForms.prototype.createEditor = function (el, config) {
+JsonForms.prototype.createEditor = function ( el, config ) {
 	// eslint-disable-next-line no-undef
 	JFEditor.defaults.options = this.defaultOptions;
 
 	// eslint-disable-next-line no-undef
-	this.editor = new JFEditor(el, {
+	this.editor = new JFEditor( el, {
 		schemaSelector: null,
 		...config,
 		ajax: true,
-		jsonFormsInstance: this,
-	});
+		jsonFormsInstance: this
+	} );
 
-	if (typeof this.editorScript === 'function') {
-		const updateEditorCallBack = (thisConfig) => {
-			this.createEditor(this.el, { ...config, ...thisConfig });
+	if ( typeof this.editorScript === 'function' ) {
+		const updateEditorCallBack = ( thisConfig ) => {
+			this.createEditor( this.el, { ...config, ...thisConfig } );
 		};
-		this.editorScript(this.editor, this.config, updateEditorCallBack);
+		this.editorScript( this.editor, this.config, updateEditorCallBack );
 	}
 
 	return this.editor;
 };
 
-JsonForms.prototype.processTemplate = function (str, vars, options = {}) {
+JsonForms.prototype.processTemplate = function ( str, vars, options = {} ) {
 	// Match patterns like <user.name> or <count>
 	const regex = /<([^>]+)>/g;
 
-	return str.replace(regex, (match, path) => {
+	return str.replace( regex, ( match, path ) => {
 		const trimmedPath = path.trim();
-		return vars[trimmedPath] !== undefined ? vars[trimmedPath] : '';
-	});
+		return vars[ trimmedPath ] !== undefined ? vars[ trimmedPath ] : '';
+	} );
 };
 
 window.JsonForms = JsonForms;
 
-(function ($) {
-	$(() => {
+( function ( $ ) {
+	$( () => {
 		function resizeTreeSidePanel() {
 			const leftSelector =
 				'.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-menu';
 			const rightSelector =
 				'.jsonforms-treewidget:not(.jsonforms-treewidget-resizeable).oo-ui-menuLayout-showMenu .oo-ui-menuLayout-content';
 
-			const $left = $(leftSelector);
-			const $right = $(rightSelector);
+			const $left = $( leftSelector );
+			const $right = $( rightSelector );
 
-			if (!$left[0] || !$right[0]) {
+			if ( !$left[ 0 ] || !$right[ 0 ] ) {
 				return;
 			}
 
-			const leftRect = $left[0].getBoundingClientRect();
-			const containerRect = $right[0].getBoundingClientRect();
+			const leftRect = $left[ 0 ].getBoundingClientRect();
+			const containerRect = $right[ 0 ].getBoundingClientRect();
 
-			const viewportHeight = $(window).height();
+			const viewportHeight = $( window ).height();
 			const toViewport = viewportHeight - leftRect.top;
 			const toContainer = containerRect.bottom - leftRect.top;
-			let available = Math.min(toViewport, toContainer);
-			available = Math.max(0, available);
+			let available = Math.min( toViewport, toContainer );
+			available = Math.max( 0, available );
 
-			$left.css('max-height', available + 'px');
+			$left.css( 'max-height', available + 'px' );
 		}
 
-		$(window).on('scroll resize', resizeTreeSidePanel);
+		$( window ).on( 'scroll resize', resizeTreeSidePanel );
 		resizeTreeSidePanel();
-	});
+	} );
 
-	// eslint-disable-next-line no-undef
-})(jQuery);
+// eslint-disable-next-line no-undef
+}( jQuery ) );

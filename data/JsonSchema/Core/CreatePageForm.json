@@ -18,7 +18,7 @@
 			"hide_header",
 			"no_frame"
 		],
-		"infobox": ["show_infobox", "infobox_position", "infobox_template"]
+		"infobox": ["show_infobox", "infobox_position", "infobox_template", "template_print_scalar"]
 	},
 	"properties": {
 		"name": {
@@ -281,6 +281,17 @@
 				"path": "show_infobox",
 				"op": "==",
 				"value": true
+			}
+		},
+		"template_print_scalar": {
+			"type": "boolean",
+			"title": "Template print scalar",
+			"description": "Print scalar values if the related template is not found",
+			"default": false,
+			"x-dependency": {
+				"path": "infobox_template",
+				"op": "!=",
+				"value": ""
 			}
 		},
 		"display_path": {

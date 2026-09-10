@@ -26,7 +26,9 @@ namespace MediaWiki\Extension\JsonForms;
 use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserOptions;
 use OutputPage;
+use Parser;
 use stdClass;
 use User;
 
@@ -298,7 +300,12 @@ class BaseRender {
 		$position = $slotMetadata->infoboxPosition ?? 'right';
 		$outputPage->enableOOUI();
 
-		$parameters = [ 'schema' => $slotMetadata->schema ];
+		// @see JsonForms -> parserFunctionRender
+		$parameters = [
+			'schema' => $slotMetadata->schema,
+			'template' => $slotMetadata->infoboxTemplate ?? null,
+			'print_scalar' => $slotMetadata->templatePrintScalar ?? false,
+		];
 
 		// Render infobox
 		$renderedContent = self::renderInfobox(
@@ -401,7 +408,7 @@ class BaseRender {
 	): ?string {
 		try {
 			// Custom template
-			if ( !empty( $slotMetadata->infoboxTemplate ) ) {
+			if ( !empty( $parameters['template'] ) ) {
 				return self::renderWithTemplate(
 					$outputPage,
 					$user,
@@ -459,7 +466,6 @@ class BaseRender {
 			Parser::OT_PREPROCESS
 		);
 
-		$parameters['template'] = $slotMetadata->infoboxTemplate;
 		$templateRender = new TemplateRender(
 			$user,
 			$title,

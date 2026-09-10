@@ -181,7 +181,7 @@ class TemplateRender extends BaseRender {
 					NS_TEMPLATE,
 				);
 
-				if ( !$this->parameters['print_scalar'] ) {
+				if ( empty( $this->parameters['print_scalar'] ) ) {
 					$ret[$key] = $this->processTemplate( $templateName, $params );
 
 				} elseif ( $titleTemplate && $titleTemplate->isKnown() ) {

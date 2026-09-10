@@ -18,11 +18,10 @@
 	"return": "target",
 	"edit_path": "",
 	"edit_jsonpath": "",
-	"infobox": {
-		"show_infobox": true,
-		"infobox_position": "right",
-		"infobox_template": ""
-	},
+	"show_infobox": true,
+	"infobox_position": "right",
+	"infobox_template": "",
+	"template_print_scalar": false,
 	"display_path": "",
 	"inline_css": "width: 600px;",
 	"title": "",

@@ -121,7 +121,7 @@ class JsonForms {
 				],
 				'print_scalar' => (object)[
 					'type' => 'bool',
-					'default' => true,
+					'default' => false,
 				],
 			],
 		];

@@ -633,7 +633,12 @@ JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor )
 	}
 
 	const metadata = {};
-	const metadataKeys = [ 'show_infobox', 'infobox_position', 'infobox_template' ];
+	const metadataKeys = [
+		'show_infobox',
+		'infobox_position',
+		'infobox_template',
+		'template_print_scalar'
+	];
 
 	for ( const key of metadataKeys ) {
 		if ( formDescriptor[ key ] ) {

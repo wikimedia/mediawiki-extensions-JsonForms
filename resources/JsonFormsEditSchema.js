@@ -110,7 +110,7 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 		schemaId = selectedSchemaEditor.schema.$id;
 	}
 
-	// form.options: "show_infobox", "infobox_position" ,"infobox_template", ...
+	// form.options: "show_infobox", "infobox_position" ,"infobox_template", "template_print_scalar", ...
 	const metadata = { ...editorValue.form.options };
 
 	let value;

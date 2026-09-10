@@ -20,11 +20,10 @@
 	"return_url": "",
 	"edit_path": "",
 	"edit_schema": "",
-	"infobox": {
-		"show_infobox": true,
-		"infobox_position": "right",
-		"infobox_template": ""
-	},
+	"show_infobox": true,
+	"infobox_position": "right",
+	"infobox_template": "",
+	"template_print_scalar": false,
 	"view": "inline",
 	"popup_button_config": {
 	},

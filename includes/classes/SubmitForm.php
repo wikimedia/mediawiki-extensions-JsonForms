@@ -737,6 +737,7 @@ class SubmitForm {
 			'show_infobox' => 'showInfobox',
 			'infobox_position' => 'infoboxPosition',
 			'infobox_template' => 'infoboxTemplate',
+			'template_print_scalar' => 'templatePrintScalar',
 		];
 
 		foreach ( $metadataKeys as $key => $value ) {

@@ -125,6 +125,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 					'show_infobox' => 'showInfobox',
 					'infobox_template' => 'infoboxTemplate',
 					'infobox_position' => 'infoboxPosition',
+					'template_print_scalar' => 'templatePrintScalar',
 				];
 
 				foreach ( $metadataKeys as $k => $v ) {

@@ -70,11 +70,12 @@ JsonFormsPageForm.prototype.createPopupButtonInfo = function ( dialog ) {
 		.get( 'wgArticlePath' )
 		.replace( '$1', 'JsonForm:' + this.formDescriptor.name );
 
+	const schemaName = ( this.formDescriptor.edit_schema ? this.formDescriptor.edit_schema : this.formDescriptor.schema );
 	const schemaUrl = mw.config
 		.get( 'wgArticlePath' )
-		.replace( '$1', 'JsonSchema:' + this.formDescriptor.schema );
+		.replace( '$1', 'JsonSchema:' + schemaName );
 
-	const infoMessage = `Using schema <a target="_blank" href="${ schemaUrl }">${ this.formDescriptor.schema }</a> via form descriptor <a target="_blank" href="${ formUrl }">${ this.formDescriptor.name }</a>`;
+	const infoMessage = `Using schema <a target="_blank" href="${ schemaUrl }">${ schemaName }</a> via form descriptor <a target="_blank" href="${ formUrl }">${ this.formDescriptor.name }</a>`;
 
 	return new OO.ui.PopupButtonWidget( {
 		icon: 'info',

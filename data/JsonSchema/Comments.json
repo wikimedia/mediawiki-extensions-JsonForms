@@ -20,13 +20,6 @@
 				"allOf": [
 					{
 						"$ref": "JsonSchema:Comment"
-					},
-					{
-						"properties": {
-							"replies": {
-								"x-hidden": false
-							}
-						}
 					}
 				]
 			}

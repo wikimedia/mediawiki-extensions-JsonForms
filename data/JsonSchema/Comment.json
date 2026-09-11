@@ -40,7 +40,12 @@
 		},
 		"replies": {
 			"type": "array",
-			"x-hidden": true,
+			"x-hidden": {
+				"path": "root",
+				"staticPath": "title",
+				"value": "Comments",
+				"op": "!="
+			},
 			"title": "",
 			"description": "",
 			"x-layout": "default",

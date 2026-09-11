@@ -1,7 +1,8 @@
 {
 	"$id": "https://wikisphere.org/wiki/JsonSchema:Comment",
 	"x-render-template": "Template:Comments.comments.Item",
-	"title": "",
+	"title": "Comment",
+	"x-no-title": true,
 	"description": "",
 	"x-layout": "default",
 	"type": "object",

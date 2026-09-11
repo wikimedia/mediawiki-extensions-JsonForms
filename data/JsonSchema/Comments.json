@@ -5,6 +5,10 @@
 	"description": "Schema for nested comments with replies",
 	"type": "object",
 	"x-layout": "paged",
+	"x-layout-config": {
+		"toggle": true,
+		"resizeable": true
+	},
 	"properties": {
 		"comments": {
 			"type": "array",

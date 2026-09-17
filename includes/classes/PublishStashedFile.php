@@ -24,7 +24,6 @@
 
 namespace MediaWiki\Extension\JsonForms;
 
-use ApiMain;
 use Status;
 use UploadBase;
 use UploadFromStash;
@@ -165,19 +164,6 @@ class PublishStashedFile {
 	}
 
 	/**
-	 * Get the image info array
-	 *
-	 * @return array|null
-	 */
-	public function getImageInfo(): ?array {
-		if ( $this->upload ) {
-			$apiMain = new ApiMain();
-			return $this->upload->getImageInfo( $apiMain->getResult() );
-		}
-		return null;
-	}
-
-	/**
 	 * Verify the upload
 	 *
 	 * @return bool True on success, false on failure
@@ -252,8 +238,6 @@ class PublishStashedFile {
 	 * Set the success status with image info
 	 */
 	private function setSuccessStatus(): void {
-		$apiMain = new ApiMain();
-		$imageInfo = $this->upload->getImageInfo( $apiMain->getResult() );
 		$fileName = $this->upload->getLocalFile()->getName();
 
 		UploadBase::setSessionStatus(
@@ -263,7 +247,6 @@ class PublishStashedFile {
 				'result' => 'Success',
 				'stage' => 'publish',
 				'filename' => $fileName,
-				'imageinfo' => $imageInfo,
 				'status' => Status::newGood()
 			]
 		);

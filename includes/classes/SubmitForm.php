@@ -353,7 +353,6 @@ class SubmitForm {
 
 					if ( $publishStashedFile->publish() ) {
 						// $fileName = $publishStashedFile->getUploadedFileName();
-						// $imageInfo = $publishStashedFile->getImageInfo();
 
 					} else {
 						$errors[] = $publishStashedFile->getLastError();

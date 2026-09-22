@@ -45,16 +45,16 @@ JsonFormsPageForm.prototype.initialize = async function () {
 	if ( !defaultOptions.callbacks ) {
 		defaultOptions.callbacks = {};
 	}
-	if ( !defaultOptions.callbacks.button ) {
-		defaultOptions.callbacks.button = {};
+	if ( !defaultOptions.callbacks.actions ) {
+		defaultOptions.callbacks.actions = {};
 	}
 
 	this.defaultOptions = {
 		...defaultOptions,
 		callbacks: {
 			...defaultOptions.callbacks,
-			button: {
-				...defaultOptions.callbacks.button,
+			actions: {
+				...defaultOptions.callbacks.actions,
 				outerFormNavButton: function ( editor ) {
 					this.onNavButton( editor );
 				}.bind( this )
@@ -393,7 +393,7 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 									innerEditorValidationResults
 								);
 							}
-							JsonForms.Alert( 'there are errors' );
+							JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 							return;
 						} else {
 							dialog.layout.setItem( panels[ 1 ] );
@@ -418,7 +418,7 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 								optionsEditorValidationResults
 							);
 						}
-						JsonForms.Alert( 'there are errors' );
+						JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 						return;
 					}
 
@@ -434,7 +434,7 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 								innerEditorValidationResults
 							);
 						}
-						JsonForms.Alert( 'there are errors' );
+						JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 						return;
 					}
 					return getActionProcess.call( this, action ).next( () => {
@@ -526,7 +526,7 @@ JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
 							innerEditorValidationResults
 						);
 					}
-					JsonForms.Alert( 'there are errors' );
+					JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 					return;
 				} else {
 					editor.disable();
@@ -573,7 +573,7 @@ JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
 						innerEditorValidationResults
 					);
 				}
-				JsonForms.Alert( 'there are errors' );
+				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 				return;
 			} else {
 				booklet.setPage( 'root.form.options' );

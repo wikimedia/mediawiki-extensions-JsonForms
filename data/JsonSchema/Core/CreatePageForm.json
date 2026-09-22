@@ -18,36 +18,53 @@
 			"hide_header",
 			"no_frame"
 		],
-		"infobox": ["show_infobox", "infobox_position", "infobox_template", "template_print_scalar"]
+		"infobox": [
+			"show_infobox",
+			"infobox_position",
+			"infobox_template",
+			"template_print_scalar"
+		]
 	},
 	"properties": {
 		"name": {
 			"type": "string",
-			"title": "Form name",
-			"description": "Unique identifier for the use in the parser function {{#jsonforms: <form name> }} to print this form in any wiki page",
+			"title": "{{int:jsonforms-formschema-createpageform-name}}",
+			"description": "{{int:jsonforms-formschema-createpageform-name-desc}}",
+			"x-description-format": "wikitext",
+			"x-title-format": "wikitext",
 			"minLength": 1
 		},
 		"schema": {
 			"type": "string",
-			"title": "JSON Schema",
-			"description": "",
+			"title": "{{int:jsonforms-formschema-createpageform-schema}}",
+			"description": "{{int:jsonforms-formschema-createpageform-schema-desc}}",
+			"x-description-format": "wikitext",
+			"x-title-format": "wikitext",
 			"default": "",
 			"minLength": 1,
-			"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
-			"x-description-format": "wikitext",
 			"x-enum-provider": "jsonSchemas"
 		},
 		"action": {
 			"type": "string",
+			"title": "{{int:jsonforms-formschema-createpageform-action}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-action-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"enum": ["create", "edit", "none"],
-			"description": "\"none\" should only be used when the submitted data is handled by a callback declared in [[MediaWiki:DefaultEditorOptions]]",
-			"x-description-format": "wikitext"
+			"x-enum-titles": [
+				"{{int:jsonforms-formschema-createpageform-action-create}}",
+				"{{int:jsonforms-formschema-createpageform-action-edit}}",
+				"{{int:jsonforms-formschema-createpageform-action-none}}"
+			],
+			"x-enum-titles-format": "wikitext"
 		},
 		"edit": {
 			"type": "string",
-			"title": "Edit page",
-			"description": "Page to edit",
+			"title": "{{int:jsonforms-formschema-createpageform-edit}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-edit-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-input": "mw.widgets.TitleInputWidget",
 			"x-dependency": {
@@ -56,17 +73,21 @@
 		},
 		"ugroups": {
 			"type": "array",
+			"title": "{{int:jsonforms-formschema-createpageform-ugroups}}",
+			"x-title-format": "wikitext",
 			"items": {
 				"type": "string",
 				"x-input": "OO.ui.MenuTagMultiselectWidget",
 				"x-enum-provider": "uGroups"
 			},
-			"default": ["user"],
-			"title": "Restrict to groups"
+			"default": ["user"]
 		},
 		"captcha": {
 			"type": "boolean",
-			"description": "Add captcha to form",
+			"title": "{{int:jsonforms-formschema-createpageform-captcha}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-captcha-desc}}",
+			"x-description-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"path": "ugroups",
@@ -76,8 +97,10 @@
 		},
 		"pagename_formula": {
 			"type": "string",
-			"title": "Page name formula",
-			"description": "can contain wikitext, properties values are retrieved using an expression like <parent.child> (e.g. <name> or <address.country>)",
+			"title": "{{int:jsonforms-formschema-createpageform-pagenameformula}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-pagenameformula-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-dependency": {
 				"action": "create"
@@ -85,8 +108,10 @@
 		},
 		"overwrite_existing_article_on_create": {
 			"type": "boolean",
-			"title": "Overwrite existing article",
-			"description": "If enabled, existing articles with the same name will be overwritten",
+			"title": "{{int:jsonforms-formschema-createpageform-overwritearticle}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-overwritearticle-desc}}",
+			"x-description-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"path": "pagename_formula",
@@ -96,15 +121,17 @@
 		},
 		"slot": {
 			"type": "string",
-			"title": "target slot",
-			"description": "Default slot for form data: if different from main the related article will be saved as a [https://www.mediawiki.org/wiki/Multi-Content_Revisions Multi-Content-Revision]",
+			"title": "{{int:jsonforms-formschema-createpageform-slot}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-slot-desc}}",
 			"x-description-format": "wikitext",
 			"default": "jsonforms-data",
 			"x-enum-provider": "jsonSlots"
 		},
 		"edit_freetext": {
 			"type": "boolean",
-			"title": "Edit freetext",
+			"title": "{{int:jsonforms-formschema-createpageform-freetext}}",
+			"x-title-format": "wikitext",
 			"description": "",
 			"default": false,
 			"x-dependency": {
@@ -115,13 +142,17 @@
 		},
 		"edit_categories": {
 			"type": "boolean",
-			"title": "Edit categories",
-			"default": false,
-			"description": "Is the user allowed to edit categories before submitting the form ?"
+			"title": "{{int:jsonforms-formschema-createpageform-categories}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-categories-desc}}",
+			"x-description-format": "wikitext",
+			"default": false
 		},
 		"default_categories": {
-			"title": "Default categories",
-			"description": "only if Edit categories is enabled",
+			"title": "{{int:jsonforms-formschema-createpageform-default-categories}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-default-categories-desc}}",
+			"x-description-format": "wikitext",
 			"type": "array",
 			"x-input": "mw.widgets.CategoryMultiselectWidget",
 			"items": {
@@ -135,10 +166,18 @@
 		},
 		"preload": {
 			"type": "string",
-			"title": "Preload",
-			"description": "Preload page or wikitext",
+			"title": "{{int:jsonforms-formschema-createpageform-preload}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-preload-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
-			"enum": ["none", "article", "wikitext"],
+			"enum": [ "none", "article", "wikitext" ],
+			"x-enum-titles": [
+				"{{int:jsonforms-formschema-createpageform-preload-none}}",
+				"{{int:jsonforms-formschema-createpageform-preload-article-enum}}",
+				"{{int:jsonforms-formschema-createpageform-preload-wikitext-enum}}"
+			],
+			"x-enum-titles-format": "wikitext",
 			"default": "none",
 			"x-dependency": {
 				"and": [
@@ -157,8 +196,10 @@
 		},
 		"preload_article": {
 			"type": "string",
-			"title": "Preload page",
-			"description": "Page to preload content from",
+			"title": "{{int:jsonforms-formschema-createpageform-preload-article}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-preload-article-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-input": "mw.widgets.TitleInputWidget",
 			"x-dependency": {
@@ -173,8 +214,10 @@
 		},
 		"preload_wikitext": {
 			"type": "string",
-			"title": "Preload wikitext",
-			"description": "Preload wikitext into the target article. (Performs substitutions using an expression like <parent.child>).",
+			"title": "{{int:jsonforms-formschema-createpageform-preload-wikitext}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-preload-wikitext-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-format": "textarea",
 			"x-dependency": {
@@ -189,16 +232,27 @@
 		},
 		"return": {
 			"type": "string",
-			"title": "Return",
-			"description": "Page to redirect to after completion",
+			"title": "{{int:jsonforms-formschema-createpageform-return}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-return-desc}}",
+			"x-description-format": "wikitext",
 			"enum": ["target", "none", "article", "url"],
+			"x-enum-titles": [
+				"{{int:jsonforms-formschema-createpageform-return-target}}",
+				"{{int:jsonforms-formschema-createpageform-return-none}}",
+				"{{int:jsonforms-formschema-createpageform-return-article}}",
+				"{{int:jsonforms-formschema-createpageform-return-url-enum}}"
+			],
+			"x-enum-titles-format": "wikitext",
 			"default": "target"
 		},
 		"return_page": {
 			"type": "string",
-			"title": "Return page",
+			"title": "{{int:jsonforms-formschema-createpageform-return-page}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-return-page-desc}}",
+			"x-description-format": "wikitext",
 			"x-input": "mw.widgets.TitleInputWidget",
-			"description": "Page to redirect to after completion",
 			"default": "",
 			"x-dependency": {
 				"path": "return",
@@ -208,8 +262,10 @@
 		},
 		"return_url": {
 			"type": "string",
-			"title": "Return URL",
-			"description": "External URL to redirect to after completion. (Performs substitutions using an expression like <parent.child>)",
+			"title": "{{int:jsonforms-formschema-createpageform-return-url}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-return-url-desc}}",
+			"x-description-format": "wikitext",
 			"format": "uri",
 			"default": "",
 			"x-dependency": {
@@ -221,9 +277,10 @@
 		"edit_path": {
 			"type": "string",
 			"format": "text",
-			"title": "Edit path",
-			"description": "Target path for form data (dot separated &ndash; array items can be added by adding a dot to the path)",
-			"x-description-format": "html",
+			"title": "{{int:jsonforms-formschema-createpageform-edit-path}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-edit-path-desc}}",
+			"x-description-format": "wikitext",
 			"default": ""
 		},
 		"edit_jsonpath": {
@@ -234,9 +291,11 @@
 		},
 		"edit_schema": {
 			"type": "string",
-			"title": "Edit schema",
+			"title": "{{int:jsonforms-formschema-createpageform-edit-schema}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-edit-schema-desc}}",
+			"x-description-format": "wikitext",
 			"format": "text",
-			"description": "Partial schema for editing 'edit_path'",
 			"default": "",
 			"x-enum-provider": "jsonSchemas",
 			"default": "",
@@ -248,8 +307,10 @@
 		},
 		"show_infobox": {
 			"type": "boolean",
-			"title": "Show Infobox",
-			"description": "Whether to show an infobox on the target page",
+			"title": "{{int:jsonforms-formschema-show-infobox}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-show-infobox-desc}}",
+			"x-description-format": "wikitext",
 			"default": true,
 			"x-dependency": {
 				"path": "slot",
@@ -259,8 +320,16 @@
 		},
 		"infobox_position": {
 			"type": "string",
-			"title": "Infobox position",
+			"title": "{{int:jsonforms-formschema-infobox-position}}",
+			"x-title-format": "wikitext",
 			"enum": ["right", "left", "top", "bottom"],
+			"x-enum-titles": [
+				"{{int:jsonforms-formschema-infobox-position-right}}",
+				"{{int:jsonforms-formschema-infobox-position-left}}",
+				"{{int:jsonforms-formschema-infobox-position-top}}",
+				"{{int:jsonforms-formschema-infobox-position-bottom}}"
+			],
+			"x-enum-titles-format": "wikitext",
 			"default": "right",
 			"x-dependency": {
 				"path": "show_infobox",
@@ -270,8 +339,10 @@
 		},
 		"infobox_template": {
 			"type": "string",
-			"title": "Infobox template",
-			"description": "Template to use (leave empty for automatic generation)",
+			"title": "{{int:jsonforms-formschema-infobox-template}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-infobox-template-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-input": "mw.widgets.TitleInputWidget",
 			"x-input-config": {
@@ -285,8 +356,10 @@
 		},
 		"template_print_scalar": {
 			"type": "boolean",
-			"title": "Template print scalar",
-			"description": "Print scalar values if the related template is not found",
+			"title": "{{int:jsonforms-formschema-print-scalar}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
+			"x-description-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"path": "infobox_template",
@@ -297,29 +370,42 @@
 		"display_path": {
 			"type": "string",
 			"format": "text",
-			"title": "Display path",
-			"description": "Json path to the subschema used to display a partial form (dot separated)",
+			"title": "{{int:jsonforms-formschema-createpageform-display-path}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-display-path-desc}}",
+			"x-description-format": "wikitext",
 			"default": "",
 			"x-hidden": true
 		},
 		"view": {
 			"type": "string",
-			"title": "View mode",
-			"enum": ["inline", "popup"],
+			"title": "{{int:jsonforms-formschema-createpageform-view}}",
+			"x-title-format": "wikitext",
+			"enum": [
+				"inline",
+				"popup"
+			],
+			"x-enum-titles": [
+				"{{int:jsonforms-formschema-createpageform-view-inline}}",
+				"{{int:jsonforms-formschema-createpageform-view-popup}}"
+			],
+			"x-enum-titles-format": "wikitext",
 			"default": "inline"
 		},
 		"title": {
 			"type": "string",
-			"title": "Form title",
-			"description": "If different from the form name",
+			"title": "{{int:jsonforms-formschema-createpageform-title}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-title-desc}}",
+			"x-description-format": "wikitext",
 			"x-dependency": {
 				"view": "inline"
 			}
 		},
 		"hide_header": {
 			"type": "boolean",
-			"title": "Hide form header",
-			"description": "",
+			"title": "{{int:jsonforms-formschema-createpageform-hide-header}}",
+			"x-title-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"view": "inline"
@@ -327,8 +413,8 @@
 		},
 		"hide_footer": {
 			"type": "boolean",
-			"title": "Hide form footer",
-			"description": "",
+			"title": "{{int:jsonforms-formschema-createpageform-hide-footer}}",
+			"x-title-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"view": "inline"
@@ -336,8 +422,8 @@
 		},
 		"no_frame": {
 			"type": "boolean",
-			"title": "Hide form frame",
-			"description": "",
+			"title": "{{int:jsonforms-formschema-createpageform-hide-form-frame}}",
+			"x-title-format": "wikitext",
 			"default": false,
 			"x-dependency": {
 				"view": "inline"
@@ -346,7 +432,8 @@
 		"popup_button_config": {
 			"x-collapsible": true,
 			"type": "object",
-			"title": "popup button config",
+			"title": "{{int:jsonforms-formschema-createpageform-popup-button-config}}",
+			"x-title-format": "wikitext",
 			"$ref": "JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ButtonWidget",
 			"x-dependency": {
 				"view": "popup"
@@ -354,7 +441,8 @@
 		},
 		"popup_size": {
 			"type": "string",
-			"title": "Popup size",
+			"title": "{{int:jsonforms-formschema-createpageform-popup-size}}",
+			"x-title-format": "wikitext",
 			"default": "medium",
 			"enum": ["medium", "large", "small"],
 			"x-dependency": {
@@ -363,14 +451,18 @@
 		},
 		"css_class": {
 			"type": "string",
-			"title": "CSS class",
-			"description": "CSS class applied to the rendered view",
+			"title": "{{int:jsonforms-formschema-createpageform-css-class}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-css-class-desc}}",
+			"x-description-format": "wikitext",
 			"default": ""
 		},
 		"inline_css": {
 			"type": "string",
-			"title": "inline css",
-			"description": "inline css applied to the form container",
+			"title": "{{int:jsonforms-formschema-createpageform-inline-css}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-inline-css-desc}}",
+			"x-description-format": "wikitext",
 			"default": "width: 600px;",
 			"x-dependency": {
 				"view": "inline"
@@ -379,31 +471,42 @@
 		"editor_options": {
 			"type": "object",
 			"x-show": true,
-			"title": "editor options",
+			"title": "{{int:jsonforms-formschema-createpageform-editor-options}}",
+			"x-title-format": "wikitext",
 			"x-collapsible_": true,
 			"properties": {
 				"base_options": {
 					"type": "string",
-					"title": "base options",
-					"description": "Editor options in the MediaWiki: namespace, javascript content model",
-					"default": "MediaWiki:DefaultEditorOptions",
-					"x-input": "mw.widgets.TitleInputWidget"
-				},
-				"base_script": {
-					"type": "string",
-					"title": "base script",
-					"description": "Editor options in the MediaWiki: namespace, javascript content model",
-					"default": "MediaWiki:DefaultEditorScript",
+					"title": "{{int:jsonforms-formschema-createpageform-base-options}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-base-options-desc}}",
+					"x-description-format": "wikitext",
+					"default": "MediaWiki:JsonFormsOptions",
 					"x-input": "mw.widgets.TitleInputWidget"
 				},
 				"validation": {
 					"type": "string",
-					"enum": ["onsubmit", "always"],
-					"default": "never",
-					"description": "When to show validation errors"
+					"title": "{{int:jsonforms-formschema-createpageform-validation}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-validation-desc}}",
+					"x-description-format": "wikitext",
+					"enum": [
+						"onsubmit",
+						"always"
+					],
+					"x-enum-titles": [
+						"{{int:jsonforms-formschema-createpageform-validation-onsubmit}}",
+						"{{int:jsonforms-formschema-createpageform-validation-always}}"
+					],
+					"x-enum-titles-format": "wikitext",
+					"default": "never"
 				},
 				"template": {
 					"type": "string",
+					"title": "{{int:jsonforms-formschema-createpageform-template}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-template-desc}}",
+					"x-description-format": "wikitext",
 					"enum": [
 						"default",
 						"ejs",
@@ -415,70 +518,98 @@
 						"swig",
 						"underscore"
 					],
-					"default": "default",
-					"description": "UI template to use"
+					"default": "default"
 				},
 				"max_depth": {
-					"title": "max depth",
 					"type": "integer",
+					"title": "{{int:jsonforms-formschema-createpageform-max-depth}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-max-depth-desc}}",
+					"x-description-format": "wikitext",
 					"minimum": 1,
 					"maximum": 100,
-					"default": 32,
-					"description": "Maximum nesting depth for the editor"
+					"default": 32
 				},
 				"path_separator": {
-					"title": "path separator",
 					"type": "string",
+					"title": "{{int:jsonforms-formschema-createpageform-path-separator}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-path-separator-desc}}",
+					"x-description-format": "wikitext",
 					"minLength": 1,
 					"maxLength": 1,
-					"default": ".",
-					"description": "Separator for path strings"
+					"default": "."
 				},
 				"default_additional_properties": {
-					"title": "default additional properties",
 					"type": "boolean",
-					"default": false,
-					"description": "Default value for additionalProperties in schemas"
+					"title": "{{int:jsonforms-formschema-createpageform-additional-properties}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-additional-properties-desc}}",
+					"x-description-format": "wikitext",
+					"default": false
 				},
 				"use_lazy_properties": {
-					"title": "use lazy properties",
 					"type": "string",
-					"enum": ["never", "always", "threshold"],
-					"default": "threshold",
-					"description": "When to use lazy loading for properties"
+					"title": "{{int:jsonforms-formschema-createpageform-lazy-properties}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-lazy-properties-desc}}",
+					"x-description-format": "wikitext",
+					"enum": [
+						"never",
+						"always",
+						"threshold"
+					],
+					"x-enum-titles": [
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-never}}",
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-always}}",
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-enum-threshold}}"
+					],
+					"x-enum-titles-format": "wikitext",
+					"default": "threshold"
 				},
 				"lazy_properties_threshold": {
-					"title": "lazy properties threshold",
 					"type": "integer",
+					"title": "{{int:jsonforms-formschema-createpageform-lazy-properties-threshold}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-lazy-properties-threshold-desc}}",
+					"x-description-format": "wikitext",
 					"minimum": 1,
 					"default": 6,
-					"description": "Number of properties at which to enable lazy loading (only used when use_lazy_properties is 'threshold')",
 					"x-dependency": {
 						"use_lazy_properties": "threshold"
 					}
 				},
 				"remove_empty_properties": {
-					"title": "remove empty properties",
 					"type": "boolean",
-					"default": true,
-					"description": "Remove empty properties from the data"
+					"title": "{{int:jsonforms-formschema-createpageform-remove-empty}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-remove-empty-desc}}",
+					"x-description-format": "wikitext",
+					"default": true
 				},
 				"required_evaluates_non_empty": {
-					"title": "required evaluates non empty",
 					"type": "boolean",
-					"default": false,
-					"description": "Considers required properties with empty values as missing properties"
+					"title": "{{int:jsonforms-formschema-createpageform-evaluates-non-empty}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-evaluates-non-empty-desc}}",
+					"x-description-format": "wikitext",
+					"default": false
 				},
 				"remove_false_properties": {
-					"title": "remove false properties",
 					"type": "boolean",
-					"default": false,
-					"description": "Remove false properties from the data"
+					"title": "{{int:jsonforms-formschema-createpageform-remove-false}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-remove-false-desc}}",
+					"x-description-format": "wikitext",
+					"default": false
 				},
 				"debug": {
 					"type": "boolean",
-					"default": false,
-					"description": "Enable debug mode"
+					"title": "{{int:jsonforms-formschema-createpageform-debug}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-debug-desc}}",
+					"x-description-format": "wikitext",
+					"default": false
 				}
 			}
 		},

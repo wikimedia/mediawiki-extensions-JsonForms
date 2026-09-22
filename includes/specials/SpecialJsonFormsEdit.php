@@ -68,7 +68,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 		$out->addWikiMsg( 'jsonforms-special-edit-message' );
 
 		$jsonForm = \JsonForms::getSourceSchema(
-			'EditDataUI',
+			'EditSchemaUI',
 			'JsonSchema/Core',
 		);
 
@@ -151,8 +151,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 		$formData->formDescriptor = (object)[
 			'edit' => $editTitle->getFullText(),
 			'editor_options' => (object)[
-				'base_options' => 'MediaWiki:DefaultEditorOptions',
-				'base_script' => 'MediaWiki:DefaultEditorScript',
+				'base_options' => 'MediaWiki:JsonFormsOptions',
 			],
 			'width' => 'auto'
 		];

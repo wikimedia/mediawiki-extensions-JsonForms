@@ -31,8 +31,7 @@
 	"css_class": "",
 	"inline_css": "width: 600px;",
 	"editor_options": {
-		"base_options": "MediaWiki:DefaultEditorOptions",
-		"base_script": "MediaWiki:DefaultEditorScript",
+		"base_options": "MediaWiki:JsonFormsOptions",
 		"validation": "onsubmit",
 		"template": "default",
 		"max_depth": 32,

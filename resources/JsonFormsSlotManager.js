@@ -50,7 +50,7 @@ JsonFormsSlotManager.prototype.onFormButton = function ( action, editor ) {
 			console.log( 'innerEditorValidationResults', innerEditorValidationResults );
 
 			if ( innerEditorValidationResults.length ) {
-				JsonForms.Alert( 'there are errors' );
+				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 				return;
 			} else {
 				editor.disable();
@@ -83,31 +83,23 @@ JsonFormsSlotManager.prototype.initialize = async function () {
 	if ( !this.defaultOptions.callbacks ) {
 		this.defaultOptions.callbacks = {};
 	}
-	if ( !this.defaultOptions.callbacks.button ) {
-		this.defaultOptions.callbacks.button = {};
+	if ( !this.defaultOptions.callbacks.actions ) {
+		this.defaultOptions.callbacks.actions = {};
 	}
 
-	this.defaultOptions.callbacks.button.submitButton = ( editor ) => {
+	this.defaultOptions.callbacks.actions.submitButton = ( editor ) => {
 		this.onFormButton( 'submit', editor );
 	};
-	this.defaultOptions.callbacks.button.cancelButton = ( editor ) => {
+	this.defaultOptions.callbacks.actions.cancelButton = ( editor ) => {
 		this.onFormButton( 'cancel', editor );
 	};
-
-	// this.defaultOptions.callbacks.template = {
-	// ...this.defaultOptions.callbacks.template,
-	// ...this.enumProviders,
-	// };
 };
 
 JsonFormsSlotManager.prototype.submitForm = function () {
 	const formEditor = this.editor.getEditor( 'root.editor' );
 
 	const innerEditor = formEditor.input.editor;
-	// console.log( 'innerEditor', innerEditor );
-
 	const structuredValue = innerEditor.getStructuredValue();
-
 	const formDescriptor = { edit: this.editPage };
 
 	// *** submission data are arbitrary and depend on the
@@ -126,8 +118,12 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 		processor: 'SlotManager'
 	};
 
-	// console.log( 'data', data );
-
+	/*
+console.log('data', data);
+	return new Promise( ( resolve, reject ) => {
+resolve()
+})
+*/
 	const payload = {
 		data: JSON.stringify( data ),
 		action: 'jsonforms-submit-form'
@@ -171,24 +167,17 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 
 ( function ( $ ) {
 	$( () => {
-	// console.log(' mw.config', mw.config);
-
 		$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 			this.el = el;
 			const data = $( el ).data().formData;
-
-			// console.log( 'data', data );
 
 			const jsonFormsSlotManager = new JsonFormsSlotManager( el, data );
 			await jsonFormsSlotManager.initialize();
 			const editor = jsonFormsSlotManager.createDefaultEditor();
 
 			const editorOnChange = async ( editor ) => {
-			// console.log('editorOnChange');
-
 				const watching = [];
 				const formEditor = editor.getEditor( 'root.editor' );
-				// console.log('formEditor', formEditor);
 
 				if ( !formEditor ) {
 					console.warn( 'formEditor not set' );
@@ -200,35 +189,27 @@ JsonFormsSlotManager.prototype.submitForm = function () {
 				// widget that needs to be loaded
 				const innerEditor = await formEditor.input.getEditor();
 
-				// console.log('innerEditor', innerEditor);
-
 				const slotRoles = mw.config.get( 'jsonforms' ).slotRoles;
 
 				const innerEditorOnChange = async ( editor ) => {
-				// console.log('innerEditorOnChange');
-
 					const editors = editor.getEditors();
 
 					// assign watchers to new slots
 					for ( const path in editors ) {
-					// console.log('path', path);
-					// maybe role
+						// maybe role
 						const role = path.replace( /^root\./, '' );
 
 						// on slot creation
 						if ( slotRoles.includes( role ) ) {
 							if ( !watching.includes( path ) ) {
-							// set role to hidden property
+								// set role to hidden property
 
 								// console.log('`${path}.role`', `${path}.role`);
 								const roleEditor = editor.getEditor( `${ path }.role` );
-								// roleEditor.setValue(role);
 
 								// @TODO replace with setValue
 								// after updating the editor's setValue method
 								roleEditor.setStateValue( role );
-								// roleEditor.input.setValue( role );
-
 								watching.push( path );
 							}
 						}

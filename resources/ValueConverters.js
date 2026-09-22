@@ -141,76 +141,78 @@
 	Converters.prototype.newPropertyWithOptions = function () {
 		const self = this;
 
-		return {
-			convertFrom: function ( key, value ) {},
-			convertTo: function ( key, value ) {
-				const type = value.type || 'text';
-				const options = value.options || {};
+		const convertTo = function ( key, value ) {
+			const type = value.type || 'text';
+			const options = value.options || {};
 
-				if ( value.multiple ) {
-					let inputName = null;
-					switch ( type ) {
-						case 'text':
-							inputName = 'tagmultiselect';
-							break;
-					}
+			if ( value.multiple ) {
+				let inputName = null;
+				switch ( type ) {
+					case 'text':
+						inputName = 'tagmultiselect';
+						break;
+				}
 
-					const thisOptions = { 'x-input': inputName };
+				const thisOptions = { 'x-input': inputName };
+				return {
+					'x-data': value,
+					type: 'array',
+					items: convertTo( key, {
+						...value,
+						type,
+						multiple: false,
+						options: thisOptions
+					} )
+				};
+			}
+
+			switch ( type ) {
+				case 'time':
+				case 'email':
+				case 'date':
 					return {
 						'x-data': value,
-						type: 'array',
-						items: self.convertTo( key, {
-							...value,
-							type,
-							multiple: false,
-							options: thisOptions
-						} )
+						type: 'string',
+						format: type,
+						...options
 					};
-				}
 
-				switch ( type ) {
-					case 'time':
-					case 'email':
-					case 'date':
-						return {
-							'x-data': value,
-							type: 'string',
-							format: type,
-							...options
-						};
+				case 'text':
+				case 'textarea':
+				case 'tel':
+				case 'url':
+				case 'color':
+				case 'datetime-local':
+				case 'json':
+				case 'range':
+					return {
+						'x-data': value,
+						type: 'string',
+						'x-format': type,
+						...options
+					};
 
-					case 'text':
-					case 'textarea':
-					case 'tel':
-					case 'url':
-					case 'color':
-					case 'datetime-local':
-					case 'json':
-					case 'range':
-						return {
-							'x-data': value,
-							type: 'string',
-							'x-format': type,
-							...options
-						};
+				case 'number':
+				case 'integer':
+				case 'boolean':
+					return { 'x-data': value, type };
 
-					case 'number':
-					case 'integer':
-					case 'boolean':
-						return { 'x-data': value, type };
+				case 'object':
+				case 'subitem':
+					return {
+						'x-data': value,
+						type: 'object',
+						additionalProperties: true
+					};
 
-					case 'object':
-					case 'subitem':
-						return {
-							'x-data': value,
-							type: 'object',
-							additionalProperties: true
-						};
-
-					default:
-						throw new Error( `Unsupported type: ${ type }` );
-				}
+				default:
+					throw new Error( `Unsupported type: ${ type }` );
 			}
+		};
+
+		return {
+			convertFrom: function ( key, value ) {},
+			convertTo
 		};
 	};
 

@@ -41,9 +41,9 @@ JsonFormsManageSchemas.prototype.initialize = async function () {
 		this.defaultOptions.callbacks = {};
 	}
 
-	this.defaultOptions.callbacks.button = Object.assign(
+	this.defaultOptions.callbacks.actions = Object.assign(
 		{},
-		this.defaultOptions.callbacks.button || {},
+		this.defaultOptions.callbacks.actions || {},
 		{
 			submitButton: ( editor ) => {
 				this.onFormButton( 'submit', editor );
@@ -71,17 +71,22 @@ JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor 
 				if ( this.debug ) {
 					console.log( 'innerEditorValidationResults', innerEditorValidationResults );
 				}
-				JsonForms.Alert( 'there are errors' );
+				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 				buttonEditor.enable();
 				return;
 			}
 
-			const schemaName = innerEditor.getSchemaName();
+			const normalizeSchemaName = ( value ) => String( value || '' ).replace( / /g, '_' );
 
-			if ( schemaName && innerEditor.getValue()[ 'x-name' ] !== schemaName ) {
+			const initialschemaName = innerEditor.getSchemaName();
+			const currentSchemaName = innerEditor.getValue()[ 'x-name' ];
+			if (
+				initialschemaName &&
+				normalizeSchemaName( initialschemaName ) !== normalizeSchemaName( currentSchemaName )
+			) {
 				// @TODO rename or create with new name
 				JsonForms.Alert(
-					'This will rename the schema, ok ?',
+					this.getMsg( 'rename-schema' ),
 					{ size: 'small' },
 					() => {
 						this.submitForm( innerEditor ).catch( ( err ) => console.error( 'API error:', err )

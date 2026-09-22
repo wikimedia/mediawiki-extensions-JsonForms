@@ -43,7 +43,8 @@
 					"properties": {
 						"goback": {
 							"type": "null",
-							"title": "go back",
+							"title": "{{int:jsonforms-formschema-goback}}",
+							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-css-inline": "display:none",
 							"x-button-action": "outerFormNavButton",
@@ -82,24 +83,30 @@
 						"title": {
 							"type": "string",
 							"minLength": 1,
-							"x-input": "title"
+							"x-input": "title",
+							"title": "{{int:jsonforms-formschema-title}}",
+							"x-title-format": "wikitext"
 						},
 						"freetext_content_model": {
 							"type": "string",
-							"title": "Content model",
+							"title": "{{int:jsonforms-formschema-content-model}}",
+							"x-title-format": "wikitext",
 							"default": "wikitext",
 							"x-watch": "role",
 							"x-enum-provider": "contentModelByRole"
 						},
 						"editor": {
 							"type": "string",
-							"title": "Editor",
 							"default": "source",
+							"title": "{{int:jsonforms-formschema-editor}}",
+							"x-title-format": "wikitext",
 							"x-watch": "freetext_content_model",
 							"x-enum-provider": "editorByContentModel"
 						},
 						"freetext": {
 							"type": "string",
+							"title": "{{int:jsonforms-formschema-freetext}}",
+							"x-title-format": "wikitext",
 							"x-watch": "editor",
 							"links": [
 								{
@@ -110,6 +117,8 @@
 						},
 						"categories": {
 							"type": "array",
+							"title": "{{int:jsonforms-formschema-categories}}",
+							"x-title-format": "wikitext",
 							"items": {
 								"type": "string",
 								"x-input": "categorymultiselect"
@@ -131,13 +140,14 @@
 			"x-css-class": "jsonforms-outerform-footer",
 			"properties": {
 				"summary": {
-					"type": "string"
+					"type": "string",
+					"title": "{{int:jsonforms-formschema-summary}}",
+					"x-title-format": "wikitext"
 				},
 				"minor": {
 					"type": "boolean",
 					"x-no-title": true,
-					"description": "",
-					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
+					"description": "{{int:jsonforms-formschema-minor-edit}}",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
 					"x-control-config": {
@@ -152,6 +162,8 @@
 					"properties": {
 						"validate": {
 							"type": "null",
+							"title": "{{int:jsonforms-formschema-validate}}",
+							"x-title-format": "wikitext",
 							"x-css-inline": "display:none",
 							"x-format": "button",
 							"x-button-action": "outerFormNavButton",
@@ -161,6 +173,8 @@
 						},
 						"submit": {
 							"type": "null",
+							"title": "{{int:jsonforms-formschema-submit}}",
+							"x-title-format": "wikitext",
 							"x-css-inline": "display:none",
 							"x-format": "button",
 							"x-button-action": "outerFormNavButton",

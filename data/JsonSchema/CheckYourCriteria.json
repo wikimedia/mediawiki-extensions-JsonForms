@@ -161,7 +161,8 @@
 												"submit": {
 													"type": "null",
 													"default": null,
-													"title": "",
+													"title": "{{int:jsonforms-formschema-submit}}",
+													"x-title-format": "wikitext",
 													"description": "",
 													"x-required": false,
 													"x-format": "button",

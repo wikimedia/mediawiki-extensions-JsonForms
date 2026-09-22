@@ -381,7 +381,7 @@ class FormBuilder {
 			$this->formDescriptor = new stdClass();
 		}
 
-		// $formData->editorOptions = $this->formDescriptor->editor_options->base_options ?? "MediaWiki:DefaultEditorOptions";
+		// $formData->editorOptions = $this->formDescriptor->editor_options->base_options ?? "MediaWiki:JsonFormsOptions";
 		$formData->formDescriptor = $this->formDescriptor;
 		$formData->startval = $this->startVal;
 

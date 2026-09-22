@@ -52,8 +52,8 @@ class JsonFormsActionJsonEdit extends Action {
 		$article = $this->getArticle();
 		$title = $article->getTitle();
 
-		$specialEditData = new SpecialJsonFormsEdit();
-		$specialEditData->execute( $title->getFullText() );
+		$specialEditSchema = new SpecialJsonFormsEdit();
+		$specialEditSchema->execute( $title->getFullText() );
 
 		return false;
 	}

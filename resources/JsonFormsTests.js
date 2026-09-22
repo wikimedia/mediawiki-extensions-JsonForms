@@ -48,7 +48,6 @@ JsonFormsTests.prototype.initialize = async function () {
 		{
 			keywords: () => ( {
 				source: async ( jseditor, { item, watched } ) => {
-					// console.log('watched', watched);
 					const path = watched.draft;
 
 					if ( !path ) {
@@ -71,13 +70,9 @@ JsonFormsTests.prototype.initialize = async function () {
 			} ),
 			testCase: () => ( {
 				source: async ( jseditor, { item, watched } ) => {
-					// console.log('testcase watched', watched);
 					const path = watched.keyword;
 
 					await this.getTestData();
-					// console.log('this.testContent', this.testContent);
-
-					// console.log('this.testContent', this.testContent);
 					if ( !this.testContent ) {
 						return [];
 					}
@@ -87,12 +82,7 @@ JsonFormsTests.prototype.initialize = async function () {
 			} ),
 			test: () => ( {
 				source: async ( jseditor, { item, watched } ) => {
-					// console.log('testcase watched', watched);
 					const testCase = watched.testcase;
-
-					// console.log('testCase', testCase);
-
-					// console.log('this.testContent', this.testContent);
 					if ( !this.testContent ) {
 						return [];
 					}
@@ -126,9 +116,6 @@ JsonFormsTests.prototype.getTestData = async function () {
 	}
 
 	const key = draftValue + '.' + keywordValue;
-
-	// console.log('key', key);
-
 	if ( key === this.previousKey ) {
 		return;
 	}
@@ -146,16 +133,10 @@ JsonFormsTests.prototype.getTestData = async function () {
 		console.error( error );
 	}
 
-	// console.log('contents', contents);
-
 	const decodedContent = atob( contents.content );
-
-	// console.log('decodedContent', decodedContent);
 
 	// Parse JSON
 	const jsonData = JSON.parse( decodedContent );
-
-	// console.log('jsonData', jsonData);
 
 	this.testContent = jsonData;
 };
@@ -202,8 +183,6 @@ JsonFormsTests.prototype.onChange = async function ( editor ) {
 		'.'
 	);
 
-	// console.log('key', key);
-
 	if ( key === this.previousEditorKey ) {
 		return;
 	}
@@ -235,18 +214,10 @@ JsonFormsTests.prototype.onChange = async function ( editor ) {
 		return;
 	}
 
-	// console.log('test', test);
-
 	const editorEditor = editor.getEditor( 'root.editor' );
-
-	// console.log('editorEditor', editorEditor);
-	// console.log('editorEditor', editorEditor.input);
-
-	// const el = document.createElement('div')
 
 	$( editorEditor.container ).empty();
 	const el = $( editorEditor.container ).get( 0 );
-	// console.log('el', el);
 
 	const initCconfig = {
 		schema: testcase.schema,

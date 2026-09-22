@@ -11,7 +11,7 @@
 		"editor_wikieditor": {
 			"type": "string",
 			"x-compact": true,
-			"x-format": "textarea",
+			"x-format": "wikitext",
 			"x-input": "wikieditor"
 		},
 		"editor_codeeditor": {
@@ -23,13 +23,13 @@
 		"editor_visualeditor": {
 			"type": "string",
 			"x-compact": true,
-			"x-format": "textarea",
+			"x-format": "wikitext",
 			"x-input": "visualeditor"
 		},
 		"editor_jsoneditor": {
 			"type": "string",
 			"x-compact": true,
-			"x-format": "textarea",
+			"x-format": "json",
 			"x-input": "jsoneditor"
 		},
 		"editor_jsonforms": {
@@ -51,30 +51,19 @@
 			}
 		},
 		"editor_suneditor": {
+			"x-compact": true,
+			"type": "object",
+			"title": "content",
 			"type": "string",
 			"x-compact": true,
-			"x-format": "textarea",
-			"x-input": "jsonforms",
-			"x-input-config": {
-				"schema": {
-					"type": "string",
-					"x-format": "html",
-					"x-input": "SunEditor"
-				}
-			}			
+			"x-format": "html",
+			"x-input": "SunEditor"
 		},
 		"editor_easymde": {
 			"type": "string",
 			"x-compact": true,
-			"x-format": "textarea",
-			"x-input": "jsonforms",
-			"x-input-config": {
-				"schema": {
-					"type": "string",
-					"x-format": "markdown",
-					"x-input": "EasyMDE"
-				}
-			}
+			"x-format": "markdown",
+			"x-input": "EasyMDE"
 		},
 		"slotOptions": {
 			"type": "object",
@@ -90,20 +79,25 @@
 				},
 				"content_model": {
 					"type": "string",
-					"title": "Content model",
+					"title": "{{int:jsonforms-formschema-content-model}}",
+					"x-title-format": "wikitext",
 					"default": "wikitext",
 					"x-watch": "role",
 					"x-enum-provider": "contentModelByRole"
 				},
 				"editor": {
 					"type": "string",
-					"title": "Editor",
+					"title": "{{int:jsonforms-formschema-editor}}",
+					"x-title-format": "wikitext",
 					"default": "source",
 					"x-watch": "content_model",
 					"x-enum-provider": "editorByContentModel"
 				},
 				"content": {
 					"type": "string",
+					"x-compact": true,
+					"title": "{{int:jsonforms-formschema-content}}",
+					"x-title-format": "wikitext",
 					"x-watch": "editor",
 					"links": [
 						{
@@ -115,13 +109,15 @@
 			}
 		},
 		"newSlot": {
-			"title": "New slot b",
+			"title": "{{int:jsonforms-formschema-new-slot}}",
+			"x-title-format": "wikitext",
 			"x-value-converter": "newSlot",
 			"type": "object",
 			"required": ["name"],
 			"properties": {
 				"name": {
-					"title": "slot name",
+					"title": "{{int:jsonforms-formschema-slot-name}}",
+					"x-title-format": "wikitext",
 					"type": "string",
 					"x-enum-provider": "slotRolesNoMain"
 				}
@@ -134,8 +130,9 @@
 			"properties": {
 				"title": {
 					"type": "string",
+					"title": "{{int:jsonforms-formschema-title}}",
+					"x-title-format": "wikitext",
 					"minLength": 1,
-					"title": "Title",
 					"x-input": "title",
 					"x-create-only": true
 				}
@@ -149,8 +146,9 @@
 			"type": "object",
 			"properties": {
 				"categories": {
-					"title": "Categories",
 					"type": "array",
+					"title": "{{int:jsonforms-formschema-categories}}",
+					"x-title-format": "wikitext",
 					"items": {
 						"type": "string",
 						"x-input": "categorymultiselect"
@@ -161,7 +159,8 @@
 	],
 	"x-additional-properties-ui": [
 		{
-			"label": "New slot",
+			"label": "{{int:jsonforms-formschema-new-slot}}",
+			"x-label-format": "wikitext",
 			"schema": "#/definitions/newSlot",
 			"popup_size": "medium"
 		}

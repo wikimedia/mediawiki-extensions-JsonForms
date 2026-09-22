@@ -525,6 +525,18 @@ class SubmitForm {
 	 * @return string|null The main slot content or null if not found
 	 */
 	protected function getMainContent( $data, $targetTitle = null, $isNewPage = false ) {
+		// slot manager
+		if (
+			$data->processor === 'SlotManager' &&
+			is_object( $data->value ) &&
+			property_exists( $data->value, 'content' )
+		) {
+			if ( is_object( $data->value->content ) ) {
+				return $data->value->content->content;
+			}
+			return $data->value->content;
+		}
+
 		if ( property_exists( $data, 'options' ) ) {
 			if ( property_exists( $data->options, 'freetext' ) ) {
 				return $data->options->freetext;
@@ -534,16 +546,6 @@ class SubmitForm {
 				return $data->options->content;
 			}
 		}
-
-		// slot manager
-		if (
-			$data->processor === 'SlotManager' &&
-			is_object( $data->value ) &&
-			property_exists( $data->value, 'content' )
-		) {
-			return $data->value->content;
-		}
-
 		$ret = null;
 
 		// For new pages with preload
@@ -1018,6 +1020,9 @@ class SubmitForm {
 
 		$metadata->slots->{SlotRecord::MAIN}->model = $contentModelMainSlot;
 
+		$metadata->slots->{SlotRecord::MAIN}->editor = $data->value->editor ??
+			$this->defaultEditorForContentModel( $contentModelMainSlot );
+
 		return $metadata;
 	}
 
@@ -1257,6 +1262,7 @@ class SubmitForm {
 	 * @return void
 	 */
 	protected function processAdditionalSlots( $metadata, $data, &$slots ) {
+		// slot manager
 		$roleNames = SlotHelper::getSlotRoles();
 
 		foreach ( get_object_vars( $data->value ) as $key => $value ) {
@@ -1278,10 +1284,19 @@ class SubmitForm {
 			$metadata->slots->{$key}->model = $value->content_model;
 			$metadata->slots->{$key}->editor = $value->editor;
 
+			$content = $value->content;
+			$editorOptions = null;
+			if ( is_object( $content ) ) {
+				if ( is_object( $content->options ) ) {
+					$metadata->slots->{$key}->{'editorOptions'} = $content->options;
+				}
+				$content = $content->content;
+			}
+
 			// Add to slots
 			$slots[$key] = [
 				'model' => $value->content_model,
-				'content' => $value->content,
+				'content' => $content,
 			];
 		}
 

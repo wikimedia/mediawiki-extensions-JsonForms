@@ -66,8 +66,7 @@ class SpecialJsonFormsTests extends SpecialPage {
 			'schema' => $jsonForm,
 			'formDescriptor' => (object)[
 				'editor_options' => (object)[
-					'base_options' => 'MediaWiki:DefaultEditorOptions',
-					'base_script' => 'MediaWiki:DefaultEditorScript',
+					'base_options' => 'MediaWiki:JsonFormsOptions',
 					'validation' => 'always',
 					'template' => 'default',
 					'max_depth' => 32,

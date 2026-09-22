@@ -1,7 +1,8 @@
 {
 	"title": "JSON Schema builder",
 	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/MetaSchema",
-	"description": "Meta-schema for defining editable JSON schemas with UI layout controls, custom input widgets, and conditional display logic. Extends standard JSON Schema with MediaWiki-specific widget configurations and layout options.",
+	"$comment": "Meta-schema for defining editable JSON schemas with UI layout controls, custom input widgets, and conditional display logic. Extends standard JSON Schema with MediaWiki-specific widget configurations and layout options.",
+	"description": "Switch the primary button below to interactively change property type",
 	"x-layout": "paged",
 	"x-layout-config": {
 		"toggle": true,
@@ -131,7 +132,7 @@
 			}
 		},
 		"baseProperties": {
-			"description": "Base JSON Schema keywords common to all schema types (excluding multiple-related keywords)",
+			"@comment": "Base JSON Schema keywords common to all schema types (excluding multiple-related keywords)",
 			"type": "object",
 			"x-default-properties": ["type", "title", "description", "x-required"],
 			"properties": {
@@ -237,8 +238,17 @@
 					]
 				},
 				"x-hidden": {
-					"type": "boolean",
-					"description": "Hide the field from the form UI"
+					"type": [ "boolean", "object"],
+					"description": "Hide the field from the form UI. Only use the 'DependencyCondition' schema if the visibility should be determined by the actual schema at runtime",
+					"oneOf": [
+						{
+							"type": "boolean"
+						},
+						{
+							"type": "object",
+							"$ref": "JsonSchema:SchemaBuilder/DependenciesHidden"
+						}
+					]
 				},
 				"x-compact": {
 					"type": "boolean",
@@ -299,48 +309,20 @@
 					"type": "object",
 					"description": "Data object to be used in conjunction with converters or enum providers",
 					"additionalProperties": true
-				}
-			},
-			"required": ["type"]
-		},
-		"multiple": {
-			"description": "Schema for logical combinations (oneOf, anyOf, allOf, not, if/then/else). Matches when type is NOT set.",
-			"type": "object",
-			"allOf": [
-				{
-					"$ref": "#/definitions/baseProperties"
 				},
-				{
-					"type": "object",
-					"properties": {
-						"type": {
-							"type": "array",
-							"items": {
-								"type": "string",
-								"enum": [
-									"string",
-									"integer",
-									"boolean",
-									"number",
-									"object",
-									"array"
-								],
-								"x-input-config": {
-									"allowArbitrary": false
-								}
-							}
-						}
+				"allOf": {
+					"description": "Schema must be valid against all of the subschemas (logical AND)",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/schema"
 					}
-				}
-			],
-			"properties": {
+				},
 				"oneOf": {
 					"description": "Schema must be valid against exactly one of the subschemas (logical XOR)",
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/schema"
-					},
-					"x-toolbar": "button"
+					}
 				},
 				"allOf": {
 					"description": "Schema must be valid against all of the subschemas (logical AND)",
@@ -373,9 +355,43 @@
 				"else": {
 					"$ref": "#/definitions/schema",
 					"description": "Conditional validation: must validate when 'if' does NOT validate"
+				}
+			},
+			"required": ["type"]
+		},
+		"multiple": {
+			"description": "Schema for logical combinations (oneOf, anyOf, allOf, not, if/then/else).",
+			"type": "object",
+			"allOf": [
+				{
+					"$ref": "#/definitions/baseProperties"
 				},
+				{
+					"type": "object",
+					"properties": {
+						"type": {
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": [
+									"string",
+									"integer",
+									"boolean",
+									"number",
+									"object",
+									"array"
+								],
+								"x-input-config": {
+									"allowArbitrary": false
+								}
+							}
+						}
+					}
+				}
+			],
+			"properties": {
 				"properties": {
-					"x-toolbar": "button",
+					"title": "Properties",
 					"type": "object",
 					"patternProperties": {
 						".*": {
@@ -390,7 +406,25 @@
 						}
 					],
 					"additionalProperties": true,
-					"description": "Explicitly defined object properties with their schemas"
+					"description": "User-defined properties with their schemas"
+				},
+				"definitions": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"description": "Reusable schema definitions (alias of $defs)"
+				},
+				"$defs": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"description": "Reusable schema definitions (alias of definitions)"
 				},
 				"links": {
 					"type": "array",
@@ -497,7 +531,7 @@
 				},
 				"x-enum-provider": {
 					"type": "string",
-					"description": "Name of the enum provider to be used in selects. When not a built-in function, must be declared in [[MediaWiki:DefaultEditorOptions]] and provide at least a \"source\" method",
+					"description": "Name of the enum provider to be used in selects. When not a built-in function, must be declared in [[MediaWiki:JsonFormsOptions]] and provide at least a \"source\" method",
 					"x-description-format": "wikitext",
 					"x-input": "OO.ui.ComboBoxInputWidget",
 					"enum": [
@@ -706,10 +740,10 @@
 							}
 						]
 					},
-					"description": "Configuration options passed to the selected input widget",
+					"@comment": "Configuration options passed to the selected input widget",
 					"x-watch": "x-input",
 					"x-message": {
-						"x-label-template": "Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
+						"x-label-template": "Options' config is determined by the selected input. Using options from <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:SchemaBuilder/InputOptions'}}\">JsonSchema:SchemaBuilder/InputOptions</a> (#/definitions/{{x-input}})"
 					},
 					"links": [
 						{
@@ -736,7 +770,7 @@
 							{
 								"path": "x-input",
 								"op": "matches",
-								"value": "autocomplete"
+								"value": "Autocomplete"
 							}
 						]
 					}
@@ -1498,7 +1532,16 @@
 							"$ref": "#/definitions/schema"
 						}
 					},
-					"description": "Reusable schema definitions"
+					"description": "Reusable schema definitions (alias of $defs)"
+				},
+				"$defs": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"description": "Reusable schema definitions (alias of definitions)"
 				},
 				"maxProperties": {
 					"type": "integer",
@@ -1521,6 +1564,7 @@
 				},
 				"properties": {
 					"x-toolbar": "button",
+					"title": "Properties",
 					"type": "object",
 					"patternProperties": {
 						".*": {
@@ -1535,7 +1579,7 @@
 						}
 					],
 					"additionalProperties": true,
-					"description": "Explicitly defined object properties with their schemas",
+					"description": "User-defined properties with their schemas",
 					"x-additional-properties-ui_": [
 						{
 							"label": "field",
@@ -1584,16 +1628,9 @@
 						}
 					}
 				},
-				"allOf": {
-					"description": "Schema must be valid against all of the subschemas (logical AND)",
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/schema"
-					}
-				},
 				"x-value-converter": {
 					"type": "string",
-					"description": "A value converter defined as [[MediaWiki:DefaultEditorOptions]]'s callback to convert forth and back the value",
+					"description": "A value converter defined as [[MediaWiki:JsonFormsOptions]]'s callback to convert forth and back the value",
 					"x-description-format": "wikitext"
 				}
 			},
@@ -1605,7 +1642,7 @@
 			"properties": {
 				"x-layout": {
 					"type": "string",
-					"enum": ["default", "tabs", "booklet", "horizontal"],
+					"enum": ["default", "tabs", "booklet", "horizontal", "paged", "splitter"],
 					"description": "Layout style for object properties",
 					"x-show": true
 				},
@@ -1700,7 +1737,7 @@
 			"required": []
 		},
 		"rootOptions": {
-			"description": "Root-level configuration properties for the schema editor",
+			"description": "Root-level configuration. Additional object properties can be added via the button \"Additional items\" and additional primitive properties can be added by the buttons at the bottom.",
 			"type": "object",
 			"properties": {
 				"x-name": {
@@ -1725,7 +1762,7 @@
 				"x-layout": {
 					"type": "string",
 					"description": "Controls how the form fields are arranged in the UI",
-					"enum": ["default", "paged", "tabs", "booklet", "horizontal"],
+					"enum": ["default", "paged", "tabs", "booklet", "horizontal", "splitter"],
 					"x-show": true
 				},
 				"x-required": {
@@ -1735,7 +1772,7 @@
 			"required": ["x-name"]
 		},
 		"rootOptionsArray": {
-			"description": "Root-level configuration properties for the schema editor",
+			"description": "Root-level configuration for array or multiple schema. Additional object properties can be added via the button \"Additional items\" and additional primitive properties can be added by the buttons at the bottom.",
 			"type": "object",
 			"properties": {
 				"x-name": {
@@ -1764,7 +1801,7 @@
 			"required": ["x-name"]
 		},
 		"schema": {
-			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
+			"@comment": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
 			"x-switch": "OO.ui.ButtonMenuSelectWidget",
 			"x-switch-config": {
 				"icon": "menu",
@@ -1807,7 +1844,7 @@
 			]
 		},
 		"ArrayItems-default": {
-			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
+			"@comment": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
 			"default": {
 				"type": "object"
 			},
@@ -1853,7 +1890,7 @@
 			]
 		},
 		"ArrayItems-multiselect": {
-			"description": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
+			"@comment": "Complete JSON Schema type selector. Supports all JSON Schema primitives plus logical combinations (multiple).",
 			"default": {
 				"type": "object"
 			},

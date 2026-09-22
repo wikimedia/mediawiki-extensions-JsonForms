@@ -52,8 +52,8 @@ class JsonFormsActionSlotManager extends Action {
 		$article = $this->getArticle();
 		$title = $article->getTitle();
 
-		$specialEditData = new SpecialJsonFormsSlotManager();
-		$specialEditData->execute( $title->getFullText() );
+		$specialSlotMananger = new SpecialJsonFormsSlotManager();
+		$specialSlotMananger->execute( $title->getFullText() );
 
 		return false;
 	}

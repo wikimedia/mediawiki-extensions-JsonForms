@@ -30,8 +30,7 @@ OO.inheritClass( JsonFormsDemo, JsonForms );
 
 ( function ( $ ) {
 	$( () => {
-		console.log( ' mw.config', mw.config );
-
+		// console.log( ' mw.config', mw.config );
 		$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 			this.el = el;
 			const data = $( el ).data().formData;

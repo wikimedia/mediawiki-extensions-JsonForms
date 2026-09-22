@@ -2,17 +2,18 @@
 	"type": "object",
 	"$id": "https://wikisphere.org/wiki/JsonSchema:Core/SelectSchema",
 	"x-watch" : "schema",
-	"title": "Edit schema",
+	"title": "{{int:jsonforms-formschema-edit-schema}}",
+	"x-title-format": "wikitext",
 	"x-collapsible": true,
 	"properties": {
 		"schema": {
 			"type": "string",
-			"title": "JSON Schema",
-			"description": "",
+			"title": "{{int:jsonforms-formschema-json-schema}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-json-schema-combined-desc}}",			
+			"x-description-format": "wikitext",
 			"default": "",
 			"minLength": 1,
-			"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
-			"x-description-format": "wikitext",
 			"x-format": "autocomplete",
 			"x-input": "LookupElement",
 			"x-autocomplete-provider": "jsonSchemas"

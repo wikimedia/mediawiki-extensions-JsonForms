@@ -1195,6 +1195,21 @@
 				}
 			]
 		},
+		"FancyTree": {
+			"type": "object",
+			"x-message": {
+				"label": "Reference: [https://wwwendt.de/tech/fancytree/doc/jsdoc/ Api reference]",
+				"x-label-format": "wikitext"
+			},
+			"allOf": [
+				{
+					"$ref": "#/definitions/commonProperties"
+				},
+				{
+					"$ref": "JsonSchema:SchemaBuilder/FancyTreeOptions"
+				}
+			]
+		},
 		"Autocomplete": {
 			"type": "object",
 			"x-message": {

@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.2.1",
+	"version": "1.2.3",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -106,16 +106,10 @@
 		}
 	},
 	"AddGroups": {
-		"jsonforms-admin": [
-			"jsonforms-admin",
-			"jsonforms-editor"
-		]
+		"jsonforms-admin": [ "jsonforms-admin", "jsonforms-editor" ]
 	},
 	"RemoveGroups": {
-		"jsonforms-admin": [
-			"jsonforms-admin",
-			"jsonforms-editor"
-		]
+		"jsonforms-admin": [ "jsonforms-admin", "jsonforms-editor" ]
 	},
 	"AvailableRights": [
 		"jsonforms-caneditdata",
@@ -182,6 +176,8 @@
 				"JsonForms.js",
 				"Utilities.js",
 				"EnumProviders.js",
+				"Events.js",
+				"Actions.js",
 				"AutocompleteProviders.js",
 				"ValueConverters.js",
 				"valueConverters/Survey.js",
@@ -222,119 +218,180 @@
 			],
 			"messages": [
 				"jsonforms-jsmodule-return-errors",
-				"jsonforms-jsmodule-fetch-ref-error"
+				"jsonforms-jsmodule-fetch-ref-error",
+				"jsonforms-editor-item",
+				"jsonforms-editor-add-row",
+				"jsonforms-editor-switch-type",
+				"jsonforms-editor-subitems",
+				"jsonforms-editor-select-one-or-more-properties",
+				"jsonforms-editor-no-schema",
+				"jsonforms-editor-dialog-action-done",
+				"jsonforms-editor-dialog-action-save",
+				"jsonforms-editor-dialog-action-close",
+				"jsonforms-editor-dialog-action-cancel",
+				"jsonforms-editor-button-delete-node-warning",
+
+				"jsonforms-editor-remove-property",
+				"jsonforms-editor-remove-selected-properties",
+				"jsonforms-editor-there-are-errors",
+				"jsonforms-editor-no-name",
+				"jsonforms-editor-cannot-add-property",
+				"jsonforms-editor-remove-item",
+				"jsonforms-editor-max-length",
+				"jsonforms-editor-new-item",
+				"jsonforms-editor-remove-current",
+				"jsonforms-editor-toggle-bookmarks",
+				"jsonforms-editor-previous",
+				"jsonforms-editor-next",
+				"jsonforms-editor-preview",
+				"jsonforms-editor-settings",
+				"jsonforms-editor-disable-validation",
+				"jsonforms-editor-close",
+				"jsonforms-editor-refresh",
+				"jsonforms-editor-additional-items",
+				"jsonforms-editor-rename-property",
+				"jsonforms-editor-new-property",
+				"jsonforms-editor-name",
+				"jsonforms-editor-delete-item",
+				"jsonforms-editor-add-item",
+				"jsonforms-editor-media-gallery",
+				"jsonforms-editor-or-open-media-gallery",
+				"jsonforms-editor-upload",
+				"jsonforms-editor-cannot-add-property",
+				"jsonforms-editor-cannot-add-property-details",
+				"jsonforms-editor-add-property",
+				"jsonforms-editor-property-name",
+				"jsonforms-editor-rename-property",
+				"jsonforms-editor-pattern-error",
+				"jsonforms-editor-layout-main-label",
+				"jsonforms-editor-max-depth-reached",
+				"jsonforms-editor-property-exists",
+				"jsonforms-instance-there-are-errors",
+				"jsonforms-instance-rename-schema",
+				"jsonforms-instance-schema-required",
+
+				"jsonforms-editor-error-value-must-be-a-valid",
+				"jsonforms-editor-error-notset",
+				"jsonforms-editor-error-notempty",
+				"jsonforms-editor-error-enum",
+				"jsonforms-editor-error-const",
+				"jsonforms-editor-error-anyOf",
+				"jsonforms-editor-error-oneOf",
+				"jsonforms-editor-error-oneOf-too-many",
+				"jsonforms-editor-error-not",
+				"jsonforms-editor-error-type-union",
+				"jsonforms-editor-error-type",
+				"jsonforms-editor-error-disallow-union",
+				"jsonforms-editor-error-disallow",
+				"jsonforms-editor-error-multipleOf",
+				"jsonforms-editor-error-maximum-excl",
+				"jsonforms-editor-error-maximum-incl",
+				"jsonforms-editor-error-minimum-excl",
+				"jsonforms-editor-error-minimum-incl",
+				"jsonforms-editor-error-maxLength",
+				"jsonforms-editor-error-contains",
+				"jsonforms-editor-error-minContains",
+				"jsonforms-editor-error-maxContains",
+				"jsonforms-editor-error-minLength",
+				"jsonforms-editor-error-pattern",
+				"jsonforms-editor-error-additionalItems",
+				"jsonforms-editor-error-maxItems",
+				"jsonforms-editor-error-minItems",
+				"jsonforms-editor-error-uniqueItems",
+				"jsonforms-editor-error-maxProperties",
+				"jsonforms-editor-error-minProperties",
+				"jsonforms-editor-error-required",
+				"jsonforms-editor-error-additional-properties",
+				"jsonforms-editor-error-property-names-exceeds-maxlength",
+				"jsonforms-editor-error-property-names-enum-mismatch",
+				"jsonforms-editor-error-property-names-const-mismatch",
+				"jsonforms-editor-error-property-names-pattern-mismatch",
+				"jsonforms-editor-error-property-names-false",
+				"jsonforms-editor-error-property-names-maxlength",
+				"jsonforms-editor-error-property-names-enum",
+				"jsonforms-editor-error-property-names-pattern",
+				"jsonforms-editor-error-property-names-unsupported",
+				"jsonforms-editor-error-date",
+				"jsonforms-editor-error-time",
+				"jsonforms-editor-error-datetime-local",
+				"jsonforms-editor-error-invalid-epoch",
+				"jsonforms-editor-error-ipv4",
+				"jsonforms-editor-error-ipv6",
+				"jsonforms-editor-error-hostname",
+				"jsonforms-editor-error-required-properties",
+				"jsonforms-editor-error-contains-array"
 			],
 			"position": "top"
 		},
 		"ext.JsonForms.infobox": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-				"styleInfobox.css"
-			],
-			"scripts": [
-			],
-			"dependencies": [
-				"oojs-ui.styles.icons-editing-core"
-			],
+			"styles": [ "styleInfobox.css" ],
+			"scripts": [],
+			"dependencies": [ "oojs-ui.styles.icons-editing-core" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.newArticle": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsNewArticle.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsNewArticle.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.editSchema": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsEditSchema.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsEditSchema.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.slotManager": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsSlotManager.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsSlotManager.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.demo": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsDemo.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsDemo.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.tests": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsTests.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsTests.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.ManageSchemas": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsManageSchemas.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsManageSchemas.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
 		"ext.JsonForms.pageForms": {
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
-			"styles": [
-			],
-			"scripts": [
-				"JsonFormsPageForms.js"
-			],
-			"dependencies": [
-				"ext.JsonForms.base"
-			],
+			"styles": [],
+			"scripts": [ "JsonFormsPageForms.js" ],
+			"dependencies": [ "ext.JsonForms.base" ],
 			"messages": [],
 			"position": "top"
 		},
@@ -342,10 +399,7 @@
 			"localBasePath": "resources",
 			"remoteExtPath": "JsonForms/resources",
 			"styles": [ "libs/jsoneditor/jsoneditor.min.css" ],
-			"scripts": [
-				"libs/jsoneditor/ace.js",
-				"libs/jsoneditor/jsoneditor.min.js"
-			]
+			"scripts": [ "libs/jsoneditor/ace.js", "libs/jsoneditor/jsoneditor.min.js" ]
 		},
 		"ext.JsonForms.easymde": {
 			"localBasePath": "resources",

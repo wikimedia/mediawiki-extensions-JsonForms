@@ -65,11 +65,14 @@
 	"properties": {
 		"form": {
 			"x-no-title": true,
-			"description": "Regular wiki article (only main slot)",
+			"description": "{{int:jsonforms-formschema-form-regular-desc}}",
+			"x-description-format": "wikitext",
 			"x-default-properties": ["title","content_model", "editor", "content", "categories"],
 			"properties": {
 				"title": {
 					"type": "string",
+					"title": "{{int:jsonforms-formschema-title}}",
+					"x-title-format": "wikitext",
 					"minLength": 1,
 					"x-input": "mw.widgets.TitleInputWidget"
 				},
@@ -80,20 +83,25 @@
 				},
 				"content_model": {
 					"type": "string",
-					"title": "Content model",
+					"title": "{{int:jsonforms-formschema-content-model}}",
+					"x-title-format": "wikitext",
 					"default": "wikitext",
 					"x-watch": "role",
 					"x-enum-provider": "contentModelByRole"
 				},
 				"editor": {
 					"type": "string",
-					"title": "Editor",
+					"title": "{{int:jsonforms-formschema-editor}}",
+					"x-title-format": "wikitext",
 					"default": "source",
 					"x-watch": "content_model",
 					"x-enum-provider": "editorByContentModel"
 				},
 				"content": {
 					"type": "string",
+					"title": "{{int:jsonforms-formschema-content}}",
+					"x-title-format": "wikitext",
+					"x-compact": true,
 					"x-watch": "editor",
 					"links": [
 						{
@@ -104,6 +112,8 @@
 				},
 				"categories": {
 					"type": "array",
+					"title": "{{int:jsonforms-formschema-categories}}",
+					"x-title-format": "wikitext",
 					"items": {
 						"type": "string",
 						"x-input": "categorymultiselect"
@@ -118,13 +128,14 @@
 			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
-					"type": "string"
+					"type": "string",
+					"title": "{{int:jsonforms-formschema-summary}}",
+					"x-title-format": "wikitext"
 				},
 				"minor": {
 					"type": "boolean",
 					"x-no-title": true,
-					"description": "",
-					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
+					"description": "{{int:jsonforms-formschema-minor-edit}}",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
 					"x-control-config": {
@@ -138,7 +149,8 @@
 					"properties": {
 						"submit": {
 							"type": "null",
-							"title": "Save changes",
+							"title": "{{int:jsonforms-formschema-save-changes}}",
+							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-button-action": "submitButton",
 							"x-input-config": {

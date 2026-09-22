@@ -21,12 +21,14 @@
 			"x-default-properties": ["summary", "minor", "buttons"],
 			"properties": {
 				"summary": {
-					"type": "string"
+					"type": "string",
+					"title": "{{int:jsonforms-formschema-summary}}",
+					"x-title-format": "wikitext"
 				},
 				"minor": {
 					"type": "boolean",
 					"x-no-title": true,
-					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
+					"description": "{{int:jsonforms-formschema-minor-edit}}",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
 					"x-control-config": {
@@ -40,7 +42,8 @@
 					"properties": {
 						"submit": {
 							"type": "null",
-							"title": "Save changes",
+							"title": "{{int:jsonforms-formschema-save-changes}}",
+							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-button-action": "submitButton",
 							"x-input-config": {
@@ -49,7 +52,8 @@
 						},
 						"cancel": {
 							"type": "null",
-							"title": "Cancel",
+							"title": "{{int:jsonforms-formschema-cancel}}",
+							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-button-action": "cancelButton",
 							"x-input-config": {

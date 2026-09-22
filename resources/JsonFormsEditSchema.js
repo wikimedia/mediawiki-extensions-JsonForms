@@ -53,7 +53,7 @@ JsonFormsEditSchema.prototype.onFormButton = function ( action, editor ) {
 
 			if ( validationResults.length ) {
 				// eslint-disable-next-line no-undef
-				JsonForms.Alert( 'there are errors' );
+				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 				return;
 			} else {
 				editor.disable();
@@ -79,9 +79,9 @@ JsonFormsEditSchema.prototype.initialize = async function () {
 		this.defaultOptions.callbacks = {};
 	}
 
-	this.defaultOptions.callbacks.button = Object.assign(
+	this.defaultOptions.callbacks.actions = Object.assign(
 		{},
-		this.defaultOptions.callbacks.button || {},
+		this.defaultOptions.callbacks.actions || {},
 		{
 			submitButton: ( editor ) => {
 				this.onFormButton( 'submit', editor );

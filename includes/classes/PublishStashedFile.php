@@ -30,7 +30,6 @@ use UploadFromStash;
 use User;
 
 class PublishStashedFile {
-
 	/** @var User */
 	private $user;
 
@@ -109,10 +108,12 @@ class PublishStashedFile {
 
 			// Initialize upload from stash
 			$this->upload = new UploadFromStash( $this->user );
+
 			$this->upload->initialize( $this->filekey, $this->filename );
 
 			// Check if file already exists
 			$file = $this->upload->getLocalFile();
+
 			if ( $file && $file->exists() ) {
 				return true;
 			}
@@ -129,7 +130,6 @@ class PublishStashedFile {
 
 			// Cache the final info
 			$this->setSuccessStatus();
-
 			return true;
 
 		} catch ( \Exception $e ) {
@@ -170,17 +170,13 @@ class PublishStashedFile {
 	 */
 	private function verifyUpload(): bool {
 		$verification = $this->upload->verifyUpload();
-
 		if ( $verification['status'] !== UploadBase::OK ) {
 			$status = Status::newFatal( 'verification-error' );
 			$status->value = [ 'verification' => $verification ];
-
 			$this->setStatus( 'Failure', 'publish', $status );
 			$this->lastError = 'Could not verify upload.';
-
 			return false;
 		}
-
 		return true;
 	}
 
@@ -205,13 +201,11 @@ class PublishStashedFile {
 
 			// Cleanup temporary file
 			$this->upload->cleanupTempFile();
-
 			return false;
 		}
 
 		// Cleanup temporary file
 		$this->upload->cleanupTempFile();
-
 		return true;
 	}
 
@@ -239,7 +233,6 @@ class PublishStashedFile {
 	 */
 	private function setSuccessStatus(): void {
 		$fileName = $this->upload->getLocalFile()->getName();
-
 		UploadBase::setSessionStatus(
 			$this->user,
 			$this->filekey,

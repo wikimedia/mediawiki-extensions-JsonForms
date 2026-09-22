@@ -27,8 +27,7 @@
 	"title": "",
 	"hide_title": false,
 	"editor_options": {
-		"base_options": "MediaWiki:DefaultEditorOptions",
-		"base_script": "MediaWiki:DefaultEditorScript",
+		"base_options": "MediaWiki:JsonFormsOptions",
 		"validation": "onsubmit",
 		"template": "default",
 		"use_lazy_properties": "threshold",

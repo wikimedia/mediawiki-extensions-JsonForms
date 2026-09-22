@@ -40,7 +40,7 @@ JsonFormsNewArticle.prototype.onFormButton = function ( action, editor ) {
 			console.log( 'validationResults', validationResults );
 
 			if ( validationResults.length ) {
-				JsonForms.Alert( 'there are errors' );
+				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
 				return;
 			} else {
 				editor.disable();
@@ -66,9 +66,9 @@ JsonFormsNewArticle.prototype.initialize = async function () {
 		this.defaultOptions.callbacks = {};
 	}
 
-	this.defaultOptions.callbacks.button = Object.assign(
+	this.defaultOptions.callbacks.actions = Object.assign(
 		{},
-		this.defaultOptions.callbacks.button || {},
+		this.defaultOptions.callbacks.actions || {},
 		{
 			submitButton: ( editor ) => {
 				this.onFormButton( 'submit', editor );
@@ -134,7 +134,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 				}
 
 				if ( !metadata.schemaName ) {
-					JsonForms.Alert( 'schema is required' );
+					JsonForms.Alert( this.getMsg( 'schema-required' ) );
 					return;
 				}
 			}
@@ -167,7 +167,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 				}
 
 				if ( !metadata.schemaName ) {
-					JsonForms.Alert( 'schema is required' );
+					JsonForms.Alert( this.getMsg( 'schema-required' ) );
 					return;
 				}
 			}

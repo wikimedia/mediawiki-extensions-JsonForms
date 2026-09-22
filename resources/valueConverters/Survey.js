@@ -22,10 +22,6 @@
 /* global JsonForms */
 // use IIFE, this ensure name is scoped
 ( function () {
-	function isObject( item ) {
-		return !!item && typeof item === 'object' && !Array.isArray( item );
-	}
-
 	function convertMatrixBuilderToSurvey( data ) {
 		if ( !data || !data.items || !data.items.length ) {
 			return data;
@@ -37,7 +33,7 @@
 		cell = returnCell;
 		const levelCount = items.length;
 
-		if ( typeof cell !== 'string' && !isObject( cell ) ) {
+		if ( typeof cell !== 'string' && !JsonForms.Utilities.isObject( cell ) ) {
 			cell = {};
 		}
 

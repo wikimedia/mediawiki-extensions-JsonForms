@@ -29,7 +29,8 @@
 					"fullname": {
 						"type": "string",
 						"title": "Full Name",
-						"x-hidden_": true,
+						"x-hidden": true,
+						"minLength": 1,
 						"description": "Computed full name from name object",
 						"x-watch": [
 							"name.salutation",
@@ -40,7 +41,10 @@
 						],
 						"x-template": "{{name.salutation}} {{name.first_name}} {{name.middle_name}} {{name.last_name}} {{name.suffix}}"
 					}
-				}
+				},
+				"required": [
+					"fullname"
+				]
 			},
 			"else": {
 				"properties": {
@@ -48,22 +52,23 @@
 						"x-hidden": true,
 						"type": "string",
 						"title": "Full Name",
+						"minLength": 1,
 						"description": "Computed full name from simple name string",
 						"x-watch": [
 							"name"
 						],
 						"x-template": "{{name}}"
 					}
-				}
+				},
+				"required": [
+					"fullname"
+				]
 			}
 		}
 	],
 	"properties": {
 		"fullname": {
-			"type": "string",
-			"title": "Full Name",
-			"x-hidden_": true,
-			"description": "Computed full name (auto-generated based on name format)"
+			"type": "string"
 		},
 		"name": {
 			"oneOf": [
@@ -178,7 +183,7 @@
 		"picture": {
 			"type": "string",
 			"title": "Picture",
-			"description": "Picture filename or URL (e.g., File:image.jpg)",
+			"description": "Picture filename",
 			"x-format": "file",
 			"x-input": "OO.ui.SelectFileWidget"
 		},

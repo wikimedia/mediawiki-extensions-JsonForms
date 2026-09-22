@@ -5,7 +5,7 @@
 	"x-message": {
 		"x-label-template": "This form is based on the schema <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:Core/DemoForm'}}\">JsonSchema:Core/DemoForm</a>"
 	},
-	"x-default-properties": [ "schema", "editor" ],
+	"x-default-properties": ["schema", "editor"],
 	"properties": {
 		"schema": {
 			"type": "string",
@@ -18,7 +18,7 @@
 				"x-label-template": "This form is based on the schema <a target=\"blank\" href=\"{{replace wgArticlePath '$1' 'JsonSchema:'}}{{schema}}\">JsonSchema:{{schema}}</a>"
 			},
 			"x-compact": "true",
-			"x-watch" : "schema",
+			"x-watch": "schema",
 			"links": [
 				{
 					"rel": "describedBy",

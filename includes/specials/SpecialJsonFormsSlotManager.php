@@ -23,6 +23,7 @@
  */
 
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+use MediaWiki\Extension\JsonForms\SchemaUtils;
 use MediaWiki\Extension\JsonForms\SlotEditor;
 use MediaWiki\Revision\SlotRecord;
 
@@ -107,10 +108,6 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 			$jsonForm->properties->editor->{'x-input-config'} = new stdClass();
 		}
 
-		$jsonForm->properties->editor->{'x-input-config'}->schema = json_encode(
-			$innerSchema,
-		);
-
 		$startValInnerForm = new stdClass();
 		$editPage = null;
 		$metadata = null;
@@ -135,6 +132,7 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 					$metadata,
 					$wikiPage,
 					$editTitle,
+					$innerSchema
 				) {
 					$slotMetadata = $metadata->slots->$role ?? new stdClass();
 
@@ -144,18 +142,36 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 						$val->editor = $slotMetadata->editor;
 					}
 					$content = \JsonForms::getSlotContent( $wikiPage, $role );
-					if (
-						!isset( $val->editor ) ||
-						strtolower( $val->editor ) !== 'jsonforms'
-					) {
-						$val->content = $content;
-					} else {
-						$json = \JsonForms::processFormData( $content, $slotMetadata );
-						$schemaName = $metadata->slots->$role->schema ?? '';
-						$val->content = json_encode( [
-							'schema' => $schemaName,
-							'editor' => SlotEditor::stringifyMaybeJSON( $json ),
-						] );
+
+					$editor = isset( $val->editor ) ? strtolower( $val->editor ) : 'source';
+					switch ( $editor ) {
+						case 'jsonforms':
+							$json = \JsonForms::processFormData( $content, $slotMetadata );
+							$schemaName = $metadata->slots->$role->schema ?? '';
+							$val->content = json_encode( [
+								'schema' => $schemaName,
+								'editor' => SlotEditor::stringifyMaybeJSON( $json ),
+							] );
+							break;
+
+						default:
+							$subschemaPath = 'definitions.editor_' . $editor . '.type';
+							$subschemaType = SchemaUtils::getValueByPath( $innerSchema, $subschemaPath );
+
+							// *** currently not used, it depends on the provided schema
+							if ( $subschemaType === 'object' ) {
+								$val->content = new stdClass();
+								$val->content->content = $content;
+								if ( !isset( $slotMetadata->editorOptions ) ) {
+									$slotMetadata->editorOptions = new stdClass();
+								}
+								$val->content->options = $slotMetadata->editorOptions;
+								$inputConfigPath = 'definitions.editor_' . $editor . '.properties.content.x-input-config';
+								SchemaUtils::setValueByPath( $innerSchema, $inputConfigPath, $slotMetadata->editorOptions );
+
+							} else {
+								$val->content = $content;
+							}
 					}
 				};
 
@@ -179,14 +195,17 @@ class SpecialJsonFormsSlotManager extends SpecialPage {
 			}
 		}
 
+		$jsonForm->properties->editor->{'x-input-config'}->schema = json_encode(
+			$innerSchema,
+		);
+
 		// Create formData as stdClass
 		$formData = new stdClass();
 		$formData->schema = $jsonForm;
 		$formData->formDescriptor = (object)[
 			'action' => !$editTitle ? 'create' : 'edit',
 			'editor_options' => (object)[
-				'base_options' => 'MediaWiki:DefaultEditorOptions',
-				'base_script' => 'MediaWiki:DefaultEditorScript',
+				'base_options' => 'MediaWiki:JsonFormsOptions',
 			],
 			'width' => 'auto'
 		];

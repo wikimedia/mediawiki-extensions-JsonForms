@@ -118,7 +118,7 @@
 						return [ 'mw.widgets.DateInputWidget' ];
 
 					case 'json':
-						return [ 'JsonEditor', 'JsonForms' ];
+						return [ 'JsonEditor', 'FancyTree', 'JsonForms' ];
 
 					case 'hidden':
 						return [ 'OO.ui.HiddenInputWidget' ];

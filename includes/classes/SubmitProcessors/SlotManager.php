@@ -62,6 +62,12 @@ class SlotManager extends SubmitForm {
 		$metadata->slots->{SlotRecord::MAIN}->editor = $data->value->editor ??
 			$this->defaultEditorForContentModel( $contentModelMainSlot );
 
+		if ( is_object( $data->value->content ) ) {
+			if ( is_object( $data->value->content->options ) ) {
+				$metadata->slots->{SlotRecord::MAIN}->{'editorOptions'} = $data->value->content->options;
+			}
+		}
+
 		$this->preserveMainSlotSchema( $metadata, $metadataPrevious, $contentModelMainSlot );
 
 		$this->addCategories( $metadata, $data );

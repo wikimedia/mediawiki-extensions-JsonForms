@@ -1,0 +1,606 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:EDTF",
+	"title": "EDTF",
+	"x-layout": "paged",
+	"description": "Extended Date/Time Format (EDTF), ISO 8601-2 Level 0–2 normalized AST. This schema represents a normalized abstract syntax tree rather than the original EDTF textual syntax. EDTF group qualifications and other syntactic constructs may be expanded into component-level AST properties.",
+	"oneOf": [
+		{
+			"$ref": "#/$defs/date"
+		},
+		{
+			"$ref": "#/$defs/dateTime"
+		},
+		{
+			"$ref": "#/$defs/season"
+		},
+		{
+			"$ref": "#/$defs/subYear"
+		},
+		{
+			"$ref": "#/$defs/interval"
+		},
+		{
+			"$ref": "#/$defs/set"
+		}
+	],
+	"$defs": {
+		"qualification": {
+			"type": "string",
+			"title": "Qualification",
+			"description": "Normalized EDTF qualification. 'none' means that no qualification is present. EDTF '?' is uncertain, '~' is approximate, and '%' is uncertain and approximate.",
+			"enum": [
+				"none",
+				"uncertain",
+				"approximate",
+				"uncertain-and-approximate"
+			],
+			"default": "none"
+		},
+		"year": {
+			"type": "object",
+			"title": "Four-Digit Year",
+			"description": "A normalized four-digit EDTF year. Level 2 permits unspecified digits (X) anywhere within the four-character year. A leading minus sign represents a negative calendar year.",
+			"required": [
+				"type",
+				"value"
+			],
+			"properties": {
+				"type": {
+					"const": "year"
+				},
+				"value": {
+					"type": "string",
+					"description": "Four year digits, optionally preceded by a minus sign. X represents an unspecified digit.",
+					"pattern": "^-?[0-9X]{4}$",
+					"minLength": 4,
+					"maxLength": 5
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				},
+				"significantDigits": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 4
+				}
+			},
+			"additionalProperties": false
+		},
+		"longYear": {
+			"type": "object",
+			"title": "Extended Year",
+			"description": "A normalized representation of an EDTF Y-prefixed extended year. The numeric year is outside the four-digit range.",
+			"required": [
+				"type",
+				"value"
+			],
+			"properties": {
+				"type": {
+					"const": "long-year"
+				},
+				"value": {
+					"type": "integer",
+					"anyOf": [
+						{
+							"minimum": 10000
+						},
+						{
+							"maximum": -10000
+						}
+					]
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				},
+				"significantDigits": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
+		"exponentialYear": {
+			"type": "object",
+			"title": "Exponential Year",
+			"description": "A normalized representation of an EDTF Level 2 exponential year such as Y-17E7. The coefficient is the signed integer preceding E and the exponent is the positive integer following E.",
+			"required": [
+				"type",
+				"coefficient",
+				"exponent"
+			],
+			"properties": {
+				"type": {
+					"const": "exponential-year"
+				},
+				"coefficient": {
+					"type": "integer"
+				},
+				"exponent": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				},
+				"significantDigits": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
+		"yearValue": {
+			"title": "Year Value",
+			"description": "One of the three EDTF year representations: four-digit, Y-prefixed extended, or Level 2 exponential.",
+			"oneOf": [
+				{
+					"$ref": "#/$defs/year"
+				},
+				{
+					"$ref": "#/$defs/longYear"
+				},
+				{
+					"$ref": "#/$defs/exponentialYear"
+				}
+			]
+		},
+		"month": {
+			"type": "object",
+			"title": "Month",
+			"description": "A calendar month. Level 2 permits unspecified digits anywhere within the two-character month component. Only 0X, 1X, and XX represent valid unspecified-month patterns.",
+			"required": [
+				"type",
+				"value"
+			],
+			"properties": {
+				"type": {
+					"const": "month"
+				},
+				"value": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 12
+						},
+						{
+							"type": "string",
+							"enum": [
+								"0X",
+								"1X",
+								"XX"
+							]
+						}
+					]
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				}
+			},
+			"additionalProperties": false
+		},
+		"day": {
+			"type": "object",
+			"title": "Day",
+			"description": "A calendar day. Level 2 permits unspecified digits anywhere within the two-character day component. The patterns 0X, 1X, 2X, 3X, and XX represent unspecified days.",
+			"required": [
+				"type",
+				"value"
+			],
+			"properties": {
+				"type": {
+					"const": "day"
+				},
+				"value": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 31
+						},
+						{
+							"type": "string",
+							"enum": [
+								"0X",
+								"1X",
+								"2X",
+								"3X",
+								"XX"
+							]
+						}
+					]
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				}
+			},
+			"additionalProperties": false
+		},
+		"date": {
+			"type": "object",
+			"title": "Date",
+			"description": "A normalized EDTF calendar date with year, month, and optional day precision. Group qualifications from EDTF syntax are normalized onto the affected components. For example, 2004-06-11% is represented by uncertain-and-approximate qualification on year, month, and day.",
+			"required": [
+				"type",
+				"year"
+			],
+			"properties": {
+				"type": {
+					"const": "date"
+				},
+				"year": {
+					"$ref": "#/$defs/yearValue"
+				},
+				"month": {
+					"$ref": "#/$defs/month"
+				},
+				"day": {
+					"$ref": "#/$defs/day"
+				}
+			},
+			"allOf": [
+				{
+					"if": {
+						"required": [
+							"day"
+						]
+					},
+					"then": {
+						"required": [
+							"month"
+						]
+					}
+				}
+			],
+			"additionalProperties": false
+		},
+		"time": {
+			"type": "object",
+			"title": "Time",
+			"description": "Normalized local time of day. Hours, minutes, and seconds are represented explicitly in the AST. A time shift may be represented as UTC (Z) or as an hour or hour-and-minute offset. A leap second is represented by exactly 60 seconds.",
+			"required": [
+				"hour",
+				"minute",
+				"second"
+			],
+			"properties": {
+				"hour": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 23
+				},
+				"minute": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 59
+				},
+				"second": {
+					"anyOf": [
+						{
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 60
+						},
+						{
+							"type": "number",
+							"minimum": 0,
+							"exclusiveMaximum": 60
+						}
+					]
+				},
+				"timezone": {
+					"type": "string",
+					"description": "UTC time shift in EDTF/ISO form: Z, ±HH, or ±HH:MM. The offset is limited to −14:00 through +14:00.",
+					"pattern": "^(?:Z|[+-](?:0[0-9]|1[0-3])(?::[0-5][0-9])?|[+-]14:00)$"
+				}
+			},
+			"additionalProperties": false
+		},
+		"dateTime": {
+			"type": "object",
+			"title": "Date and Time",
+			"description": "A normalized EDTF date and local time of day.",
+			"required": [
+				"type",
+				"date",
+				"time"
+			],
+			"properties": {
+				"type": {
+					"const": "datetime"
+				},
+				"date": {
+					"$ref": "#/$defs/date"
+				},
+				"time": {
+					"$ref": "#/$defs/time"
+				}
+			},
+			"additionalProperties": false
+		},
+		"season": {
+			"type": "object",
+			"title": "Season",
+			"description": "A normalized EDTF season. Codes 21–24 represent Spring, Summer, Autumn, and Winter independently of hemisphere.",
+			"required": [
+				"type",
+				"year",
+				"code"
+			],
+			"properties": {
+				"type": {
+					"const": "season"
+				},
+				"year": {
+					"$ref": "#/$defs/yearValue"
+				},
+				"code": {
+					"type": "integer",
+					"enum": [
+						21,
+						22,
+						23,
+						24
+					],
+					"x-enum-titles": [
+						"Spring",
+						"Summer",
+						"Autumn",
+						"Winter"
+					]
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				}
+			},
+			"additionalProperties": false
+		},
+		"subYear": {
+			"type": "object",
+			"title": "Sub-year Period",
+			"description": "A normalized EDTF Level 2 sub-year grouping.",
+			"required": [
+				"type",
+				"year",
+				"code"
+			],
+			"properties": {
+				"type": {
+					"const": "sub-year"
+				},
+				"year": {
+					"$ref": "#/$defs/yearValue"
+				},
+				"code": {
+					"type": "integer",
+					"enum": [
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33,
+						34,
+						35,
+						36,
+						37,
+						38,
+						39,
+						40,
+						41
+					],
+					"x-enum-titles": [
+						"Spring (Northern Hemisphere)",
+						"Summer (Northern Hemisphere)",
+						"Autumn (Northern Hemisphere)",
+						"Winter (Northern Hemisphere)",
+						"Spring (Southern Hemisphere)",
+						"Summer (Southern Hemisphere)",
+						"Autumn (Southern Hemisphere)",
+						"Winter (Southern Hemisphere)",
+						"Quarter 1",
+						"Quarter 2",
+						"Quarter 3",
+						"Quarter 4",
+						"Quadrimester 1",
+						"Quadrimester 2",
+						"Quadrimester 3",
+						"Semestral 1",
+						"Semestral 2"
+					]
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				}
+			},
+			"additionalProperties": false
+		},
+		"temporalValue": {
+			"title": "Temporal Value",
+			"description": "A normalized EDTF temporal value that may occur as a set member.",
+			"oneOf": [
+				{
+					"$ref": "#/$defs/date"
+				},
+				{
+					"$ref": "#/$defs/dateTime"
+				},
+				{
+					"$ref": "#/$defs/season"
+				},
+				{
+					"$ref": "#/$defs/subYear"
+				}
+			]
+		},
+		"intervalDate": {
+			"title": "Interval Date",
+			"description": "A normalized EDTF date permitted as an interval endpoint. EDTF intervals use dates rather than date-time values.",
+			"$ref": "#/$defs/date"
+		},
+		"openEndpoint": {
+			"type": "object",
+			"title": "Open Endpoint",
+			"description": "An open EDTF interval endpoint represented by '..'. It means that the interval has no specified boundary at that side.",
+			"required": [
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "open"
+				}
+			},
+			"additionalProperties": false
+		},
+		"unknownEndpoint": {
+			"type": "object",
+			"title": "Unknown Endpoint",
+			"description": "An unknown EDTF interval endpoint represented by an empty endpoint in the textual syntax. Unknown means that an endpoint exists but its value is not known; it is distinct from an open endpoint.",
+			"required": [
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "unknown"
+				}
+			},
+			"additionalProperties": false
+		},
+		"intervalEndpoint": {
+			"title": "Interval Endpoint",
+			"description": "A normalized EDTF interval endpoint. It may be a date, an open endpoint, or an unknown endpoint.",
+			"oneOf": [
+				{
+					"$ref": "#/$defs/intervalDate"
+				},
+				{
+					"$ref": "#/$defs/openEndpoint"
+				},
+				{
+					"$ref": "#/$defs/unknownEndpoint"
+				}
+			]
+		},
+		"interval": {
+			"type": "object",
+			"title": "Interval",
+			"description": "A normalized EDTF interval. The two endpoints correspond to the two sides of the EDTF '/' separator. EDTF intervals use date endpoints; time-of-day is excluded. Level 1 adds open and unknown endpoints, and Level 2 permits qualified and unspecified date components within the endpoints.",
+			"required": [
+				"type",
+				"start",
+				"end"
+			],
+			"properties": {
+				"type": {
+					"const": "interval"
+				},
+				"start": {
+					"$ref": "#/$defs/intervalEndpoint"
+				},
+				"end": {
+					"$ref": "#/$defs/intervalEndpoint"
+				}
+			},
+			"additionalProperties": false
+		},
+		"rangeEndpoint": {
+			"title": "Range Endpoint",
+			"description": "An endpoint of a normalized EDTF Level 2 consecutive range used inside a set. An endpoint may be a temporal value or an open range marker.",
+			"oneOf": [
+				{
+					"$ref": "#/$defs/temporalValue"
+				},
+				{
+					"$ref": "#/$defs/openEndpoint"
+				}
+			]
+		},
+		"range": {
+			"type": "object",
+			"title": "Set Range",
+			"description": "A normalized representation of an EDTF Level 2 consecutive range introduced by '..' inside a set. It is an AST construct for set ranges and is not a separate top-level EDTF value.",
+			"required": [
+				"type"
+			],
+			"properties": {
+				"type": {
+					"const": "range"
+				},
+				"start": {
+					"$ref": "#/$defs/rangeEndpoint"
+				},
+				"end": {
+					"$ref": "#/$defs/rangeEndpoint"
+				}
+			},
+			"anyOf": [
+				{
+					"required": [
+						"start"
+					]
+				},
+				{
+					"required": [
+						"end"
+					]
+				}
+			],
+			"additionalProperties": false
+		},
+		"setElement": {
+			"title": "Set Element",
+			"description": "A member of an EDTF Level 2 set. A member is either a temporal value or a normalized consecutive range.",
+			"oneOf": [
+				{
+					"$ref": "#/$defs/temporalValue"
+				},
+				{
+					"$ref": "#/$defs/range"
+				}
+			]
+		},
+		"setKind": {
+			"type": "string",
+			"title": "Set Kind",
+			"description": "The semantics of an EDTF Level 2 set. 'choice' corresponds to square brackets and means one member is selected; 'multiple' corresponds to curly brackets and means all members are included.",
+			"enum": [
+				"choice",
+				"multiple"
+			]
+		},
+		"set": {
+			"type": "object",
+			"title": "Set",
+			"description": "A normalized EDTF Level 2 set. Square brackets are represented by kind 'choice'; curly brackets are represented by kind 'multiple'. Consecutive '..' ranges are represented by range elements.",
+			"required": [
+				"type",
+				"kind",
+				"elements"
+			],
+			"properties": {
+				"type": {
+					"const": "set"
+				},
+				"kind": {
+					"$ref": "#/$defs/setKind"
+				},
+				"elements": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"$ref": "#/$defs/setElement"
+					}
+				},
+				"qualification": {
+					"$ref": "#/$defs/qualification"
+				}
+			},
+			"additionalProperties": false
+		}
+	}
+}
+

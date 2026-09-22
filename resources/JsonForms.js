@@ -35,7 +35,19 @@ function JsonForms( el, data ) {
 	this.data = data;
 
 	this._schemaCache = {};
+	this._articleCache = {};
+
 	this._pendingRequests = {};
+	this._pendingRequestsContent = {};
+
+	this.callbacksMap = {
+		enum_providers: 'enumProviders',
+		autocomplete_providers: 'autocompleteProviders',
+		converters: 'valueConverters',
+		actions: 'actions',
+		events: 'events',
+		template: 'template'
+	};
 }
 
 JsonForms.prototype.initialize = async function () {
@@ -44,6 +56,8 @@ JsonForms.prototype.initialize = async function () {
 	this.enumProviders = new JsonForms.EnumProviders();
 	this.autocompleteProviders = new JsonForms.AutocompleteProviders();
 	this.valueConverters = new JsonForms.ValueConverters();
+	this.events = new JsonForms.Events();
+	this.actions = new JsonForms.Actions();
 
 	const defaultOptions = {
 		...JFEditor.defaults.options,
@@ -52,38 +66,79 @@ JsonForms.prototype.initialize = async function () {
 
 	defaultOptions.callbacks = defaultOptions.callbacks || {};
 
-	defaultOptions.callbacks.enum_providers = {
-		...this.enumProviders,
-		...( ( defaultOptions.callbacks && defaultOptions.callbacks.enum_providers ) ||
+	for ( const key in this.callbacksMap ) {
+		defaultOptions.callbacks[ key ] = {
+			...this[ this.callbacksMap[ key ] ],
+			...( ( defaultOptions.callbacks && defaultOptions.callbacks[ key ] ) ||
 			{} )
-	};
-
-	defaultOptions.callbacks.autocomplete_providers = {
-		...this.autocompleteProviders,
-		...( ( defaultOptions.callbacks &&
-			defaultOptions.callbacks.autocomplete_providers ) ||
-			{} )
-	};
-
-	defaultOptions.callbacks.converters = {
-		...this.valueConverters,
-		...( ( defaultOptions.callbacks && defaultOptions.callbacks.converters ) ||
-			{} )
-	};
+		};
+	}
 
 	this.defaultOptions = defaultOptions;
+};
+
+JsonForms.prototype.getValidContexts = function ( objName, funcName ) {
+	let contexts = [];
+	if ( objName in this.defaultOptions.callbacks ) {
+		contexts.push( this.defaultOptions.callbacks[ objName ] );
+	}
+
+	if ( this.callbacksMap[ objName ] && this[ this.callbacksMap[ objName ] ] ) {
+		contexts.push( this[ this.callbacksMap[ objName ] ] );
+	}
+
+	if ( !contexts.length ) {
+		return [];
+	}
+
+	const ret = [];
+	for ( const context of contexts ) {
+		if ( JsonForms.Utilities.isObject( context ) ) {
+			if ( !funcName || context[ funcName ] ) {
+				ret.push( context );
+			}
+		}
+	}
+
+	return ret;
+};
+
+JsonForms.prototype.getCallbackObj = function ( objName, funcName ) {
+	const contexts = this.getValidContexts( objName, funcName );
+	return contexts.length ? contexts[ 0 ] : null;
+};
+
+JsonForms.prototype.emitEvent = function ( editor, name, eventData ) {
+	// the first argument must be the event name
+	JsonForms.emitter.emit( name, this, editor, eventData );
+};
+
+JsonForms.prototype.registerEvent = function ( context, eventName, methodName ) {
+	JsonForms.emitter.connect( context, {
+		[ eventName ]: methodName
+	} );
+};
+
+JsonForms.prototype.unregisterEvent = function ( context, eventName ) {
+	JsonForms.emitter.disconnect( context, {
+		[ eventName ]: null
+	} );
 };
 
 JsonForms.prototype.registerConverter = function ( name, fn ) {
 	JsonForms.ValueConverters.prototype[ name ] = fn;
 };
 
-JsonForms.prototype.registerAutocompleteProviders = function ( name, fn ) {
+JsonForms.prototype.registerAutocompleteProvider = function ( name, fn ) {
 	JsonForms.AutocompleteProviders.prototype[ name ] = fn;
 };
 
-JsonForms.prototype.registerEnumProviders = function ( name, fn ) {
+JsonForms.prototype.registerEnumProvider = function ( name, fn ) {
 	JsonForms.EnumProviders.prototype[ name ] = fn;
+};
+
+JsonForms.prototype.registerAction = function ( name, fn ) {
+	JsonForms.Actions.prototype[ name ] = fn;
 };
 
 JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
@@ -147,6 +202,19 @@ JsonForms.prototype.getModule = async function ( str ) {
 			URL.revokeObjectURL( url );
 		}
 	}
+};
+
+JsonForms.prototype.getMsg = function ( key, params ) {
+	return this.getMwMessage( 'jsonforms-instance-' + key, params );
+};
+
+JsonForms.prototype.getMwMessage = function ( key, params ) {
+	/* eslint-disable mediawiki/msg-doc */
+	return mw.msg( key, ...( params || [] ) );
+};
+
+JsonForms.prototype.getMWConfigValues = function () {
+	return mw.config.values;
 };
 
 // use as schema loader - location
@@ -227,6 +295,69 @@ JsonForms.prototype.notifyRefFetchFailed = function ( uri, options ) {
 	}
 };
 
+JsonForms.prototype.fetchArticleContent = function ( articleTitle ) {
+	// @IMPORTANT !! otherwise the processed schema could
+	// be returned instead of the original schema
+	/* eslint-disable arrow-body-style */
+	const returnClone = ( schema ) => {
+		return Promise.resolve( JsonForms.Utilities.clone( schema ) );
+	};
+
+	if ( this._articleCache[ articleTitle ] ) {
+		return returnClone( this._articleCache[ articleTitle ] );
+	}
+
+	if ( this._pendingRequestsContent[ articleTitle ] ) {
+		return this._pendingRequestsContent[ articleTitle ].then( returnClone );
+	}
+
+	const payload = {
+		action: 'query',
+		prop: 'revisions',
+		revslots: 'main',
+		titles: articleTitle,
+		formatversion: 2,
+		rvprop: 'content'
+	};
+
+	this._pendingRequestsContent[ articleTitle ] = new Promise( ( resolve, reject ) => {
+		new mw.Api()
+			.get( payload )
+			.done( ( data ) => {
+				const pages = JsonForms.Utilities.getNestedProp(
+					[ 'query', 'pages' ],
+					data
+				);
+
+				if ( !pages || pages.length === 0 || pages[ 0 ].missing ) {
+					reject( new Error( `Article not found: ${ articleTitle }` ) );
+					return;
+				}
+
+				const content = JsonForms.Utilities.getNestedProp(
+					[ 0, 'revisions', 0, 'content' ],
+					pages
+				);
+
+				if ( content === undefined || content === null ) {
+					reject( new Error( `No content returned for: ${ articleTitle }` ) );
+					return;
+				}
+				this._articleCache[ articleTitle ] = content;
+				resolve( content );
+			} )
+			.fail( ( error, errorCode ) => {
+				console.error( 'API call failed - error:', error );
+				console.error( 'Error code:', errorCode );
+				reject( error );
+			} ).always( () => {
+				delete this._pendingRequestsContent[ articleTitle ];
+			} );
+	} );
+
+	return this._pendingRequestsContent[ articleTitle ].then( returnClone );
+};
+
 JsonForms.prototype.fetchSchema = function ( schemaName ) {
 	// @IMPORTANT !! otherwise the processed schema could
 	// be returned instead of the original schema
@@ -259,15 +390,15 @@ JsonForms.prototype.fetchSchema = function ( schemaName ) {
 					let result = thisRes[ payload.action ].result;
 					const schema = JSON.parse( result );
 					this._schemaCache[ schemaName ] = schema;
-					delete this._pendingRequests[ schemaName ];
 					resolve( schema );
 				}
 			} )
 			.fail( ( error, errorCode ) => {
-				delete this._pendingRequests[ schemaName ];
 				console.error( 'API call failed - error:', error );
 				console.error( 'Error code:', errorCode );
 				reject( error );
+			} ).always( () => {
+				delete this._pendingRequests[ schemaName ];
 			} );
 	} );
 
@@ -297,6 +428,10 @@ JsonForms.prototype.createEditor = function ( el, config ) {
 		this.editorScript( this.editor, this.config, updateEditorCallBack );
 	}
 
+	if ( typeof this.defaultOptions.onInit === 'function' ) {
+		this.defaultOptions.onInit( this, this.editor );
+	}
+
 	return this.editor;
 };
 
@@ -310,6 +445,8 @@ JsonForms.prototype.processTemplate = function ( str, vars, options = {} ) {
 	} );
 };
 
+// or use mw.hook
+JsonForms.emitter = new OO.EventEmitter();
 window.JsonForms = JsonForms;
 
 ( function ( $ ) {

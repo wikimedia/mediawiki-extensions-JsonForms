@@ -10,12 +10,40 @@ export default {
 	remove_false_properties: false,
 	required_evaluates_non_empty: false,
 	debug: false,
+
+	//after the editor has been initialized and
+	// before is ready
+	onInit: function (jsonFormsInstance, editor) {
+		editor.on('ready', () => {
+			// update editor with new config
+			// const config = {}
+			// jsonFormsInstance.createEditor( jsonFormsInstance.el, { ...jsonFormsInstance.config, ...config } );
+		});
+
+		editor.on('change', () => {});
+
+		// subeditor access
+		const editorAB = editor.watch('root.a.b', (editor) => {
+			// do something when the value changes
+			// console.log('^^editorAB', editor.getValue());
+		});
+
+		// another way to register an event, this will fire
+		// for each editor in the page, including nested editors
+		// in the same form
+		const context = this;
+		const onPagedLayoutSetPage = function (thisJsonFormsInstance, editor, eventData) {
+			// console.log('event onPagedLayoutSetPage via event registration', editor, eventData);
+		};
+		jsonFormsInstance.registerEvent(
+			context,
+			'pagedLayoutSetPage',
+			onPagedLayoutSetPage,
+		);
+	},
 	callbacks: {
 		enum_providers: {
 			wikiList: function () {
-				let cache = null;
-				let pending = null;
-
 				function parseBulletList(content) {
 					const regex = /^\*\s*(.+)$/gm;
 					const items = [];
@@ -28,11 +56,9 @@ export default {
 					return items;
 				}
 
+				const cache = {};
 				return {
 					source: (jseditor, { item, watched }) => {
-						if (cache) return cache;
-						if (pending) return pending;
-
 						if (
 							!jseditor.schema['x-data'] ||
 							!jseditor.schema['x-data'].article
@@ -41,38 +67,18 @@ export default {
 								'A key "article" must be specified in an object with key "x-data" in the enum schema',
 							);
 
-							cache = [];
-							pending = null;
-							return cache;
+							return [];
 						}
 
 						const pageTitle = jseditor.schema['x-data'].article;
+						if (cache[pageTitle]) {
+							return cache[pageTitle];
+						}
 
-						pending = new mw.Api().get({
-								action: 'query',
-								prop: 'revisions',
-								revslots: 'main',
-								titles: pageTitle,
-								formatversion: 2,
-								rvprop: 'content',
-							})
-							.then((data) => {
-								const pages = data.query?.pages || [];
-								if (pages.length === 0 || pages[0].missing) {
-									cache = [];
-									pending = null;
-									return cache;
-								}
-								const content = pages[0].revisions?.[0]?.content;
-								cache = content ? parseBulletList(content) : [];
-								pending = null;
-								return cache;
-							})
-							.catch((error) => {
-								console.error('Failed to get page content:', error);
-							});
-
-						return pending;
+						return jseditor.fetchArticleContent(pageTitle).then((content) => {
+							cache[pageTitle] = parseBulletList(content);
+							return cache[pageTitle];
+						});
 					},
 					filter: (jseditor, { item, watched }) => {
 						return true;
@@ -140,10 +146,11 @@ export default {
 							);
 						}
 
-						if (pending) return pending;
+						if (pending) {
+							return pending;
+						}
 
 						const api = new mw.Api();
-
 						pending = api
 							.get({
 								action: 'query',
@@ -180,8 +187,11 @@ export default {
 				};
 			},
 		},
+
+		// must be a function with a "compile" method
 		template: {},
-		button: {
+
+		actions: {
 			submit: function (editor) {
 				const jsonEditor = editor.jsoneditor;
 				const jsonForm = jsonEditor.options.jsonFormsInstance;
@@ -201,7 +211,45 @@ export default {
 				}
 			},
 		},
+
+		// currently not used
 		upload: {},
+
+		// an object of converter names returning a convertTo and convertFrom functions
+		// the converter name must then be used in the schema using x-value-converter: [converter name]
 		converters: {},
+
+		preprocessData: function (editor, data) {
+			return data;
+		},
+
+		postprocessData: function (editor, data) {
+			return data;
+		},
+
+		events: {
+			initialized: function (editor, eventData) {
+				// console.log('event initialized via options', editor, eventData);
+			},
+			ready: function (editor, eventData) {
+				// console.log('event ready via options', editor, eventData);
+			},
+			change: function (editor, eventData) {
+				// console.log('event change via options', editor, eventData);
+			},
+			buildComplete: function (editor, eventData) {
+				// console.log('event buildComplete via options', editor, eventData);
+			},
+			pagedLayoutSetPage: function (editor, eventData) {
+				// console.log('event pagedLayoutSetPage via options', editor, eventData);
+			},
+			fancyTreeSelectItem: function (editor, eventData) {
+				// console.log('event fancyTreeSelectItem via options', editor, eventData);
+			},
+			fancyTreeClickItem: function (editor, eventData) {
+				// console.log('event fancyTreeClickItem via options', editor, eventData);
+			},
+		},
 	},
 };
+

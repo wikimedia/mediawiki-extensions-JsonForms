@@ -618,13 +618,6 @@ class JsonForms {
 				$titleText = $options->base_options;
 				$data->editorOptions = self::getLatestResource( $titleText, $filePath, );
 			}
-
-			if ( !empty( (array)$options->base_script ) ) {
-				$pathArr = explode( ':', $options->base_script );
-				$filePath = __DIR__ . '/../data/MediaWiki/' . $pathArr[1] . '.js';
-				$titleText = $options->base_script;
-				$data->editorScript = self::getLatestResource( $titleText, $filePath );
-			}
 		}
 
 		return $data;
@@ -813,13 +806,10 @@ class JsonForms {
 				return null;
 			}
 
-			// save the revision, otherwise FormBuilder cannot
-			// return the related revision
-			$services = MediaWikiServices::getInstance();
-			$slotRoleRegistry = $services->getSlotRoleRegistry();
-			$modelId = $slotRoleRegistry
-				->getRoleHandler( SlotRecord::MAIN )
-				->getDefaultModel( $title );
+			$modelId = strtolower( pathinfo( $filePath, PATHINFO_EXTENSION ) );
+			if ( $modelId === 'js' ) {
+				$modelId = 'javascript';
+			}
 
 			$slots = [
 				[

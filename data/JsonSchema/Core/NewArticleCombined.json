@@ -64,18 +64,22 @@
 				"title": {
 					"type": "string",
 					"minLength": 1,
-					"x-input": "mw.widgets.TitleInputWidget"
+					"x-input": "mw.widgets.TitleInputWidget",
+					"title": "{{int:jsonforms-formschema-title}}",
+					"x-title-format": "wikitext"
 				},
 				"content_model": {
 					"type": "string",
-					"title": "Content model",
+					"title": "{{int:jsonforms-formschema-content-model}}",
+					"x-title-format": "wikitext",
 					"default": "wikitext",
 					"x-watch": "role",
 					"x-enum-provider": "contentModelByRole"
 				},
 				"editor": {
 					"type": "string",
-					"title": "Editor",
+					"title": "{{int:jsonforms-formschema-editor}}",
+					"x-title-format": "wikitext",
 					"default": "source",
 					"x-watch": "content_model",
 					"x-enum-provider": "editorByContentModel"
@@ -83,6 +87,9 @@
 				"content": {
 					"type": "string",
 					"x-watch": "editor",
+					"x-compact": true,
+					"title": "{{int:jsonforms-formschema-content}}",
+					"x-title-format": "wikitext",
 					"links": [
 						{
 							"rel": "describedBy",
@@ -92,6 +99,8 @@
 				},
 				"categories": {
 					"type": "array",
+					"title": "{{int:jsonforms-formschema-categories}}",
+					"x-title-format": "wikitext",
 					"items": {
 						"type": "string",
 						"x-input": "categorymultiselect"
@@ -103,12 +112,14 @@
 		"newSchema": {
 			"type": "object",
 			"x-watch": "schema",
-			"title": "Edit schema",
+			"title": "{{int:jsonforms-formschema-edit-schema}}",
+			"x-title-format": "wikitext",
 			"properties": {
 				"schema": {
 					"type": "string",
-					"title": "JSON Schema",
-					"description": "Manage schemas [[Special:JsonFormsManage/Schemas|here]]",
+					"title": "{{int:jsonforms-formschema-json-schema}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-json-schema-desc}}",
 					"x-description-format": "wikitext",
 					"default": "",
 					"x-format": "text",
@@ -116,7 +127,7 @@
 					"x-enum-provider": "jsonSchemas"
 				},
 				"preview": {
-					"x-css-class": "jsonforms-editdata-preview",
+					"x-css-class": "jsonforms-editschema-preview",
 					"x-compact": "true",
 					"x-watch": "schema",
 					"links": [
@@ -133,29 +144,36 @@
 	},
 	"properties": {
 		"form": {
-			"x-compact": true,
-			"title": "combined",
-			"description": "Main slot + one slot for data",
+			"x-no-title": true,
+			"description": "{{int:jsonforms-formschema-form-combined-desc}}",
+			"x-description-format": "wikitext",
 			"x-layout": "tabs",
 			"properties": {
 				"main": {
+					"title": "{{int:jsonforms-formschema-main}}",
+					"x-title-format": "wikitext",
 					"x-compact": true,
 					"$ref": "#/definitions/article"
 				},
 				"schema": {
 					"type": "object",
 					"x-compact": true,
+					"title": "{{int:jsonforms-formschema-schema}}",
+					"x-title-format": "wikitext",
 					"properties": {
 						"schemaName": {
 							"type": "string",
-							"title": "JSON Schema",
+							"title": "{{int:jsonforms-formschema-json-schema}}",
+							"x-title-format": "wikitext",
+							"description": "{{int:jsonforms-formschema-json-schema-combined-desc}}",
+							"x-description-format": "wikitext",
 							"default": "",
 							"minLength": 1,
-							"description": "any schema listed {{#querylink: Special:PrefixIndex|here|namespace=2100}}",
-							"x-description-format": "wikitext",
 							"x-enum-provider": "jsonSchemas"
 						},
 						"editor": {
+							"title": "{{int:jsonforms-formschema-editor}}",
+							"x-title-format": "wikitext",
 							"x-dependency": {
 								"path": "schemaName",
 								"op": "!=",
@@ -177,17 +195,29 @@
 				},
 				"options": {
 					"x-compact": true,
+					"title": "{{int:jsonforms-formschema-options}}",
+					"x-title-format": "wikitext",
 					"properties": {
 						"show_infobox": {
 							"type": "boolean",
-							"title": "Show Infobox",
-							"description": "Whether to show an infobox on the target page",
+							"title": "{{int:jsonforms-formschema-show-infobox}}",
+							"x-title-format": "wikitext",
+							"description": "{{int:jsonforms-formschema-show-infobox-desc}}",
+							"x-description-format": "wikitext",
 							"default": true
 						},
 						"infobox_position": {
 							"type": "string",
-							"title": "Infobox position",
+							"title": "{{int:jsonforms-formschema-infobox-position}}",
+							"x-title-format": "wikitext",
 							"enum": ["right", "left", "top", "bottom"],
+							"x-enum-titles": [
+								"{{int:jsonforms-formschema-infobox-position-right}}",
+								"{{int:jsonforms-formschema-infobox-position-left}}",
+								"{{int:jsonforms-formschema-infobox-position-top}}",
+								"{{int:jsonforms-formschema-infobox-position-bottom}}"
+							],
+							"x-enum-titles-format": "wikitext",
 							"default": "right",
 							"x-dependency": {
 								"path": "show_infobox",
@@ -197,8 +227,10 @@
 						},
 						"infobox_template": {
 							"type": "string",
-							"title": "Infobox template",
-							"description": "Template to use (leave empty for automatic generation)",
+							"title": "{{int:jsonforms-formschema-infobox-template}}",
+							"x-title-format": "wikitext",
+							"description": "{{int:jsonforms-formschema-infobox-template-desc}}",
+							"x-description-format": "wikitext",
 							"default": "",
 							"x-input": "mw.widgets.TitleInputWidget",
 							"x-input-config": {
@@ -212,8 +244,10 @@
 						},
 						"template_print_scalar": {
 							"type": "boolean",
-							"title": "Template print scalar",
-							"description": "Print scalar values if the related template is not found",
+							"title": "{{int:jsonforms-formschema-print-scalar}}",
+							"x-title-format": "wikitext",
+							"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
+							"x-description-format": "wikitext",
 							"default": false,
 							"x-dependency": {
 								"path": "infobox_template",
@@ -231,12 +265,14 @@
 			"x-default-properties": ["summary","minor", "buttons"],
 			"properties": {
 				"summary": {
-					"type": "string"
+					"type": "string",
+					"title": "{{int:jsonforms-formschema-summary}}",
+					"x-title-format": "wikitext"
 				},
 				"minor": {
 					"type": "boolean",
 					"x-no-title": true,
-					"description": "This is a [https://www.mediawiki.org/wiki/Help:Minor_edit minor edit]",
+					"description": "{{int:jsonforms-formschema-minor-edit}}",
 					"x-description-format": "wikitext",
 					"x-input": "checkbox",
 					"x-control-config": {
@@ -250,7 +286,8 @@
 					"properties": {
 						"submit": {
 							"type": "null",
-							"title": "Save changes",
+							"title": "{{int:jsonforms-formschema-save-changes}}",
+							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-button-action": "submitButton",
 							"x-input-config": {

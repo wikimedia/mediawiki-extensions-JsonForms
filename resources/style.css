@@ -169,7 +169,7 @@
 	background-color: #fff;
 }
 
-.jsonforms-editdata-preview {
+.jsonforms-editschema-preview:has( * .jsonforms-editor-container ) {
 	position: relative;
 	padding: 1rem;
 	margin: 1rem 0;
@@ -191,14 +191,14 @@
 	-ms-user-select: none;
 }
 
-.jsonforms-editdata-preview:hover {
+.jsonforms-editschema-preview:has( * .jsonforms-editor-container ):hover {
 	transform: translateY( -2px );
 	box-shadow: 0 4px 12px rgba( 0, 0, 0, 0.15 );
 	border-color: #c0c0c0;
 }
 
 /* Blurred overlay - always present */
-.jsonforms-editdata-preview::after {
+.jsonforms-editschema-preview:has( * .jsonforms-editor-container )::after {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -213,8 +213,8 @@
 }
 
 /* Text appears only on hover - DOES NOT cover entire container */
-.jsonforms-editdata-preview:hover::before {
-	content: 'This is a preview, edit data after insert';
+.jsonforms-editschema-preview:has( * .jsonforms-editor-container ):hover::before {
+	content: 'This is a preview, data can be edited after insert';
 	white-space: pre;
 	position: absolute;
 	top: 50%;
@@ -299,7 +299,7 @@
 }
 
 .jsonforms-editor-container {
-	overflow: auto;
+	/* overflow: auto; */
 }
 
 .jsonforms-editor .oo-ui-selectWidget {
@@ -844,4 +844,14 @@
 	padding: 0.703125em 0.9375em 0.625em;
 	padding-left: 0.9375em;
 	line-height: 1;
+}
+
+.jsonforms-editor ul.fancytree-container {
+	font-family: sans-serif;
+	font-size: 0.875rem;
+	margin: 0;
+	background-color: transparent;
+	border: medium none currentColor;
+	min-height: auto;
+	position: static;
 }

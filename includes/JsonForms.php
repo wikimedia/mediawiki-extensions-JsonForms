@@ -820,7 +820,8 @@ class JsonForms {
 			];
 
 			$errors = [];
-			self::importRevision( $title, $slots, $errors );
+			$timestamp = wfTimestampNow();
+			self::importRevision( $title, $slots, $timestamp, $errors );
 			if ( count( $errors ) ) {
 			// "Invalid json:" . implode( PHP_EOL, $errors)
 				throw new ErrorPageError( 'jsonforms-json-error-title', 'jsonforms-json-error', [ $errors[0], $title->getFullText() ] );
@@ -1581,10 +1582,11 @@ class JsonForms {
 	/**
 	 * @param Title $title
 	 * @param array slots
+	 * @param int|null $timestamp
 	 * @param array &$errors []
 	 * @return
 	 */
-	public static function importRevision( $title, $slots, &$errors = [] ) {
+	public static function importRevision( $title, $slots, $timestamp, &$errors = [] ) {
 		$services = MediaWikiServices::getInstance();
 		$wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
 
@@ -1618,6 +1620,7 @@ class JsonForms {
 
 		$revision = new WikiRevision();
 		$revision->setTitle( $title );
+		$revision->setTimestamp( $timestamp ?? wfTimestampNow() );
 
 		// $content = $this->makeContent( $title, $revId, $revisionInfo );
 		// $revision->setContent( SlotRecord::MAIN, $content );

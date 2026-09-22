@@ -91,7 +91,8 @@ class Importer {
 				echo $titleStr . "\n";
 				$title_ = TitleClass::newFromText( $titleStr );
 
-				\JsonForms::importRevision( $title_, $slots, $this->errors );
+				$timestamp = $value['timestamp'] ?? wfTimestampNow();
+				\JsonForms::importRevision( $title_, $slots, $timestamp, $this->errors );
 				if ( !count( $this->errors ) ) {
 					echo ' (success)' . PHP_EOL;
 				} else {

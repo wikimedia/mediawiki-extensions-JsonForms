@@ -11,7 +11,7 @@ export default {
 	required_evaluates_non_empty: false,
 	debug: false,
 
-	//after the editor has been initialized and
+	// after the editor has been initialized and
 	// before is ready
 	onInit: function (jsonFormsInstance, editor) {
 		editor.on('ready', () => {
@@ -44,6 +44,8 @@ export default {
 	callbacks: {
 		enum_providers: {
 			wikiList: function () {
+				const cache = {};
+
 				function parseBulletList(content) {
 					const regex = /^\*\s*(.+)$/gm;
 					const items = [];
@@ -56,9 +58,10 @@ export default {
 					return items;
 				}
 
-				const cache = {};
 				return {
 					source: (jseditor, { item, watched }) => {
+						const jsonForm = jseditor.jsoneditor.jsonFormsInstance;
+
 						if (
 							!jseditor.schema['x-data'] ||
 							!jseditor.schema['x-data'].article
@@ -75,7 +78,7 @@ export default {
 							return cache[pageTitle];
 						}
 
-						return jseditor.fetchArticleContent(pageTitle).then((content) => {
+						return jsonForm.fetchArticleContent(pageTitle).then((content) => {
 							cache[pageTitle] = parseBulletList(content);
 							return cache[pageTitle];
 						});
@@ -194,7 +197,7 @@ export default {
 		actions: {
 			submit: function (editor) {
 				const jsonEditor = editor.jsoneditor;
-				const jsonForm = jsonEditor.options.jsonFormsInstance;
+				const jsonForm = jsonEditor.jsonFormsInstance;
 				const validation = jsonEditor.validate();
 				if (!validation.length) {
 					editor.disable();
@@ -252,4 +255,3 @@ export default {
 		},
 	},
 };
-

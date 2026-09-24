@@ -5,7 +5,15 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-eslint' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.initConfig( {
-		banana: conf.MessagesDirs,
+		banana: Object.assign(
+			{
+				options: {
+					disallowBlankTranslations: 'warn',
+					requireLowerCase: false
+				}
+			},
+			conf.MessagesDirs
+		),
 		eslint: {
 			options: {
 				cache: true

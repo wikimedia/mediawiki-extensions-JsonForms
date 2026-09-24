@@ -851,7 +851,7 @@
 	font-size: 0.875rem;
 	margin: 0;
 	background-color: transparent;
-	border: medium none currentColor;
+	border: medium none currentcolor;
 	min-height: auto;
 	position: static;
 }

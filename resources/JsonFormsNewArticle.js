@@ -114,7 +114,7 @@ JsonFormsNewArticle.prototype.submitForm = function () {
 					...footerEditor.getValue()
 				};
 
-				metadata = { ...( editorValue.form.options || {} ) };
+				metadata = { ... editorValue.form.options };
 
 				const schemaEditor = this.editor.getEditor(
 					'root.form.schema.editor'

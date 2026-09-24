@@ -2,15 +2,14 @@
 	"root": true,
 	"extends": [
 		"wikimedia/client",
-		"wikimedia/mediawiki"
+		"wikimedia/mediawiki",
+		"wikimedia/language/es2020"
 	],
 	"parserOptions": {
-		"ecmaVersion": 2018,
 		"sourceType": "module"
 	},
 	"env": {
-		"browser": true,
-		"es2018": true
+		"browser": true
 	},
 	"rules": {
 		"import/no-dynamic-require": "off",

@@ -61,7 +61,7 @@ JsonForms.prototype.initialize = async function () {
 
 	const defaultOptions = {
 		...JFEditor.defaults.options,
-		...( this.editorOptions || {} )
+		... this.editorOptions
 	};
 
 	defaultOptions.callbacks = defaultOptions.callbacks || {};
@@ -69,8 +69,7 @@ JsonForms.prototype.initialize = async function () {
 	for ( const key in this.callbacksMap ) {
 		defaultOptions.callbacks[ key ] = {
 			...this[ this.callbacksMap[ key ] ],
-			...( ( defaultOptions.callbacks && defaultOptions.callbacks[ key ] ) ||
-			{} )
+			... ( defaultOptions.callbacks && defaultOptions.callbacks[ key ] )
 		};
 	}
 
@@ -147,7 +146,7 @@ JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
 		schema: this.schema,
 		schemaName: this.schemaName,
 		startval: this.startval,
-		...( ( this.data.formDescriptor || {} ).editor_options || {} ),
+		... ( this.data.formDescriptor || {} ).editor_options,
 		...config
 	};
 

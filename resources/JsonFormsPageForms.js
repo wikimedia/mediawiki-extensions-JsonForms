@@ -238,7 +238,7 @@ JsonFormsPageForm.prototype.createDefaultEditor = async function ( config = {} )
 		schema: this.schema,
 		schemaName: this.schemaName,
 		startval: this.startval,
-		...( ( this.data.formDescriptor || {} ).editor_options || {} )
+		... ( this.data.formDescriptor || {} ).editor_options
 		// the user-defined start_path is declared inside
 		// the config object in the jsonform widget from phpn
 		// so we don't need to handle it here
@@ -480,7 +480,7 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 	const button = new OO.ui.ButtonWidget( {
 		flags: [],
 		classes: [],
-		...( this.formDescriptor.popup_button_config || {} ),
+		... this.formDescriptor.popup_button_config,
 		icon: getIcon(),
 		label: getlabel()
 	} );

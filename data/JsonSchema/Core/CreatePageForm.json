@@ -7,7 +7,6 @@
 	"x-layout": "tabs",
 	"x-group-properties": {
 		"appearance": [
-			"display_path",
 			"view",
 			"popup_button_config",
 			"popup_size",
@@ -283,6 +282,15 @@
 			"x-description-format": "wikitext",
 			"default": ""
 		},
+		"display_path": {
+			"type": "string",
+			"format": "text",
+			"title": "{{int:jsonforms-formschema-createpageform-display-path}}",
+			"x-title-format": "wikitext",
+			"description": "{{int:jsonforms-formschema-createpageform-display-path-desc}}",
+			"x-description-format": "wikitext",
+			"default": ""
+		},
 		"edit_jsonpath": {
 			"type": "string",
 			"format": "text",
@@ -360,22 +368,7 @@
 			"x-title-format": "wikitext",
 			"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
 			"x-description-format": "wikitext",
-			"default": false,
-			"x-dependency": {
-				"path": "infobox_template",
-				"op": "!=",
-				"value": ""
-			}
-		},
-		"display_path": {
-			"type": "string",
-			"format": "text",
-			"title": "{{int:jsonforms-formschema-createpageform-display-path}}",
-			"x-title-format": "wikitext",
-			"description": "{{int:jsonforms-formschema-createpageform-display-path-desc}}",
-			"x-description-format": "wikitext",
-			"default": "",
-			"x-hidden": true
+			"default": false
 		},
 		"view": {
 			"type": "string",

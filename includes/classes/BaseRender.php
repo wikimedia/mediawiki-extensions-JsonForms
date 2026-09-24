@@ -474,7 +474,18 @@ class BaseRender {
 		);
 		$templateRender->setParser( $parser );
 
-		return $templateRender->render( $data );
+		$ret = $templateRender->render( $data );
+		return self::recursiveTagParseFully( $parser, $ret );
+	}
+
+	/**
+	 * @param Parser $parser
+	 * @param string $text
+	 * @return string
+	 */
+	public static function recursiveTagParseFully( $parser, $text ) {
+		return Parser::stripOuterParagraph(
+			$parser->recursiveTagParseFully( $text ) );
 	}
 
 	/**

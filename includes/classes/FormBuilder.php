@@ -350,6 +350,12 @@ class FormBuilder {
 			$this->outerFormSchema->properties->form->properties->editor->{'x-input-config'}->edit_path =
 				$this->formDescriptor->edit_path;
 		}
+
+		// display_path
+		if ( !empty( $this->formDescriptor->edit_path ) ) {
+			$this->outerFormSchema->properties->form->properties->editor->{'x-input-config'}->display_path =
+				$this->formDescriptor->display_path;
+		}
 	}
 
 	/**

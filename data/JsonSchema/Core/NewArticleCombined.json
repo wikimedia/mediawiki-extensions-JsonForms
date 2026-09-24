@@ -248,12 +248,7 @@
 							"x-title-format": "wikitext",
 							"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
 							"x-description-format": "wikitext",
-							"default": false,
-							"x-dependency": {
-								"path": "infobox_template",
-								"op": "!=",
-								"value": ""
-							}
+							"default": false
 						}
 					}
 				}

@@ -210,6 +210,13 @@ class JsonForms {
 			throw new MWException( 'Cannot load core schema' );
 		}
 
+		$formSchemaPopupConfig = self::getSourceSchema(
+			'ButtonWidgetSchema',
+			'JsonSchema/Core',
+		);
+
+		SchemaUtils::setValueByPath( $formSchema, 'properties.popup_button_config', $formSchemaPopupConfig );
+
 		$parametersProcessor = new ParametersProcessor( $argv, $formSchema );
 		$parametersProcessor->buildOptionsSchema();
 

@@ -1,0 +1,111 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$comment": "Used by JsonForms's ParametersProcessor to define the default parameters of the parser function",
+	"title": "OO.ui.ButtonWidget",
+	"type": "object",
+	"x-message": {
+		"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonWidget OO.ui.ButtonWidget]",
+		"x-label-format": "wikitext"
+	},
+	"x-default-properties": [],
+	"properties": {
+		"accessKey": {
+			"type": "string",
+			"description": "The access key"
+		},
+		"classes": {
+			"type": "array",
+			"description": "The names of the CSS classes to apply to the element.",
+			"items": {
+				"type": "string",
+				"x-input": "OO.ui.TagMultiselectWidget"
+			}
+		},
+		"dir": {
+			"type": "string",
+			"description": "The directionality of the input (ltr/rtl).",
+			"enum": ["ltr", "rtl"]
+		},
+		"disabled": {
+			"type": "boolean",
+			"description": "Disable the widget."
+		},
+		"id": {
+			"type": "string",
+			"description": "The HTML id attribute used in the rendered tag."
+		},
+		"inputFilter": {
+			"type": "string",
+			"description": "The name of an input filter function. Input filters modify the value of an input before it is accepted"
+		},
+		"inputId": {
+			"type": "string",
+			"description": "The value of the input's HTML id attribute."
+		},
+		"name": {
+			"type": "string",
+			"description": "The value of the input's HTML name attribute."
+		},
+		"text": {
+			"type": "string",
+			"description": "Text to insert"
+		},
+		"title": {
+			"type": "string",
+			"description": "The title text."
+		},
+		"flags": {
+			"type": "array",
+			"description": "The name or names of the flags (e.g., 'progressive' or 'primary') to apply.",
+			"items": {
+				"type": "string",
+				"x-input": "OO.ui.TagMultiselectWidget"
+			}
+		},
+		"icon": {
+			"type": "string",
+			"description": "The symbolic name of the icon, see [https://doc.wikimedia.org/oojs-ui/master/demos/?page=icons&theme=wikimediaui&direction=ltr&platform=desktop here]",
+			"x-description-format": "wikitext"
+		},
+		"indicator": {
+			"type": "string",
+			"description": "Symbolic name of the indicator (e.g. 'required' or 'down')."
+		},
+		"framed": {
+			"type": "boolean",
+			"description": "Render the button with a frame",
+			"default": true
+		},
+		"href": {
+			"type": "string",
+			"description": "Hyperlink to visit when the button is clicked."
+		},
+		"invisibleLabel": {
+			"type": "boolean",
+			"description": "Whether the label should be visually hidden (but still accessible to screen-readers)."
+		},
+		"label": {
+			"type": "string",
+			"description": "The label text."
+		},
+		"noFollow": {
+			"type": "boolean",
+			"description": "Search engine traversal hint"
+		},
+		"rel": {
+			"type": ["string", "array"],
+			"description": "Relationship attributes for the hyperlink",
+			"items": {
+				"type": "string"
+			}
+		},
+		"tabIndex": {
+			"type": ["string", "number", "null"],
+			"description": "Number that specifies the element's position in the tab-navigation order (e.g., 1 for the first focusable element)."
+		},
+		"target": {
+			"type": "string",
+			"description": "The frame or window in which to open the hyperlink."
+		}
+	}
+}

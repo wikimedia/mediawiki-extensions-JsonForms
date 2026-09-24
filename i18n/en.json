@@ -276,7 +276,7 @@
 	"jsonforms-formschema-createpageform-edit-schema": "Edit schema",
 	"jsonforms-formschema-createpageform-edit-schema-desc": "Partial schema for editing 'edit_path'",
 	"jsonforms-formschema-createpageform-display-path": "Display path",
-	"jsonforms-formschema-createpageform-display-path-desc": "Json path to the subschema used to display a partial form (dot separated)",
+	"jsonforms-formschema-createpageform-display-path-desc": "Json-path of the subschema to display instead of the whole schema (dot separated, use \"root\" to only display the parent schema and the related scalar properties)",
 	"jsonforms-formschema-createpageform-view": "View mode",
 	"jsonforms-formschema-createpageform-view-inline": "inline",
 	"jsonforms-formschema-createpageform-view-popup": "popup",

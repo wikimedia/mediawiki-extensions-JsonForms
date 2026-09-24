@@ -44,8 +44,8 @@
 			"x-hidden": {
 				"path": "root",
 				"staticPath": "title",
-				"value": "Comments",
-				"op": "!="
+				"value": "Comment",
+				"op": "=="
 			},
 			"title": "",
 			"description": "",

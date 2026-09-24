@@ -42,7 +42,7 @@
 
 	// @credits https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
 	Utilities.prototype.getNestedProp = function ( path, obj ) {
-		return path.reduce( ( xs, x ) => ( xs && xs[ x ] ? xs[ x ] : null ), obj );
+		return path.reduce( ( xs, x ) => ( xs && xs[ x ] !== undefined ? xs[ x ] : undefined ), obj );
 	};
 
 	Utilities.prototype.removeArrayItem = function ( arr, value ) {

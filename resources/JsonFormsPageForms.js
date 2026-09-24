@@ -454,15 +454,35 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 		}
 	};
 
+	const getlabel = () => {
+		const label = JsonForms.Utilities.getNestedProp( [ 'popup_button_config', 'label' ], this.formDescriptor );
+		if ( label !== undefined && label !== null ) {
+			return label;
+		}
+
+		if ( this.formDescriptor.title !== undefined && this.formDescriptor.title !== null ) {
+			return this.formDescriptor.title;
+		}
+
+		return this.formDescriptor.name;
+	};
+
+	const getIcon = () => {
+		const icon = JsonForms.Utilities.getNestedProp( [ 'popup_button_config', 'icon' ], this.formDescriptor );
+
+		if ( icon !== undefined && icon !== null ) {
+			return icon;
+		}
+
+		return this.formDescriptor.action === 'create' ? 'add' : 'edit';
+	};
+
 	const button = new OO.ui.ButtonWidget( {
-		icon: this.formDescriptor.action === 'create' ? 'add' : 'edit',
 		flags: [],
 		classes: [],
 		...( this.formDescriptor.popup_button_config || {} ),
-		label:
-			JsonForms.Utilities.getNestedProp( [ 'popup_button_config', 'label' ], this.formDescriptor ) ||
-			this.formDescriptor.title ||
-			this.formDescriptor.name
+		icon: getIcon(),
+		label: getlabel()
 	} );
 
 	button.on( 'click', () => {

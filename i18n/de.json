@@ -274,7 +274,7 @@
 	"jsonforms-formschema-createpageform-edit-schema": "Schema bearbeiten",
 	"jsonforms-formschema-createpageform-edit-schema-desc": "Teil-Schema zum Bearbeiten von 'edit_path'",
 	"jsonforms-formschema-createpageform-display-path": "Anzeigepfad",
-	"jsonforms-formschema-createpageform-display-path-desc": "JSON-Pfad zum Teil-Schema, das zur Anzeige eines Teilformulars verwendet wird (durch Punkte getrennt)",
+	"jsonforms-formschema-createpageform-display-path-desc": "Json-Pfad des Unterschemas, das anstelle des gesamten Schemas angezeigt werden soll (durch Punkte getrennt, verwenden Sie \"root\", um nur das übergeordnete Schema und die zugehörigen skalaren Eigenschaften anzuzeigen)",
 	"jsonforms-formschema-createpageform-view": "Ansichtsmodus",
 	"jsonforms-formschema-createpageform-view-inline": "inline",
 	"jsonforms-formschema-createpageform-view-popup": "popup",

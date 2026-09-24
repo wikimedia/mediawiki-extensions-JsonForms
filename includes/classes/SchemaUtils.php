@@ -385,4 +385,33 @@ class SchemaUtils {
 		return $schema;
 	}
 */
+
+	/**
+	 * Flatten a nested object/array into a single-level array.
+	 *
+	 * @param stdClass|array $source
+	 * @param string $prefix
+	 * @param string $separator
+	 * @return array
+	 */
+	public static function flattenNested( $source, $prefix = '', $separator = '.' ) {
+		$result = [];
+
+		foreach ( $source as $key => $value ) {
+			$newKey = $prefix === '' ? (string)$key : $prefix . $separator . $key;
+
+			if ( is_object( $value ) || is_array( $value ) ) {
+				$children = self::flattenNested( $value, $newKey, $separator );
+				$result[ $newKey ] = $value;
+				if ( $children !== [] ) {
+					$result += $children;
+				}
+			} else {
+				$result[ $newKey ] = $value;
+			}
+		}
+
+		return $result;
+	}
+
 }

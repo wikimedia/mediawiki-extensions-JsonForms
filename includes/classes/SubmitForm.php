@@ -1165,7 +1165,21 @@ class SubmitForm {
 		$editPath = $data->formDescriptor->edit_path ?? '';
 		if ( empty( $editPath ) ) {
 			$schemas = $data->structuredValue->schemas;
-			$slotMetadata->jsonPaths = $data->structuredValue->jsonPaths;
+			// $slotMetadata->jsonPaths = $data->structuredValue->jsonPaths;
+
+			// merge the existing jsonpaths but filter based
+			// on the actual data (do not simply replace the jsonPaths based
+			// on $data->structuredValue->jsonPaths since if there
+			// are hidden subschemas structuredValue does not include them)
+			$flatten = SchemaUtils::flattenNested( $data->value, '', '.' );
+
+			$slotMetadata->jsonPaths = (object)array_intersect_key(
+				array_merge(
+					(array)( $slotMetadata->jsonPaths ?? new stdClass() ),
+					(array)$data->structuredValue->jsonPaths
+				),
+				$flatten
+			);
 
 		} else {
 			if ( empty( $data->formDescriptor->edit_jsonpath ) ) {

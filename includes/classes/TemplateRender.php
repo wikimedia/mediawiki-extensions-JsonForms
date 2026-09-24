@@ -59,15 +59,6 @@ class TemplateRender extends BaseRender {
 	}
 
 	/**
-	 * @param string $text
-	 * @return string
-	 */
-	public function recursiveTagParseFully( $text ) {
-		return Parser::stripOuterParagraph(
-			$this->parser->recursiveTagParseFully( $text ) );
-	}
-
-	/**
 	 * @param string $key
 	 * @param array $value
 	 * @param array $children

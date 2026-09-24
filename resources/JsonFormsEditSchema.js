@@ -138,7 +138,6 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 		action: 'jsonforms-submit-form'
 	};
 
-	// console.log('payload', payload);
 	return new Promise( ( resolve, reject ) => {
 		new mw.Api()
 			.postWithToken( 'csrf', payload )

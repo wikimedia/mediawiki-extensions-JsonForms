@@ -305,8 +305,6 @@
 
 	"jsonforms-formschema-createpageform-remove-empty-scalar": "Label for the remove empty properties option",
 	"jsonforms-formschema-createpageform-remove-empty-scalar-desc": "Description for the remove empty properties option",
-	"jsonforms-formschema-createpageform-evaluates-non-empty": "Label for the required evaluates non-empty option",
-	"jsonforms-formschema-createpageform-evaluates-non-empty-desc": "Description for the required evaluates non-empty option",
 	"jsonforms-formschema-createpageform-remove-false": "Label for the remove false properties option",
 	"jsonforms-formschema-createpageform-remove-false-desc": "Description for the remove false properties option",
 	"jsonforms-formschema-createpageform-debug": "Label for the debug option",

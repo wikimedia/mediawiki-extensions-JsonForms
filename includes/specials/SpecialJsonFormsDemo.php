@@ -75,7 +75,6 @@ class SpecialJsonFormsDemo extends SpecialPage {
 					'use_lazy_properties' => 'threshold',
 					'lazy_properties_threshold' => 6,
 					'remove_empty_scalar_properties' => true,
-					'required_evaluates_non_empty' => false,
 					'remove_false_properties' => false,
 					'debug' => true,
 				],

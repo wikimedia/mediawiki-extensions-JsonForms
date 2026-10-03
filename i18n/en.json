@@ -331,8 +331,6 @@
 
 	"jsonforms-formschema-createpageform-remove-empty-scalar": "remove empty scalar properties",
 	"jsonforms-formschema-createpageform-remove-empty-scalar-desc": "Remove empty scalar properties from the data",
-	"jsonforms-formschema-createpageform-evaluates-non-empty": "required evaluates non empty",
-	"jsonforms-formschema-createpageform-evaluates-non-empty-desc": "Considers required properties with empty values as missing properties",
 	"jsonforms-formschema-createpageform-remove-false": "remove false properties",
 	"jsonforms-formschema-createpageform-remove-false-desc": "Remove false properties from the data",
 	"jsonforms-formschema-createpageform-debug": "debug",

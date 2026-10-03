@@ -9,7 +9,6 @@ export default {
 	lazy_properties_layout: 'search+buttons',	// search, buttons, search+buttons, sidebar
 	remove_empty_scalar_properties: true,
 	remove_false_properties: false,
-	required_evaluates_non_empty: false,
 	debug: false,
 
 	// after the editor has been initialized and

@@ -328,8 +328,6 @@
 	"jsonforms-formschema-createpageform-lazy-properties-layout-sidebar": "Seitenleiste",
 	"jsonforms-formschema-createpageform-remove-empty-scalar": "Leere skalare Eigenschaften entfernen",
 	"jsonforms-formschema-createpageform-remove-empty-scalar-desc": "Leere Eigenschaften aus den Daten entfernen",
-	"jsonforms-formschema-createpageform-evaluates-non-empty": "Required wertet nicht-leer",
-	"jsonforms-formschema-createpageform-evaluates-non-empty-desc": "Betrachtet erforderliche Eigenschaften mit leeren Werten als fehlende Eigenschaften",
 	"jsonforms-formschema-createpageform-remove-false": "False-Eigenschaften entfernen",
 	"jsonforms-formschema-createpageform-remove-false-desc": "False-Eigenschaften aus den Daten entfernen",
 	"jsonforms-formschema-createpageform-debug": "Debug",

@@ -608,14 +608,6 @@
 					"x-description-format": "wikitext",
 					"default": true
 				},
-				"required_evaluates_non_empty": {
-					"type": "boolean",
-					"title": "{{int:jsonforms-formschema-createpageform-evaluates-non-empty}}",
-					"x-title-format": "wikitext",
-					"description": "{{int:jsonforms-formschema-createpageform-evaluates-non-empty-desc}}",
-					"x-description-format": "wikitext",
-					"default": false
-				},
 				"remove_false_properties": {
 					"type": "boolean",
 					"title": "{{int:jsonforms-formschema-createpageform-remove-false}}",

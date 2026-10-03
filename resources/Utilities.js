@@ -20,6 +20,7 @@
  */
 
 /* global JsonForms */
+/* eslint-disable es-x/no-rest-spread-properties */
 
 // use IIFE, this ensure name is scoped
 ( function () {
@@ -72,8 +73,19 @@
 		);
 	};
 
-	Utilities.prototype.clone = function ( val ) {
-		return JSON.parse( JSON.stringify( val ) );
+	Utilities.prototype.clone = function ( obj, options = {} ) {
+		const exclude = options.exclude || [];
+		const cyclicObjectValues = options.cyclicObjectValues || [];
+
+		const shallow = {};
+		const other = {};
+		for ( const [ key, value ] of Object.entries( obj ) ) {
+			if ( !exclude.includes( key ) ) {
+				( cyclicObjectValues.includes( key ) ? shallow : other )[ key ] = value;
+			}
+		}
+
+		return { ...JSON.parse( JSON.stringify( other ) ), ...shallow };
 	};
 
 	// attach instance

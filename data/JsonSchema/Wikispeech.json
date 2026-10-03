@@ -26,7 +26,7 @@
 					"x-padding": true,
 					"default": "",
 					"x-enum-provider": "wikiList",
-					"x-data": {
+					"x-enum-provider-config": {
 						"article": "Template:Languages"
 					}
 				},

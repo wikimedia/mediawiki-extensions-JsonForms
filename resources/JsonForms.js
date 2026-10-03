@@ -427,15 +427,16 @@ JsonForms.prototype.createEditor = function ( el, config ) {
 	// eslint-disable-next-line no-undef
 	JFEditor.defaults.options = this.defaultOptions;
 
-	config = {
-		...config
-		// ajax: true
-	};
+	config = { ...config, jsonFormsInstance: this };
 
-	this.initialConfig = JsonForms.Utilities.clone( config );
+	this.initialConfig = JsonForms.Utilities.clone( config, {
+		cyclicObjectValues: [ 'jsonFormsInstance', 'dialog' ],
+		// @ATTENTION, remove startval and schema manually where needed
+		exclude: [ 'display_path' ]
+	} );
 
 	// eslint-disable-next-line no-undef
-	this.editor = new JFEditor( el, { ...config, jsonFormsInstance: this } );
+	this.editor = new JFEditor( el, config );
 
 	if ( typeof this.defaultOptions.onInit === 'function' ) {
 		this.defaultOptions.onInit( this, this.editor );

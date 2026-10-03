@@ -239,10 +239,6 @@ JsonFormsPageForm.prototype.createDefaultEditor = async function ( config = {} )
 		schemaName: this.schemaName,
 		startval: this.startval,
 		...( this.data.formDescriptor || {} ).editor_options
-		// the user-defined start_path is declared inside
-		// the config object in the jsonform widget from phpn
-		// so we don't need to handle it here
-		// start_path: ...
 	};
 
 	if ( !this.isPopup ) {
@@ -291,20 +287,14 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 
 			const el = document.createElement( 'div' );
 
-			// const hasData = JsonForms.Utilities.getNestedProp(
-			// [ 'form', 'editor' ],
-			// this.startval
-			// );
-
 			// @ATTENTION, we don't use editor.getEditor('root.form.editor')
 			// etc. since it's not synchronous !!
 			const editor = this.createEditor( el, {
 				...config,
-				// startval: hasData ? this.startval.form.editor : undefined,
-				// used by this.theme $overlay
-				dialog,
 				startval: this.startval,
-				display_path: 'form.editor'
+				display_path: 'form.editor',
+				// used by this.theme $overlay
+				dialog
 			} );
 
 			dialog.editor = editor;
@@ -324,10 +314,11 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 			dialog.optionsEditor = jsonFormsOptions.createEditor( elOptions, {
 				display_path: 'form.options',
 				startval: this.startval,
+				schema: config.schema,
 				// used by this.theme $overlay
-				dialog,
-				schema: config.schema
+				dialog
 			} );
+
 			panelB.$element.append( elOptions );
 
 			// expanded false is necessary to make getBodyHeight work

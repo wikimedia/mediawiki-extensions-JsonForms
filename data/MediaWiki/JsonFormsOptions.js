@@ -64,17 +64,17 @@ export default {
 						const jsonForm = jseditor.jsoneditor.jsonFormsInstance;
 
 						if (
-							!jseditor.schema['x-enum-provider'] ||
-							!jseditor.schema['x-enum-provider'].article
+							!jseditor.schema['x-enum-provider-config'] ||
+							!jseditor.schema['x-enum-provider-config'].article
 						) {
 							console.log(
-								'A key "article" must be specified in an object with key "x-enum-provider" in the enum schema',
+								'A key "article" must be specified in an object with key "x-enum-provider-config" in the enum schema',
 							);
 
 							return [];
 						}
 
-						const pageTitle = jseditor.schema['x-enum-provider'].article;
+						const pageTitle = jseditor.schema['x-enum-provider-config'].article;
 						if (cache[pageTitle]) {
 							return cache[pageTitle];
 						}

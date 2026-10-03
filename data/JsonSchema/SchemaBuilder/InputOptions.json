@@ -1130,6 +1130,13 @@
 				}
 			]
 		},
+		"LookupMultiselect": {
+			"allOf": [
+				{
+					"$ref": "#/definitions/OO.ui.MenuTagMultiselectWidget"
+				}
+			]
+		},
 		"button": {
 			"allOf": [
 				{
@@ -1159,11 +1166,7 @@
 			]
 		},
 		"VisualEditor": {
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				}
-			]
+			"$ref": "#/definitions/commonProperties"
 		},
 		"EasyMDE": {
 			"type": "object",
@@ -1171,14 +1174,15 @@
 				"label": "Reference: [https://github.com/ionaru/easy-markdown-editor easy-markdown-editor]",
 				"x-label-format": "wikitext"
 			},
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"$ref": "JsonSchema:SchemaBuilder/EeasyMDEOptions"
-				}
-			]
+			"$ref": "JsonSchema:SchemaBuilder/EeasyMDEOptions"
+		},
+		"JsonEditor": {
+			"type": "object",
+			"x-message": {
+				"label": "Reference: [https://github.com/josdejong/jsoneditor JsonEditor options]",
+				"x-label-format": "wikitext"
+			},
+			"$ref": "JsonSchema:SchemaBuilder/JsonEditorOptions"
 		},
 		"SunEditor": {
 			"type": "object",
@@ -1186,14 +1190,7 @@
 				"label": "Reference: [https://suneditor.com/options SunEditor options]",
 				"x-label-format": "wikitext"
 			},
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"$ref": "JsonSchema:SchemaBuilder/SunEditorOptions"
-				}
-			]
+			"$ref": "JsonSchema:SchemaBuilder/SunEditorOptions"
 		},
 		"FancyTree": {
 			"type": "object",
@@ -1201,14 +1198,7 @@
 				"label": "Reference: [https://wwwendt.de/tech/fancytree/doc/jsdoc/ Api reference]",
 				"x-label-format": "wikitext"
 			},
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"$ref": "JsonSchema:SchemaBuilder/FancyTreeOptions"
-				}
-			]
+			"$ref": "JsonSchema:SchemaBuilder/FancyTreeOptions"
 		},
 		"Autocomplete": {
 			"type": "object",

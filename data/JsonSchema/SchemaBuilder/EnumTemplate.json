@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/EnumTemplate",
-  "title": "Enum options",
+  "title": "Enum template",
   "description": "Where dropdown options come from: one watched field, or a mix of watched fields and static entries.",
   "type": "object",
 

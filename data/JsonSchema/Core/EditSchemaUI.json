@@ -132,7 +132,12 @@
 							"x-title-format": "wikitext",
 							"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
 							"x-description-format": "wikitext",
-							"default": false
+							"default": false,
+							"x-dependency": {
+								"path": "show_infobox",
+								"op": "==",
+								"value": true
+							}
 						}
 					}
 				}

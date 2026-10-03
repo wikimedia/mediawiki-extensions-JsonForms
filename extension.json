@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -33,6 +33,7 @@
 		"JsonFormsApiFetchSchema": "includes/api/JsonFormsApiFetchSchema.php",
 		"JsonFormsApiProcessSchema": "includes/api/JsonFormsApiProcessSchema.php",
 		"JsonFormsApiSubmitForm": "includes/api/JsonFormsApiSubmitForm.php",
+		"JsonFormsApiDeleteArticle": "includes/api/JsonFormsApiDeleteArticle.php",
 		"JsonFormsApiGroupNames": "includes/api/JsonFormsApiGroupNames.php"
 	},
 	"AutoloadNamespaces": {
@@ -46,6 +47,7 @@
 		"jsonforms-fetch-schema": "JsonFormsApiFetchSchema",
 		"jsonforms-process-schema": "JsonFormsApiProcessSchema",
 		"jsonforms-submit-form": "JsonFormsApiSubmitForm",
+		"jsonforms-delete-article": "JsonFormsApiDeleteArticle",
 		"jsonforms-groupnames": "JsonFormsApiGroupNames"
 	},
 	"ExtensionMessagesFiles": {
@@ -218,7 +220,11 @@
 			],
 			"messages": [
 				"jsonforms-jsmodule-return-errors",
-				"jsonforms-jsmodule-fetch-ref-error",
+				"jsonforms-editor-fetch-ref-error",
+				"jsonforms-editor-fetch-invalid-json",
+				"jsonforms-editor-fetch-invalid-schema",
+				"jsonforms-editor-internal-ref-error",
+				"jsonforms-editor-describedby-cannot-fetch-ref",
 				"jsonforms-editor-item",
 				"jsonforms-editor-add-row",
 				"jsonforms-editor-switch-type",
@@ -259,6 +265,7 @@
 				"jsonforms-editor-upload",
 				"jsonforms-editor-cannot-add-property",
 				"jsonforms-editor-cannot-add-property-details",
+				"jsonforms-editor-cannot-add-property-log",
 				"jsonforms-editor-add-property",
 				"jsonforms-editor-property-name",
 				"jsonforms-editor-rename-property",
@@ -266,8 +273,10 @@
 				"jsonforms-editor-layout-main-label",
 				"jsonforms-editor-max-depth-reached",
 				"jsonforms-editor-property-exists",
+				"jsonforms-editor-lookupmultiselect-placeholder",
 				"jsonforms-instance-there-are-errors",
 				"jsonforms-instance-rename-schema",
+				"jsonforms-instance-delete-article",
 				"jsonforms-instance-schema-required",
 
 				"jsonforms-editor-error-value-must-be-a-valid",

@@ -22,20 +22,22 @@
  * @copyright Copyright ©2026, https://wikisphere.org
  */
 
-class JsonFormsApiGroupNames extends ApiBase {
+use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+
+class JsonFormsApiDeleteArticle extends ApiBase {
 
 	/**
 	 * @inheritDoc
 	 */
 	public function isWriteMode() {
-		return false;
+		return true;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function mustBePosted(): bool {
-		return false;
+		return true;
 	}
 
 	/**
@@ -46,8 +48,20 @@ class JsonFormsApiGroupNames extends ApiBase {
 
 		\JsonForms::initialize();
 		$result = $this->getResult();
+		$params = $this->extractRequestParams();
 		$context = RequestContext::getMain();
-		$result_ = JsonForms::groupsList( $context );
+
+		$data = json_decode( $params['data'], true );
+		$title = TitleClass::newFromText( $data['title'] ?? $data['article'] );
+
+		$result_ = null;
+		if ( $title && $title->isKnown() ) {
+			$reason = 'JsonForms deletion by UI';
+			$status = \JsonForms::deleteArticle( $title, $user, $reason );
+			if ( $status->isOK() ) {
+				$result_ = true;
+			}
+		}
 
 		$result->addValue( [ $this->getModuleName() ], 'result', json_encode( $result_ ) );
 	}
@@ -56,7 +70,19 @@ class JsonFormsApiGroupNames extends ApiBase {
 	 * @inheritDoc
 	 */
 	public function getAllowedParams() {
-		return [];
+		return [
+			'data' => [
+				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_REQUIRED => true
+			]
+		];
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function needsToken() {
+		return 'csrf';
 	}
 
 	/**
@@ -64,8 +90,8 @@ class JsonFormsApiGroupNames extends ApiBase {
 	 */
 	protected function getExamplesMessages() {
 		return [
-			'action=jsonforms-groupnames'
-			=> 'apihelp-jsonforms-groupnames-example-1'
+			'action=jsonforms-delete-article'
+			=> 'apihelp-jsonforms-delete-article-example-1'
 		];
 	}
 }

@@ -1,12 +1,13 @@
 export default {
-	validation: 'onsubmit', // onsubmit, always
+	validation: 'onsubmit', // onsubmit, always, never
 	template: 'default',
 	max_depth: 16,
 	path_separator: '.',
 	default_additional_properties: false,
 	use_lazy_properties: 'threshold', // never, always, threshold
 	lazy_properties_threshold: 6,
-	remove_empty_properties: false,
+	lazy_properties_layout: 'search+buttons',	// search, buttons, search+buttons, sidebar
+	remove_empty_scalar_properties: true,
 	remove_false_properties: false,
 	required_evaluates_non_empty: false,
 	debug: false,
@@ -63,17 +64,17 @@ export default {
 						const jsonForm = jseditor.jsoneditor.jsonFormsInstance;
 
 						if (
-							!jseditor.schema['x-data'] ||
-							!jseditor.schema['x-data'].article
+							!jseditor.schema['x-enum-provider'] ||
+							!jseditor.schema['x-enum-provider'].article
 						) {
 							console.log(
-								'A key "article" must be specified in an object with key "x-data" in the enum schema',
+								'A key "article" must be specified in an object with key "x-enum-provider" in the enum schema',
 							);
 
 							return [];
 						}
 
-						const pageTitle = jseditor.schema['x-data'].article;
+						const pageTitle = jseditor.schema['x-enum-provider'].article;
 						if (cache[pageTitle]) {
 							return cache[pageTitle];
 						}
@@ -221,6 +222,10 @@ export default {
 		// an object of converter names returning a convertTo and convertFrom functions
 		// the converter name must then be used in the schema using x-value-converter: [converter name]
 		converters: {},
+
+		preprocessSchema: function (editor, schema) {
+			return schema;
+		},
 
 		preprocessData: function (editor, data) {
 			return data;

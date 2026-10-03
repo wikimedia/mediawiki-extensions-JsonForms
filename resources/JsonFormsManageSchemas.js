@@ -50,6 +50,9 @@ JsonFormsManageSchemas.prototype.initialize = async function () {
 			},
 			cancelButton: ( editor ) => {
 				this.onFormButton( 'cancel', editor );
+			},
+			deleteButton: ( editor ) => {
+				this.onFormButton( 'delete', editor );
 			}
 		}
 	);
@@ -57,14 +60,29 @@ JsonFormsManageSchemas.prototype.initialize = async function () {
 	this.schema = this.adjustFormSchema();
 };
 
-JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor ) {
-	buttonEditor.disable();
+JsonFormsManageSchemas.prototype.createDefaultEditor = async function ( config = {} ) {
+	const editor = JsonFormsManageSchemas.super.prototype.createDefaultEditor.call( this );
 
+	editor.on( 'ready', ( editor ) => {
+		this.initButtons( editor );
+	} );
+};
+
+JsonFormsManageSchemas.prototype.initButtons = function ( jsonEditor ) {
+	const deleteButton = jsonEditor.getEditor( 'root.footer.buttons.delete' );
+
+	if ( !this.formDescriptor.edit ) {
+		deleteButton.theme.toggle( deleteButton.container, false );
+	}
+};
+
+JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor ) {
 	const innerformEditor = this.editor.getEditor( 'root.editor' );
 	const innerEditor = innerformEditor.input.editor;
 
 	switch ( action ) {
 		case 'submit': {
+			buttonEditor.disable();
 			const innerEditorValidationResults = innerEditor.validate();
 
 			if ( innerEditorValidationResults.length ) {
@@ -115,7 +133,64 @@ JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor 
 
 			window.location.href = url; }
 			break;
+
+		case 'delete':
+			JsonForms.Alert(
+				this.getMsg( 'delete-article' ),
+				{ size: 'small' },
+				() => {
+					this.deleteArticle()
+						.catch( ( err ) => console.error( 'API error:', err ) );
+				}
+			);
 	}
+};
+
+JsonFormsManageSchemas.prototype.deleteArticle = function () {
+	const data = {
+		title: this.formDescriptor.edit
+	};
+
+	const payload = {
+		data: JSON.stringify( data ),
+		action: 'jsonforms-delete-article'
+	};
+
+	return new Promise( ( resolve, reject ) => {
+		new mw.Api()
+			.postWithToken( 'csrf', payload )
+			.done( ( thisRes ) => {
+				if ( this.debug ) {
+					console.log( 'thisRes', thisRes );
+				}
+				let result = thisRes[ payload.action ].result;
+				result = JSON.parse( result );
+				if ( result.errors && result.errors.length ) {
+					const config = {
+						htmlMessage: mw.msg(
+							'jsonforms-jsmodule-return-errors',
+							result.errors.join( ' ,' )
+						),
+						type: 'error'
+					};
+					resolve( false );
+					const nonModalDialog = new JsonForms.NonModalDialog();
+					nonModalDialog.open( config );
+
+				} else {
+					const url = mw.config
+						.get( 'wgArticlePath' )
+						.replace( '$1', mw.config.get( 'wgPageName' ) );
+
+					window.location.href = url;
+				}
+			} )
+			.fail( ( thisRes ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'jsonforms-delete-article', thisRes );
+				reject( thisRes );
+			} );
+	} );
 };
 
 // adjust form schema based on form descriptor

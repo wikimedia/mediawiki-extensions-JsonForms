@@ -207,9 +207,7 @@ resolve()
 								// console.log('`${path}.role`', `${path}.role`);
 								const roleEditor = editor.getEditor( `${ path }.role` );
 
-								// @TODO replace with setValue
-								// after updating the editor's setValue method
-								roleEditor.setStateValue( role );
+								roleEditor.setValue( role );
 								watching.push( path );
 							}
 						}

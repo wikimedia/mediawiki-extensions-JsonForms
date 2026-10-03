@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JSONEditor Options",
+  "description": "Configuration options for the jsoneditor library by josdejong.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["tree", "view", "form", "code", "text", "preview"],
+      "default": "tree",
+      "description": "Set the editor mode."
+    },
+    "modes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["tree", "view", "form", "code", "text", "preview"]
+      },
+      "description": "Allowed modes shown in the mode switcher menu."
+    },
+    "schema": {
+      "type": "object",
+      "description": "A JSON schema used to validate the JSON data."
+    },
+    "schemaRefs": {
+      "type": "object",
+      "description": "Schemas referenced via $ref from the main schema.",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "name": {
+      "type": "string",
+      "description": "Initial field name for the root node."
+    },
+    "search": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show a search box in the upper right corner."
+    },
+    "history": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable undo/redo buttons (tree, form, preview modes)."
+    },
+    "indentation": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 2,
+      "description": "Number of spaces used for indentation."
+    },
+    "escapeUnicode": {
+      "type": "boolean",
+      "default": false,
+      "description": "Escape unicode characters as hexadecimal codes."
+    },
+    "sortObjectKeys": {
+      "type": "boolean",
+      "default": false,
+      "description": "Sort object keys in tree, view, or form modes."
+    },
+    "onChange": {
+      "type": "function",
+      "description": "Callback fired when the user changes the JSON content."
+    },
+    "onEditable": {
+      "type": "function",
+      "description": "Callback to determine whether a node is editable (tree mode)."
+    },
+    "onError": {
+      "type": "function",
+      "description": "Callback fired when an error occurs."
+    },
+    "onModeChange": {
+      "type": "function",
+      "description": "Callback fired when the mode is changed. Signature: (newMode, oldMode)."
+    },
+    "onValidate": {
+      "type": "function",
+      "description": "Callback for custom validation logic."
+    },
+    "onCreateMenu": {
+      "type": "function",
+      "description": "Callback to customize the context menu (tree mode). Signature: (items, node)."
+    },
+    "ace": {
+      "type": "object",
+      "description": "A custom instance of the Ace editor for code mode."
+    },
+    "ajv": {
+      "type": "object",
+      "description": "A custom instance of ajv for JSON schema validation."
+    },
+    "theme": {
+      "type": "string",
+      "description": "Ace editor theme used in code mode."
+    }
+  },
+  "additionalProperties": false
+}

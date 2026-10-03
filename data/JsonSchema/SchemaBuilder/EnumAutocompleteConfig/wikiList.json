@@ -1,0 +1,11 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/AutocompleteConfig/wikiList",
+	"type": "object",
+	"properties": {
+		"article": {
+			"type": "string",
+			"input": "mw.widgets.TitleInputWidget"
+		}
+	}
+}

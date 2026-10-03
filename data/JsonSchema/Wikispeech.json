@@ -47,10 +47,10 @@
 					},
 					"x-padding": true,
 					"x-enum-provider": "wikiList",
-					"default": "",
-					"x-data": {
+					"x-enum-provider-config": {
 						"article": "Template:TTS models"
-					}
+					},
+					"default": ""
 				},
 				"Speech rate": {
 					"type": "number",

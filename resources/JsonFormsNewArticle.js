@@ -79,7 +79,7 @@ JsonFormsNewArticle.prototype.initialize = async function () {
 
 JsonForms.prototype.initButtons = function ( jsonEditor ) {
 	// https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
-	const parsedId = jsonEditor.schema.$id.split( 'JsonSchema:' )[ 1 ].split( '/' ).pop();
+	const parsedId = this.parseSchemaId( jsonEditor.schema.$id );
 	switch ( parsedId ) {
 		case 'NewArticleDataOnly':
 			{

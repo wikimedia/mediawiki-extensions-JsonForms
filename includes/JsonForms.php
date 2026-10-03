@@ -1270,6 +1270,7 @@ class JsonForms {
 	 * @param WikiPage $wikiPage
 	 * @param User $user
 	 * @param string $reason
+	 * @return MediaWiki\Status\Status
 	 */
 	public static function deletePage( $wikiPage, $user, $reason ) {
 		if ( !( $wikiPage instanceof WikiPage ) ) {
@@ -1277,7 +1278,7 @@ class JsonForms {
 		}
 		if ( version_compare( MW_VERSION, '1.35', '<' ) ) {
 			$error = '';
-			$wikiPage->doDeleteArticle(
+			return $wikiPage->doDeleteArticle(
 				$reason,
 				false,
 				null,
@@ -1285,9 +1286,8 @@ class JsonForms {
 				$error,
 				$user,
 			);
-		} else {
-			$wikiPage->doDeleteArticleReal( $reason, $user );
 		}
+		return $wikiPage->doDeleteArticleReal( $reason, $user );
 	}
 
 	/**

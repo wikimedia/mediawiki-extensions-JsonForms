@@ -57,6 +57,16 @@
 							"x-format": "button",
 							"x-button-action": "cancelButton",
 							"x-input-config": {
+								"flags": []
+							}
+						},
+						"delete": {
+							"type": "null",
+							"title": "{{int:jsonforms-formschema-delete}}",
+							"x-title-format": "wikitext",
+							"x-format": "button",
+							"x-button-action": "deleteButton",
+							"x-input-config": {
 								"flags": ["destructive"]
 							}
 						}

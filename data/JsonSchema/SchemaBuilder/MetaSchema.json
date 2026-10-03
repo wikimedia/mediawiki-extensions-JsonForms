@@ -135,6 +135,63 @@
 			"@comment": "Base JSON Schema keywords common to all schema types (excluding multiple-related keywords)",
 			"type": "object",
 			"x-default-properties": ["type", "title", "description", "x-required"],
+			"x-group-properties": {
+				"specific": [
+					"default",
+					"additionalProperties",
+					"x-default-properties",
+					"x-ui-name",
+					"definitions",
+					"$defs",
+					"maxProperties",
+					"minProperties",
+					"propertyNames",
+					"maxLength",
+					"minLength",
+					"pattern",
+					"x-template",
+					"x-value-formula",
+					"exclusiveMaximum",
+					"exclusiveMinimum",
+					"maximum",
+					"minimum",
+					"multipleOf",
+					"maxContains",
+					"maxItems",
+					"minContains",
+					"minItems"
+				],
+				"advanced": [
+					"$schema",
+					"$comment",
+					"$id",
+					"$ref",
+					"contentEncoding",
+					"contentMediaType",
+					"deprecated",
+					"examples",
+					"readOnly",
+					"writeOnly",
+					"x-value-converter",
+					"x-ui-name",
+					"x-runtime-only",
+					"x-create-only",
+					"x-render-template"
+				],
+				"style/UI": [
+					"x-collapsible",
+					"x-no-title",
+					"x-no-description",
+					"x-css-class",
+					"x-css-inline",
+					"x-show",
+					"x-hidden",
+					"x-compact",
+					"x-padding",
+					"x-border",
+					"x-hidden-properties"
+				]
+			},
 			"properties": {
 				"const": {
 					"description": "The value must be equal to this constant"
@@ -501,6 +558,35 @@
 					"type": "string",
 					"description": "Default string value when not provided"
 				},
+				"optionsFrom": {
+					"type": "string",
+					"title": "options from",
+					"enum": [ "inline", "enum template", "enum provider"],
+					"x-dependency": {
+						"or": [
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.DropdownInputWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.RadioSelectInputWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.ButtonSelectWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.ComboBoxInputWidget"
+							}
+						]
+					}
+				},
 				"enum": {
 					"type": "array",
 					"items": {
@@ -510,7 +596,10 @@
 							"inputPosition": "outline"
 						}
 					},
-					"description": "String must be one of the specified values"
+					"description": "String must be one of the specified values",
+					"x-dependency": {
+						"optionsFrom": "inline"
+					}
 				},
 				"x-enum-titles": {
 					"type": "array",
@@ -518,16 +607,25 @@
 					"items": {
 						"type": "string",
 						"x-input": "OO.ui.TagMultiselectWidget"
+					},
+					"x-dependency": {
+						"optionsFrom": "inline"
 					}
 				},
 				"x-enum-titles-format": {
 					"type": "string",
 					"description": "description format",
-					"enum": ["text", "html", "wikitext"]
+					"enum": ["text", "html", "wikitext"],
+					"x-dependency": {
+						"optionsFrom": "inline"
+					}
 				},
 				"x-enum-template": {
 					"$ref": "JsonSchema:SchemaBuilder/EnumTemplate",
-					"description": "Dynamic source for enum using templates"
+					"description": "Dynamic source for enum using templates",
+					"x-dependency": {
+						"optionsFrom": "enum template"
+					}
 				},
 				"x-enum-provider": {
 					"type": "string",
@@ -535,12 +633,29 @@
 					"x-description-format": "wikitext",
 					"x-input": "OO.ui.ComboBoxInputWidget",
 					"enum": [
+						"wikiList",
 						"uGroups",
 						"slotRoles",
 						"jsonSlots",
 						"contentModels",
 						"jsonSchemas"
-					]
+					],
+					"x-dependency": {
+						"optionsFrom": "enum provider"
+					}
+				},
+				"x-enum-provider-config": {
+					"type": "object",
+					"x-watch": "x-enum-provider",
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/EnumAutocompleteConfig/{{x-enum-provider}}"
+						}
+					],
+					"x-dependency": {
+						"optionsFrom": "enum provider"
+					}
 				},
 				"maxLength": {
 					"minimum": 0,
@@ -556,11 +671,6 @@
 					"format": "regex",
 					"type": "string",
 					"description": "Regular expression pattern that the string must match"
-				},
-				"x-pattern-message": {
-					"x-format": "textarea",
-					"type": "string",
-					"description": "User-friendly error message to show when pattern validation fails"
 				},
 				"x-template": {
 					"type": "string",
@@ -642,7 +752,6 @@
 					"type": "string",
 					"default": "text",
 					"enum": [
-						"autocomplete",
 						"color",
 						"json",
 						"hidden",
@@ -760,6 +869,13 @@
 				"x-autocomplete-provider": {
 					"type": "string",
 					"description": "Autocomplete configuration for text inputs",
+					"x-input": "OO.ui.ComboBoxInputWidget",
+					"default": "",
+					"enum": [
+						"wikipedia",
+						"dawa",
+						"wikidata"
+					],
 					"x-dependency": {
 						"or": [
 							{
@@ -774,6 +890,30 @@
 							}
 						]
 					}
+				},
+				"x-autocomplete-provider-config": {
+					"type": "object",
+					"x-dependency": {
+						"or": [
+							{
+								"path": "x-input",
+								"op": "matches",
+								"value": "LookupElement"
+							},
+							{
+								"path": "x-input",
+								"op": "matches",
+								"value": "Autocomplete"
+							}
+						]
+					},
+					"x-watch": "x-autocomplete-provider",
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/EnumAutocompleteConfig/{{x-autocomplete-provider}}"
+						}
+					]
 				},
 				"x-value-formula": {
 					"type": "string",
@@ -849,20 +989,33 @@
 				"x-autocomplete-provider": {
 					"type": "string",
 					"description": "Autocomplete configuration for text inputs",
+					"x-input": "OO.ui.ComboBoxInputWidget",
+					"enum": [
+						"wikipedia",
+						"dawa",
+						"wikidata"
+					],
+					"default": "",
 					"x-dependency": {
-						"or": [
-							{
-								"path": "x-input",
-								"op": "matches",
-								"value": "LookupElement"
-							},
-							{
-								"path": "x-input",
-								"op": "matches",
-								"value": "autocomplete"
-							}
-						]
+						"path": "x-input",
+						"op": "matches",
+						"value": "LookupMultiselect"
 					}
+				},
+				"x-autocomplete-provider-config": {
+					"type": "object",
+					"x-dependency": {
+						"path": "x-input",
+						"op": "matches",
+						"value": "LookupMultiselect"
+					},
+					"x-watch": "x-autocomplete-provider",
+					"links": [
+						{
+							"rel": "describedBy",
+							"href": "JsonSchema:SchemaBuilder/EnumAutocompleteConfig/{{x-autocomplete-provider}}"
+						}
+					]
 				}
 			}
 		},

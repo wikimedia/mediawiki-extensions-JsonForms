@@ -30,7 +30,7 @@ function JsonForms( el, data ) {
 	this.schema = data.schema;
 	this.schemaName = data.schemaName;
 	this.startval = data.startval;
-
+	this.initialConfig = {};
 	this.editor = null;
 	this.data = data;
 
@@ -43,10 +43,10 @@ function JsonForms( el, data ) {
 	this.callbacksMap = {
 		enum_providers: 'enumProviders',
 		autocomplete_providers: 'autocompleteProviders',
-		converters: 'valueConverters',
-		actions: 'actions',
-		events: 'events',
-		template: 'template'
+		converters: 'valueConverters'
+		// actions: 'actions',
+		// events: 'events',
+		// template: 'template'
 	};
 }
 
@@ -61,7 +61,7 @@ JsonForms.prototype.initialize = async function () {
 
 	const defaultOptions = {
 		...JFEditor.defaults.options,
-		... this.editorOptions
+		...this.editorOptions
 	};
 
 	defaultOptions.callbacks = defaultOptions.callbacks || {};
@@ -84,6 +84,9 @@ JsonForms.prototype.getValidContexts = function ( objName, funcName ) {
 
 	if ( this.callbacksMap[ objName ] && this[ this.callbacksMap[ objName ] ] ) {
 		contexts.push( this[ this.callbacksMap[ objName ] ] );
+
+	} else if ( this[ objName ] ) {
+		contexts.push( this[ objName ] );
 	}
 
 	if ( !contexts.length ) {
@@ -92,9 +95,14 @@ JsonForms.prototype.getValidContexts = function ( objName, funcName ) {
 
 	const ret = [];
 	for ( const context of contexts ) {
-		if ( JsonForms.Utilities.isObject( context ) ) {
-			if ( !funcName || context[ funcName ] ) {
-				ret.push( context );
+		if ( typeof context === 'function' ) {
+			ret.push( context );
+
+		} else {
+			if ( JsonForms.Utilities.isObject( context ) ) {
+				if ( !funcName || context[ funcName ] ) {
+					ret.push( context );
+				}
 			}
 		}
 	}
@@ -142,16 +150,19 @@ JsonForms.prototype.registerAction = function ( name, fn ) {
 
 JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
 	config = {
-		jsonFormsInstance: this,
 		schema: this.schema,
 		schemaName: this.schemaName,
 		startval: this.startval,
-		... ( this.data.formDescriptor || {} ).editor_options,
+		...( this.data.formDescriptor || {} ).editor_options,
 		...config
 	};
 
 	this.createEditor( this.el, config );
 	return this.editor;
+};
+
+JsonForms.prototype.getInitialConfig = function () {
+	return this.initialConfig || {};
 };
 
 /*
@@ -201,6 +212,10 @@ JsonForms.prototype.getModule = async function ( str ) {
 			URL.revokeObjectURL( url );
 		}
 	}
+};
+
+JsonForms.prototype.parseSchemaId = function ( str ) {
+	return typeof str === 'string' ? str.split( 'JsonSchema:' )[ 1 ].split( '/' ).pop() : '';
 };
 
 JsonForms.prototype.getMsg = function ( key, params ) {
@@ -280,11 +295,11 @@ JsonForms.prototype.processSchema = function ( schema ) {
 	} );
 };
 
-JsonForms.prototype.notifyRefFetchFailed = function ( uri, options ) {
-	const external = options.external === true;
+JsonForms.prototype.notifyError = function ( options, params ) {
+	// const external = options.external === true;
 	const config = {
 		type: 'error',
-		htmlMessage: mw.msg( 'jsonforms-jsmodule-fetch-ref-error', uri )
+		htmlMessage: mw.msg( options.error, ...params )
 	};
 	if ( !this.isPopup ) {
 		const nonModalDialog = new JsonForms.NonModalDialog();
@@ -412,20 +427,15 @@ JsonForms.prototype.createEditor = function ( el, config ) {
 	// eslint-disable-next-line no-undef
 	JFEditor.defaults.options = this.defaultOptions;
 
-	// eslint-disable-next-line no-undef
-	this.editor = new JFEditor( el, {
-		schemaSelector: null,
-		...config,
-		ajax: true,
-		jsonFormsInstance: this
-	} );
+	config = {
+		...config
+		// ajax: true
+	};
 
-	if ( typeof this.editorScript === 'function' ) {
-		const updateEditorCallBack = ( thisConfig ) => {
-			this.createEditor( this.el, { ...config, ...thisConfig } );
-		};
-		this.editorScript( this.editor, this.config, updateEditorCallBack );
-	}
+	this.initialConfig = JsonForms.Utilities.clone( config );
+
+	// eslint-disable-next-line no-undef
+	this.editor = new JFEditor( el, { ...config, jsonFormsInstance: this } );
 
 	if ( typeof this.defaultOptions.onInit === 'function' ) {
 		this.defaultOptions.onInit( this, this.editor );

@@ -855,3 +855,37 @@
 	min-height: auto;
 	position: static;
 }
+
+.jsonforms-sidebarlayout-container {
+	display: flex;
+	gap: 10px;
+    position: relative;
+}
+
+.jsonforms-sidebarlayout-menu {
+	flex: 0 0 240px;
+	position: relative;
+}
+
+.jsonforms-sidebarlayout-menu-inner {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.jsonforms-sidebarlayout-content {
+	flex: 1;
+}
+
+.jsonforms-editor .jsonforms-edit-object {
+	text-align: right;
+	display: block;
+	float: right;
+}
+
+.jsonforms-editor .oo-ui-fieldLayout.oo-ui-fieldLayout-align-inline
+	> .oo-ui-fieldLayout-body
+	> .oo-ui-fieldLayout-field {
+	padding-right: 4px;
+}

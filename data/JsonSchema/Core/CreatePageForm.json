@@ -368,7 +368,12 @@
 			"x-title-format": "wikitext",
 			"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
 			"x-description-format": "wikitext",
-			"default": false
+			"default": false,
+			"x-dependency": {
+				"path": "show_infobox",
+				"op": "==",
+				"value": true
+			}
 		},
 		"view": {
 			"type": "string",
@@ -485,7 +490,8 @@
 					"x-description-format": "wikitext",
 					"enum": [
 						"onsubmit",
-						"always"
+						"always",
+						"never"
 					],
 					"x-enum-titles": [
 						"{{int:jsonforms-formschema-createpageform-validation-onsubmit}}",
@@ -572,11 +578,33 @@
 						"use_lazy_properties": "threshold"
 					}
 				},
-				"remove_empty_properties": {
-					"type": "boolean",
-					"title": "{{int:jsonforms-formschema-createpageform-remove-empty}}",
+				"lazy_properties_layout": {
+					"type": "string",
+					"x-hidden": true,
+					"title": "{{int:jsonforms-formschema-createpageform-lazy-properties-layout}}",
 					"x-title-format": "wikitext",
-					"description": "{{int:jsonforms-formschema-createpageform-remove-empty-desc}}",
+					"description": "{{int:jsonforms-formschema-createpageform-lazy-properties-layout-desc}}",
+					"x-description-format": "wikitext",
+					"enum": [
+						"search",
+						"buttons",
+						"search+buttons",
+						"sidebar"
+					],
+					"x-enum-titles": [
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-layout-search}}",
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-layout-buttons}}",
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-layout-search+buttons}}",
+						"{{int:jsonforms-formschema-createpageform-lazy-properties-layout-sidebar}}"
+					],
+					"x-enum-titles-format": "wikitext",
+					"default": "search+buttons"
+				},
+				"remove_empty_scalar_properties": {
+					"type": "boolean",
+					"title": "{{int:jsonforms-formschema-createpageform-remove-empty-scalar}}",
+					"x-title-format": "wikitext",
+					"description": "{{int:jsonforms-formschema-createpageform-remove-empty-scalar-desc}}",
 					"x-description-format": "wikitext",
 					"default": true
 				},

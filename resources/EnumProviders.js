@@ -39,7 +39,13 @@
 				switch ( format ) {
 					case 'text':
 					case 'strings':
-						return [ 'OO.ui.TagMultiselectWidget', 'OO.ui.MenuTagMultiselectWidget', 'OO.ui.CheckboxMultiselectInputWidget', 'ButtonMultiselectWidget' ];
+						return [
+							'OO.ui.TagMultiselectWidget',
+							'OO.ui.MenuTagMultiselectWidget',
+							'OO.ui.CheckboxMultiselectInputWidget',
+							'ButtonMultiselectWidget',
+							'LookupMultiselect'
+						];
 
 					case 'title':
 					case 'titles':
@@ -101,9 +107,6 @@
 				}
 
 				switch ( format ) {
-					case 'autocomplete':
-						return [ 'Autocomplete', 'LookupElement' ];
-
 					case 'captcha':
 						return [ 'captcha' ];
 
@@ -144,7 +147,9 @@
 							'OO.ui.DropdownInputWidget',
 							'OO.ui.RadioSelectInputWidget',
 							'OO.ui.ButtonSelectWidget',
-							'OO.ui.ComboBoxInputWidget'
+							'OO.ui.ComboBoxInputWidget',
+							'LookupElement',
+							'Autocomplete'
 						];
 
 					case 'email':

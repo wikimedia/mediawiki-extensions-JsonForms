@@ -10,7 +10,7 @@
 		"navigation": false
 	},
 	"type": "object",
-	"additionalProperties": true,
+	"additionalProperties": false,
 	"x-default-properties": ["height", "minHeight"],
 	"definitions": {
 		"buttonName": {

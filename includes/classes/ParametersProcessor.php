@@ -182,34 +182,6 @@ class ParametersProcessor {
 	}
 
 	/**
-	 * @param array $params
-	 * @return array
-	 */
-	public function processNested( $params ) {
-		$result = [];
-
-		foreach ( $params as $key => $value ) {
-			if ( strpos( $key, '.' ) === false ) {
-				$result[$key] = $value;
-
-			} else {
-				$parts = explode( '.', $key );
-
-				$nested = array_reduce(
-					array_reverse( $parts ),
-					static function ( $carry, $part ) {
-						return [ $part => $carry ];
-					},
-					$value
-				);
-				$result = array_merge_recursive( $result, $nested );
-			}
-		}
-
-		return $result;
-	}
-
-	/**
 	 * @param array $argv
 	 */
 	protected function parse( array $argv ): void {
@@ -239,7 +211,7 @@ class ParametersProcessor {
 			}
 		}
 
-		$this->named = $this->processNested( $named );
+		$this->named = SchemaUtils::flatToNested( $named, '.' );
 		$this->unnamed = $unnamed;
 	}
 

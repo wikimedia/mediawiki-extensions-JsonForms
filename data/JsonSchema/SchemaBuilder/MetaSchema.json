@@ -764,6 +764,7 @@
 						"tel",
 						"text",
 						"textarea",
+						"tree",
 						"user",
 						"url",
 						"uuid",
@@ -868,7 +869,8 @@
 				},
 				"x-autocomplete-provider": {
 					"type": "string",
-					"description": "Autocomplete configuration for text inputs",
+					"description": "Name of the autocomplete provider. When not a built-in function, must be declared in [[MediaWiki:JsonFormsOptions]] and provide at least a \"search\" method",
+					"x-description-format": "wikitext",
 					"x-input": "OO.ui.ComboBoxInputWidget",
 					"default": "",
 					"enum": [
@@ -988,7 +990,7 @@
 				},
 				"x-autocomplete-provider": {
 					"type": "string",
-					"description": "Autocomplete configuration for text inputs",
+					"description": "Name of the autocomplete provider. When not a built-in function, must be declared in [[MediaWiki:JsonFormsOptions]] and provide at least a \"search\" method",
 					"x-input": "OO.ui.ComboBoxInputWidget",
 					"enum": [
 						"wikipedia",

@@ -123,6 +123,9 @@
 					case 'json':
 						return [ 'JsonEditor', 'FancyTree', 'JsonForms' ];
 
+					case 'tree':
+						return [ 'FancyTree' ];
+
 					case 'hidden':
 						return [ 'OO.ui.HiddenInputWidget' ];
 

@@ -368,7 +368,7 @@
 	"jsonforms-editor-error-uniqueItems": "Array muss eindeutige Elemente haben",
 	"jsonforms-editor-error-maxProperties": "Objekt darf höchstens $1 Eigenschaften haben",
 	"jsonforms-editor-error-minProperties": "Objekt muss mindestens $1 Eigenschaften haben",
-	"jsonforms-editor-error-required": "Objekt fehlt die erforderliche Eigenschaft $1",
+	"jsonforms-editor-error-required": "Objekt fehlt die erforderliche Eigenschaft <b>$1</b>",
 	"jsonforms-editor-error-additional-properties": "Keine zusätzlichen Eigenschaften erlaubt, aber Eigenschaft $1 ist gesetzt",
 	"jsonforms-editor-error-property-names-exceeds-maxlength": "Eigenschaftsname $1 überschreitet maxLength",
 	"jsonforms-editor-error-property-names-enum-mismatch": "Eigenschaftsname $1 entspricht keinem der Aufzählungswerte",

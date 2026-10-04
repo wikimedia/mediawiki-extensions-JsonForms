@@ -371,7 +371,7 @@
 	"jsonforms-editor-error-uniqueItems": "Array must have unique items",
 	"jsonforms-editor-error-maxProperties": "Object must have at most $1 properties",
 	"jsonforms-editor-error-minProperties": "Object must have at least $1 properties",
-	"jsonforms-editor-error-required": "Object is missing the required property $1",
+	"jsonforms-editor-error-required": "Object is missing the required property <b>$1</b>",
 	"jsonforms-editor-error-additional-properties": "No additional properties allowed, but property $1 is set",
 	"jsonforms-editor-error-property-names-exceeds-maxlength": "Property name $1 exceeds maxLength",
 	"jsonforms-editor-error-property-names-enum-mismatch": "Property name $1 does not match any enum values",

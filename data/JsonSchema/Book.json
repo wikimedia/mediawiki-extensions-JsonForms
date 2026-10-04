@@ -1,4 +1,6 @@
 {
+	"$id": "https://wikisphere.org/wiki/JsonSchema:Book",
+	"x-layout": "default",
 	"required": [
 		"title"
 	],
@@ -8,10 +10,11 @@
 		"title": {
 			"type": "string",
 			"title": "Title",
-			"description": "",
 			"x-format": "text",
 			"x-input": "OO.ui.TextInputWidget",
-			"x-input-config": {}
+			"x-input-config": {},
+			"x-required": true,
+			"x-format-type": "custom"
 		},
 		"authors": {
 			"type": "array",
@@ -40,17 +43,15 @@
 					"first_name",
 					"last_name"
 				],
-				"title": "",
-				"description": "",
-				"x-layout": "default"
+				"x-layout": "default",
+				"x-required": false
 			},
-			"description": "",
-			"x-layout": "default"
+			"x-layout": "default",
+			"x-required": false
 		},
 		"cover": {
 			"type": "string",
 			"title": "Cover",
-			"description": "",
 			"x-format": "file",
 			"x-input": "OO.ui.SelectFileWidget",
 			"x-input-config": {
@@ -66,10 +67,25 @@
 					"image/bmp",
 					"image/x-windows-bmp"
 				]
-			}
+			},
+			"x-required": false,
+			"x-format-type": "custom"
+		},
+		"categories": {
+			"type": "string",
+			"x-required": false,
+			"x-format-type": "custom",
+			"x-format": "tree",
+			"x-input": "FancyTree",
+			"x-input-config": {
+				"selectMode": 3,
+				"source-selector": "wiki article",
+				"dataOutput": "concatenated-titles",
+				"sourceArticle": "BookCategories"
+			},
+			"x-border": true,
+			"title": "categories",
+			"x-title-format": "text"
 		}
-	},
-	"description": "",
-	"x-layout": "default",
-	"$id": "https://wikisphere.org/wiki/JsonSchema:Book"
+	}
 }

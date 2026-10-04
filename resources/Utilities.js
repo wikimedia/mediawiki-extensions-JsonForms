@@ -74,6 +74,10 @@
 	};
 
 	Utilities.prototype.clone = function ( obj, options = {} ) {
+		if ( obj === null || typeof obj !== 'object' ) {
+			return obj;
+		}
+
 		const exclude = options.exclude || [];
 		const cyclicObjectValues = options.cyclicObjectValues || [];
 

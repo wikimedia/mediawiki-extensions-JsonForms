@@ -25,6 +25,7 @@ namespace MediaWiki\Extension\JsonForms;
 
 use MediaWiki\Extension\JsonForms\Aliases\Linker as LinkerClass;
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
+use MediaWiki\Extension\JsonForms\Utils\TreeBuilder;
 use User;
 
 class InfoboxRender extends BaseRender {
@@ -433,24 +434,29 @@ class InfoboxRender extends BaseRender {
 	private function formatValue( $value, &$schemaInfo ) {
 		$format = $this->getComputedFormat( $schemaInfo );
 
-		// Handle file format - display thumbnail
+		// file
 		if ( $format === 'file' && is_string( $value ) && !empty( $value ) ) {
 			return $this->renderFileThumbnail( $value, $schemaInfo );
 		}
 
-		// Handle user format - display link to user page
+		// user
 		if ( $format === 'user' && is_string( $value ) && !empty( $value ) ) {
 			return $this->renderUserLink( $value );
 		}
 
-		// Handle category format - display link to category
+		// category
 		if ( $format === 'category' && is_string( $value ) && !empty( $value ) ) {
 			return $this->renderCategoryLink( $value );
 		}
 
-		// Handle pagename format - display link to page
+		// pagename
 		if ( $format === 'pagename' && is_string( $value ) && !empty( $value ) ) {
 			return $this->renderPageLink( $value );
+		}
+
+		// tree
+		if ( $format === 'tree' && is_string( $value ) && !empty( $value ) ) {
+			return $this->renderTreeFormat( $value, $schemaInfo );
 		}
 
 		if ( ( $format === 'url' || $format === 'uri' ) && is_string( $value ) && !empty( $value ) ) {
@@ -581,6 +587,22 @@ class InfoboxRender extends BaseRender {
 		] );
 
 		return $link;
+	}
+
+	/**
+	 * @param string $value
+	 * @param array $schemaInfo
+	 * @return string
+	 */
+	private function renderTreeFormat( string $value, $schemaInfo ): string {
+		// @TODO store config and retrieve dataOutput, sourceArticle, keyPathSeparator
+		$keyPathSeparator = '/';
+		$paths = json_decode( $value, true );
+		if ( $paths ) {
+			return TreeBuilder::renderHtml( $paths, $keyPathSeparator, [] );
+		}
+
+		return '';
 	}
 
 	/**

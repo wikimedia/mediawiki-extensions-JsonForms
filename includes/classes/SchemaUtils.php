@@ -387,6 +387,35 @@ class SchemaUtils {
 */
 
 	/**
+	 * @param array $params
+	 * @param string $sep
+	 * @return array
+	 */
+	public static function flatToNested( $params, $sep = '.' ) {
+		$result = [];
+
+		foreach ( $params as $key => $value ) {
+			if ( strpos( $key, $sep ) === false ) {
+				$result[$key] = $value;
+
+			} else {
+				$parts = explode( $sep, $key );
+
+				$nested = array_reduce(
+					array_reverse( $parts ),
+					static function ( $carry, $part ) {
+						return [ $part => $carry ];
+					},
+					$value
+				);
+				$result = array_merge_recursive( $result, $nested );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Flatten a nested object/array into a single-level array.
 	 *
 	 * @param stdClass|array $source

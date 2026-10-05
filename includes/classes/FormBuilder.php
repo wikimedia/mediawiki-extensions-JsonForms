@@ -158,23 +158,36 @@ class FormBuilder {
 		}
 
 		$metadata = \JsonForms::getMetadata( $wikiPage );
-		if ( !$this->isValidMetadata( $metadata ) ) {
-			return;
+		if ( $metadata && !empty( (array)$metadata ) ) {
+			if ( !$this->isValidMetadata( $metadata ) ) {
+				return;
+			}
+
+			$slotRole = $this->getSlotRole();
+			if ( !isset( $metadata->slots->$slotRole ) ) {
+				return;
+			}
+
+			$slotMetadata = $metadata->slots->$slotRole;
+			$content = \JsonForms::getSlotContent( $wikiPage, $slotRole );
+
+			if ( !$content ) {
+				return;
+			}
+
+			$json = \JsonForms::processFormData( $content, $slotMetadata );
+
+		} else {
+			$role = $this->formDescriptor->slot ?? SlotRecord::MAIN;
+			$content = \JsonForms::getSlotContent( $wikiPage, $role );
+
+			if ( !$content ) {
+				return;
+			}
+
+			$json = SlotEditor::parseMaybeJSON( $content );
 		}
 
-		$slotRole = $this->getSlotRole();
-		if ( !isset( $metadata->slots->$slotRole ) ) {
-			return;
-		}
-
-		$slotMetadata = $metadata->slots->$slotRole;
-		$content = \JsonForms::getSlotContent( $wikiPage, $slotRole );
-
-		if ( !$content ) {
-			return;
-		}
-
-		$json = \JsonForms::processFormData( $content, $slotMetadata );
 		$jsonData = $this->extractJsonData( $json );
 		$this->startVal->form->editor = $jsonData;
 	}

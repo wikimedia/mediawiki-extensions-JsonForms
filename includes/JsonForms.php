@@ -1077,7 +1077,7 @@ class JsonForms {
 	 * @param string $role
 	 * @return null|string
 	 */
-	public static function getSlotContent( $wikiPage, $role ) {
+	public static function getSlotContent( $wikiPage, $role = SlotRecord::MAIN ) {
 		$slots = self::getSlots( $wikiPage );
 		if ( !is_array( $slots ) ) {
 			return;

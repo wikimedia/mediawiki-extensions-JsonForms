@@ -1951,6 +1951,24 @@
 				},
 				"x-required": {
 					"x-hidden": true
+				},
+				"definitions": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"description": "Reusable schema definitions (alias of $defs)"
+				},
+				"$defs": {
+					"type": "object",
+					"patternProperties": {
+						".*": {
+							"$ref": "#/definitions/schema"
+						}
+					},
+					"description": "Reusable schema definitions (alias of definitions)"
 				}
 			},
 			"required": ["x-name"]

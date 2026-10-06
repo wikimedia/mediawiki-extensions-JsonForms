@@ -10,17 +10,82 @@
 		return {
 			source: ( jseditor, { item, watched } ) => {
 				if ( jseditor.isMetaSchema ) {
-					const levelEditor = jseditor.parentEditor.parentEditor;
-					const value = levelEditor.getValue();
-					return Object.keys( value.properties || {} );
+					let parent = jseditor;
+					let properties = null;
+					while ( parent ) {
+						parent = parent.parentEditor;
+						if ( !parent ) {
+							break;
+						}
+
+						const value = parent.getValue();
+						if ( value.properties ) {
+							properties = value.properties;
+							break;
+						}
+					}
+
+					if ( properties ) {
+						return Object.keys( properties || {} );
+					}
+
+					return [];
+
+				} else {
+					// @TODO
+					return [];
 				}
 			}
 		};
 	};
 
 	EnumProviders.prototype.allProperties = function () {
+		const getEffectivePathMeta = function ( editor ) {
+			let parent = editor;
+			let path = [ 'root' ];
+			while ( parent ) {
+				parent = parent.parentEditor;
+				if ( !parent ) {
+					break;
+				}
+
+				const value = parent.getValue();
+				if ( value.properties ) {
+					path.push( editor.key );
+					break;
+				}
+			}
+			return path;
+		};
+
 		return {
 			source: ( jseditor, { item, watched } ) => {
+				const jsoneditor = jseditor.jsoneditor;
+
+				if ( jseditor.isMetaSchema ) {
+					let parent = jseditor;
+					let properties = [];
+					while ( parent ) {
+						parent = parent.parentEditor;
+						if ( !parent ) {
+							break;
+						}
+
+						const value = parent.getValue();
+						if ( value.properties ) {
+							for ( const key in value.properties ) {
+								properties.push( [ ...getEffectivePathMeta( parent ), key ] );
+							}
+						}
+					}
+
+					return properties.sort( ( a, b ) => a.length - b.length )
+						.map( ( x ) => jsoneditor.stringifyPath( x ) );
+
+				} else {
+					// @TODO
+					return [];
+				}
 			}
 		};
 	};

@@ -84,6 +84,9 @@
 	"jsonforms-special-submit-missing-data": "Error message when data is missing",
 	"jsonforms-special-submit-cannot-load-schema": "Error message when the schema cannot be loaded",
 	"jsonforms-special-missing-jsonpath": "Error message when the jsonpath is missing",
+	"jsonforms-special-incorrect-jsonpath": "Error message when the jsonpath is wrong",
+	"jsonforms-special-unexpanded-parameter": "Error message unexpanded parameters in path or jsonpath",
+
 	"jsonforms-special-submit-return-no-return-url": "Error message when the return URL cannot be determined",
 	"jsonforms-special-submit-move-error": "Error message when a move operation fails. Parameters:\n* $1 - the source title\n* $2 - the target title",
 	"jsonforms-special-submit-rename-file-error": "Error message when renaming a file fails. Parameters:\n* $1 - the source title\n* $2 - the target title",

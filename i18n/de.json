@@ -98,6 +98,8 @@
 	"jsonforms-special-submit-missing-data": "Fehlende Daten",
 	"jsonforms-special-submit-cannot-load-schema": "Schema kann nicht geladen werden",
 	"jsonforms-special-missing-jsonpath": "Fehlender jsonpath",
+	"jsonforms-special-incorrect-jsonpath": "Jsonpath sieht falsch aus. Er kann für vorhandene Daten weggelassen werden",
+	"jsonforms-special-unexpanded-parameter": "nicht expandierte Parameter in edit_path oder edit_jsonpath",
 
 	"jsonforms-special-submit-return-no-return-url": "Rücksprung-URL kann nicht ermittelt werden",
 	"jsonforms-special-submit-move-error": "Verschiebefehler (von \"$1\" nach \"$2\")",

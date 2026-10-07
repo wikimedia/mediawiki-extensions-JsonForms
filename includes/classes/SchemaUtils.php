@@ -117,13 +117,23 @@ class SchemaUtils {
 	 * @return array [shouldAppend, cleanedPath]
 	 */
 	public static function parseAppendPath( $path ) {
+		// sometimes the path could be
+		// {{{path}}}.propA. with an empty {{{path}}} value
+		$retPath = static function ( $path ) {
+			if ( strpos( $path, '.' ) === 0 ) {
+				return substr( $path, 1 );
+			}
+			return $path;
+		};
+
 		foreach ( self::$appendSymbols as $symbol ) {
 			$symbolLen = strlen( $symbol );
 			if ( substr( $path, -$symbolLen ) === $symbol ) {
-				return [ true, substr( $path, 0, -$symbolLen ) ];
+				return [ true, $retPath( substr( $path, 0, -$symbolLen ) ) ];
 			}
 		}
-		return [ false, $path ];
+
+		return [ false, $retPath( $path ) ];
 	}
 
 	/**

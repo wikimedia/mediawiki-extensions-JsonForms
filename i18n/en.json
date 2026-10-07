@@ -99,6 +99,8 @@
 	"jsonforms-special-submit-missing-data": "missing data",
 	"jsonforms-special-submit-cannot-load-schema": "cannot load schema",
 	"jsonforms-special-missing-jsonpath": "missing jsonpath",
+	"jsonforms-special-incorrect-jsonpath": "jsonpath looks wrong. It can be omitted for existing data",
+	"jsonforms-special-unexpanded-parameter": "unexpanded parameters in edit_path or edit_jsonpath",
 
 	"jsonforms-special-submit-return-no-return-url": "cannot determine return url",
 	"jsonforms-special-submit-move-error": "move error (from \"$1\" to \"$2\")",

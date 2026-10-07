@@ -96,13 +96,11 @@ JsonFormsEditSchema.prototype.initialize = async function () {
 JsonFormsEditSchema.prototype.submitForm = function () {
 	const editorValue = this.editor.getValue();
 
-	// console.log('editorValue', editorValue);
 	let structuredValue;
 
 	const selectedSchemaEditor = this.editor.getEditor(
 		'root.form.schema.selectedSchema.editor'
 	);
-	// console.log('selectedSchemaEditor', selectedSchemaEditor);
 
 	let schemaId;
 	if ( selectedSchemaEditor ) {
@@ -182,8 +180,6 @@ JsonFormsEditSchema.prototype.submitForm = function () {
 		$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 			this.el = el;
 			const data = $( el ).data().formData;
-
-			console.log( 'data', data );
 
 			const jsonFormsEditSchema = new JsonFormsEditSchema( el, data );
 			await jsonFormsEditSchema.initialize();

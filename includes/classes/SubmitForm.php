@@ -1182,16 +1182,39 @@ class SubmitForm {
 			);
 
 		} else {
-			if ( empty( $data->formDescriptor->edit_jsonpath ) ) {
-				$errors[] = $this->context->msg( 'jsonforms-special-missing-jsonpath' )->text();
+			[ $shouldAppend, $editPath ] = SchemaUtils::parseAppendPath( $editPath );
+			$slotMetadata->jsonPaths = $slotMetadata->jsonPaths ?? new stdClass();
+
+			if ( strpos( $editPath, '{{{' ) !== false ) {
+				$errors[] = $this->context->msg( 'jsonforms-special-unexpanded-parameter' )->text();
 				return;
 			}
 
 			$edit_jsonpath = $data->formDescriptor->edit_jsonpath;
-			[ $shouldAppend, $editPath ] = SchemaUtils::parseAppendPath( $editPath );
 
-			// a dot shouldn't be appended here, so it's a safe check
-			[ $_, $edit_jsonpath ] = SchemaUtils::parseAppendPath( $edit_jsonpath );
+			if ( empty( $edit_jsonpath ) ) {
+				// determine from slotMetadata
+				if ( isset( $slotMetadata->jsonPaths->{$editPath} ) ) {
+					$edit_jsonpath = $slotMetadata->jsonPaths->$editPath;
+				}
+			} else {
+				// a dot shouldn't be appended here, so it's a safe check
+				[ $_, $edit_jsonpath ] = SchemaUtils::parseAppendPath( $edit_jsonpath );
+
+				// check from slotMetadata
+				if (
+					isset( $slotMetadata->jsonPaths->{$editPath} ) &&
+					$slotMetadata->jsonPaths->$editPath !== $edit_jsonpath
+				) {
+					$errors[] = $this->context->msg( 'jsonforms-special-incorrect-jsonpath' )->text();
+					return;
+				}
+			}
+
+			if ( empty( $edit_jsonpath ) ) {
+				$errors[] = $this->context->msg( 'jsonforms-special-missing-jsonpath' )->text();
+				return;
+			}
 
 			$stringEndsWith = static function ( $str, $suffix ) {
 				return substr( $str, -strlen( $suffix ) ) === $suffix;
@@ -1211,8 +1234,6 @@ class SubmitForm {
 				$partialData = SchemaUtils::getValueByPath( $baseData, $editPath );
 				$editPath = $editPath . '.' . count( $partialData );
 			}
-
-			$slotMetadata->jsonPaths = $slotMetadata->jsonPaths ?? new stdClass();
 
 			// add base path
 			$slotMetadata->jsonPaths->$editPath = $edit_jsonpath;

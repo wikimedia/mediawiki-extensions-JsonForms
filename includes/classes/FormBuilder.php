@@ -121,6 +121,11 @@ class FormBuilder {
 	 * @return bool
 	 */
 	private function shouldLoadExistingData(): bool {
+		// force action edit
+		if ( !empty( $this->formDescriptor->edit_path ) ) {
+			$this->formDescriptor->action === 'edit';
+		}
+
 		$isCreateAction = property_exists( $this->formDescriptor, 'action' ) &&
 			$this->formDescriptor->action === 'create';
 
@@ -189,6 +194,7 @@ class FormBuilder {
 		}
 
 		$jsonData = $this->extractJsonData( $json );
+
 		$this->startVal->form->editor = $jsonData;
 	}
 
@@ -229,7 +235,7 @@ class FormBuilder {
 		);
 
 		if ( $shouldAppend ) {
-			return SlotEditor::stringifyMaybeJSON( $json );
+			return '';
 		}
 
 		$extractedJson = SchemaUtils::getValueByPath(
@@ -365,7 +371,7 @@ class FormBuilder {
 		}
 
 		// display_path
-		if ( !empty( $this->formDescriptor->edit_path ) ) {
+		if ( !empty( $this->formDescriptor->display_path ) ) {
 			$this->outerFormSchema->properties->form->properties->editor->{'x-input-config'}->display_path =
 				$this->formDescriptor->display_path;
 		}

@@ -133,7 +133,7 @@ class TemplateRender extends BaseRender {
 			$pathStr = implode( '.', $newPath );
 			$pathStrNoIndex = implode( '.', $newPathNoIndex );
 
-			$schemaInfo = $this->getSchemaInfo( $pathStr, $key );
+			$schemaInfo = $this->getSchemaInfo( $pathStr, $key, $path );
 			if ( empty( $schemaInfo['x-render-template'] ) ) {
 				$templateName = $templatePrefix;
 				if ( !empty( $newPath ) ) {

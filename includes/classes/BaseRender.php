@@ -173,27 +173,35 @@ class BaseRender {
 	/**
 	 * Get schema info for a property path
 	 *
-	 * @param string $key
 	 * @param string $path
+	 * @param string $key
+	 * @param array $parentPathArr
 	 * @return array
 	 */
-	protected function getSchemaInfo( $path, $key = '' ) {
-		$fullPath = $path;
-		$schemaInfo = $this->getSchemaFromPath( $path );
-
-		$returnSchema = static function ( $schema ) use ( $schemaInfo, $key ) {
-			$filtered = array_filter( $schemaInfo, static function ( $value ) {
-				return is_scalar( $value );
-			} );
-			return array_merge( self::$schemaInfo, $filtered );
+	protected function getSchemaInfo( $path, $key, $parentPathArr ) {
+		$returnSchema = static function ( $schema ) {
+			$filtered = array_filter( $schema, 'is_scalar' );
+			return array_replace( self::$schemaInfo, $filtered );
 		};
 
-		$isItems = is_numeric( $key );
+		if ( is_numeric( $key ) ) {
+			$schemaInfo_ = $this->getSchemaFromPath( implode( '.', $parentPathArr ) );
+			$items = $schemaInfo_['items'] ?? null;
 
-		if ( $isItems && isset( $schemaInfo['items'] ) ) {
-			return $returnSchema( $schemaInfo['items'] );
+			if ( is_array( $items ) && $items !== [] ) {
+				if ( \JsonForms::isList( $items ) ) {
+					// tuple
+					$index = (int)$key;
+					if ( isset( $items[$index] ) ) {
+						return $returnSchema( $items[$index] );
+					}
+				} else {
+					return $returnSchema( $items );
+				}
+			}
 		}
 
+		$schemaInfo = $this->getSchemaFromPath( $path );
 		return $returnSchema( $schemaInfo );
 	}
 

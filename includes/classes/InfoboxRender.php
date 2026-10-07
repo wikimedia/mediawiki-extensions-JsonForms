@@ -140,6 +140,7 @@ class InfoboxRender extends BaseRender {
 					$childrenHtml,
 					$level,
 					$pathStr,
+					$path,
 				);
 			} else {
 				$ret .= $this->renderLeaf(
@@ -147,6 +148,7 @@ class InfoboxRender extends BaseRender {
 					$value,
 					gettype( $value ),
 					$pathStr,
+					$path,
 					is_array( $node )
 				);
 			}
@@ -158,21 +160,24 @@ class InfoboxRender extends BaseRender {
 	/**
 	 * Get display label for a key (unified logic)
 	 *
-	 * @param string $key
 	 * @param string $path
+	 * @param string $key
+	 * @param array $parentPathArr
 	 * @return string
 	 */
-	private function getDisplayKey( $path, $key ) {
-		$schemaInfo = $this->getSchemaInfo( $path, !is_numeric( $key ) ? $key : null );
+	private function getDisplayKey( $path, $key, $parentPathArr ) {
+		$schemaInfo = $this->getSchemaInfo( $path, $key, $parentPathArr );
+
+		if ( is_numeric( $key ) ) {
+			$title = !empty( $schemaInfo['title'] ) ? $schemaInfo['title'] :
+				wfMessage( 'jsonforms-editor-item' )->text();
+
+			return $title . " " . ( $key + 1 );
+		}
 
 		// $schemaInfo are already escaped
 		if ( !empty( $schemaInfo['title'] ) ) {
 			return $schemaInfo['title'];
-		}
-
-		// For numeric keys (array items)
-		if ( is_numeric( $key ) ) {
-			return 'Item ' . ( $key + 1 );
 		}
 
 		return htmlspecialchars( $key );
@@ -260,15 +265,16 @@ class InfoboxRender extends BaseRender {
 	 * @param string $childrenHtml
 	 * @param int $level
 	 * @param string $path
+	 * @param array $parentPathArr
 	 * @return string
 	 */
-	private function renderContainer( $key, $value, $childrenHtml, $level, $path ) {
-		$displayKey = $this->getDisplayKey( $path, $key );
+	private function renderContainer( $key, $value, $childrenHtml, $level, $path, $parentPathArr ) {
+		$displayKey = $this->getDisplayKey( $path, $key, $parentPathArr );
 		$count = is_array( $value ) ? count( $value ) : null;
 		$type = gettype( $value );
 		$isArray = $type === 'array';
 
-		$schemaInfo = $this->getSchemaInfo( $path, $key );
+		$schemaInfo = $this->getSchemaInfo( $path, $key, $parentPathArr );
 
 		$uniqueHint = '';
 		if ( $isArray && $schemaInfo['uniqueItems'] ) {
@@ -350,14 +356,15 @@ class InfoboxRender extends BaseRender {
 	 * @param mixed $value
 	 * @param string $type
 	 * @param string $path
+	 * @param array $parentPathArr
 	 * @param bool $isArrayItem
 	 * @return string
 	 */
-	private function renderLeaf( $key, $value, $type, $path, $isArrayItem ) {
-		$displayKey = $this->getDisplayKey( $path, $key );
+	private function renderLeaf( $key, $value, $type, $path, $parentPathArr, $isArrayItem ) {
+		$displayKey = $this->getDisplayKey( $path, $key, $parentPathArr );
 		$escapedType = htmlspecialchars( $type );
 
-		$schemaInfo = $this->getSchemaInfo( $path, $key );
+		$schemaInfo = $this->getSchemaInfo( $path, $key, $parentPathArr );
 		if ( !$schemaInfo['type'] ) {
 			$schemaInfo['type'] = strtolower( $type );
 		}

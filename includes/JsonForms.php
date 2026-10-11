@@ -462,14 +462,7 @@ class JsonForms {
 	 */
 	public static function getDefaultTrackingCategories() {
 		$services = MediaWikiServices::getInstance();
-		if ( method_exists( $services, 'getTrackingCategories' ) ) {
-			$trackingCategoriesClass = $services->getTrackingCategories();
-			$trackingCategories = $trackingCategoriesClass->getTrackingCategories();
-		} else {
-			$context = RequestContext::getMain();
-			$config = $context->getConfig();
-			$trackingCategories = new TrackingCategories( $config );
-		}
+		$trackingCategories = $services->getTrackingCategories()->getTrackingCategories();
 
 		$ret = [];
 		foreach ( $trackingCategories as $value ) {
@@ -958,27 +951,11 @@ class JsonForms {
 			$actions[] = 'create';
 		}
 
-		if ( class_exists( 'MediaWiki\Permissions\PermissionStatus' ) ) {
-			$status = new MediaWiki\Permissions\PermissionStatus();
-			foreach ( $actions as $action ) {
-				$user->authorizeWrite( $action, $title, $status );
-			}
-			if ( !$status->isGood() ) {
-				return false;
-			}
-			return true;
-		}
-
-		$PermissionManager = $services->getPermissionManager();
-		$errors = [];
+		$status = new MediaWiki\Permissions\PermissionStatus();
 		foreach ( $actions as $action ) {
-			$errors = array_merge(
-				$errors,
-				$PermissionManager->getPermissionErrors( $action, $user, $title ),
-			);
+			$user->authorizeWrite( $action, $title, $status );
 		}
-
-		return count( $errors ) === 0;
+		return $status->isGood();
 	}
 
 	/**
@@ -994,13 +971,9 @@ class JsonForms {
 		$namespace = $formattedNamespaces[$ns];
 
 		$schemaUrl = str_replace( '$1', "$namespace:", $wgArticlePath );
-		if ( method_exists( MediaWikiServices::class, 'getUrlUtils' ) ) {
-			// MW 1.39+
-			return MediaWikiServices::getInstance()
-				->getUrlUtils()
-				->expand( $schemaUrl );
-		}
-		return wfExpandUrl( $schemaUrl );
+		return MediaWikiServices::getInstance()
+			->getUrlUtils()
+			->expand( $schemaUrl );
 	}
 
 	/**
@@ -1178,13 +1151,9 @@ class JsonForms {
 		if ( !$title || !$title->canExist() ) {
 			return null;
 		}
-		// MW 1.36+
-		if ( method_exists( MediaWikiServices::class, 'getWikiPageFactory' ) ) {
-			return MediaWikiServices::getInstance()
-				->getWikiPageFactory()
-				->newFromTitle( $title );
-		}
-		return WikiPage::factory( $title );
+		return MediaWikiServices::getInstance()
+			->getWikiPageFactory()
+			->newFromTitle( $title );
 	}
 
 	public static function createStdClass( array $data ): stdClass {
@@ -1236,9 +1205,7 @@ class JsonForms {
 		$options = [
 			'LIMIT' => self::$queryLimit,
 			'ORDER BY' => 'page_title',
-			'USE INDEX' => version_compare( MW_VERSION, '1.36', '<' )
-				? 'name_title'
-				: 'page_name_title',
+			'USE INDEX' => 'page_name_title',
 		];
 
 		$res = $dbr->select(
@@ -1285,17 +1252,6 @@ class JsonForms {
 		if ( !( $wikiPage instanceof WikiPage ) ) {
 			return;
 		}
-		if ( version_compare( MW_VERSION, '1.35', '<' ) ) {
-			$error = '';
-			return $wikiPage->doDeleteArticle(
-				$reason,
-				false,
-				null,
-				null,
-				$error,
-				$user,
-			);
-		}
 		return $wikiPage->doDeleteArticleReal( $reason, $user );
 	}
 
@@ -1324,9 +1280,7 @@ class JsonForms {
 		];
 
 		$options = [
-			'USE INDEX' => version_compare( MW_VERSION, '1.36', '<' )
-				? 'name_title'
-				: 'page_name_title',
+			'USE INDEX' => 'page_name_title',
 			'ORDER BY' => 'substr_count DESC',
 			'LIMIT' => 1,
 		];
@@ -1526,20 +1480,13 @@ class JsonForms {
 		);
 		asort( $allGroups );
 
-		$lang = method_exists( Language::class, 'getGroupName' )
-			// MW 1.38+
-			? $context->getLanguage()
-			: null;
+		$lang = $context->getLanguage();
 
 		foreach ( $allGroups as $groupname ) {
 			// $permissions = $groupPermissions[$groupname] ?? [];
 			// Replace * with a more descriptive groupname
 
-			$groupnameLocalized =
-				$lang !== null
-					// MW 1.38+
-					? $lang->getGroupName( $groupname )
-					: UserGroupMembership::getGroupName( $groupname );
+			$groupnameLocalized = $lang->getGroupName( $groupname );
 
 			$groupnameLocalized =
 				$groupnameLocalized === '*' ? 'all' : $groupnameLocalized;

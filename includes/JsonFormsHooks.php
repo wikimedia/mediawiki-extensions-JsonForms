@@ -193,9 +193,7 @@ class JsonFormsHooks {
 		$data = json_decode( $data, true );
 
 		// this includes annotated categories and tracking categories
-		$getCategoriesMethod = version_compare( MW_VERSION, '1.38', '>=' )
-			? 'getCategoryNames'
-			: 'getCategoryLinks';
+		$getCategoriesMethod = 'getCategoryNames';
 
 		$categoryNames = $parserOutput->$getCategoriesMethod();
 

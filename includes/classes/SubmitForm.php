@@ -26,7 +26,6 @@ namespace MediaWiki\Extension\JsonForms;
 
 use CommentStoreComment;
 use ContentHandler;
-use ContentModelChange;
 use MediaWiki\Extension\JsonForms\Aliases\Title as TitleClass;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
@@ -149,9 +148,7 @@ class SubmitForm {
 	protected function changeContentModel( $page, $model ) {
 		// $page = $this->wikiPageFactory->newFromTitle( $title );
 		// ***edited
-		$performer = method_exists( RequestContext::class, 'getAuthority' )
-			? $this->context->getAuthority()
-			: $this->user;
+		$performer = $this->context->getAuthority();
 		// ***edited
 		$services = $this->services;
 		$contentModelChangeFactory = $services->getContentModelChangeFactory();
@@ -162,25 +159,13 @@ class SubmitForm {
 			// ***edited
 			$model,
 		);
-		// MW 1.36+
-		if ( method_exists( ContentModelChange::class, 'authorizeChange' ) ) {
-			$permissionStatus = $changer->authorizeChange();
-			if ( !$permissionStatus->isGood() ) {
-				// *** edited
-				$out = $this->output;
-				$wikitext = $out->formatPermissionStatus( $permissionStatus );
-				// Hack to get our wikitext parsed
-				return Status::newFatal( new RawMessage( '$1', [ $wikitext ] ) );
-			}
-		} else {
-			$errors = $changer->checkPermissions();
-			if ( $errors ) {
-				// *** edited
-				$out = $this->output;
-				$wikitext = $out->formatPermissionsErrorMessage( $errors );
-				// Hack to get our wikitext parsed
-				return Status::newFatal( new RawMessage( '$1', [ $wikitext ] ) );
-			}
+		$permissionStatus = $changer->authorizeChange();
+		if ( !$permissionStatus->isGood() ) {
+			// *** edited
+			$out = $this->output;
+			$wikitext = $out->formatPermissionStatus( $permissionStatus );
+			// Hack to get our wikitext parsed
+			return Status::newFatal( new RawMessage( '$1', [ $wikitext ] ) );
 		}
 		// Can also throw a ThrottledError, don't catch it
 		$status = $changer->doContentModelChange(

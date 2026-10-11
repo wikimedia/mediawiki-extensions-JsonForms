@@ -226,7 +226,7 @@ class ManagePager extends TablePager {
 	 */
 	protected function isFieldSortable( $field ) {
 		// @see here https://doc.wikimedia.org/mediawiki-core/
-		// 'USE INDEX' => ( version_compare( MW_VERSION, '1.36', '<' ) ? 'name_title' : 'page_name_title' ),
+		// 'USE INDEX' => 'page_name_title',
 
 		// return false;
 	}

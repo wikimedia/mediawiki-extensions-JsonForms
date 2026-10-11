@@ -423,16 +423,9 @@ class SlotEditor {
 	private function getWatchlistValue( string $watchlist ): bool {
 		$services = MediaWikiServices::getInstance();
 
-		if ( method_exists( MediaWikiServices::class, 'getWatchlistManager' ) ) {
-			// >=1.37
-			$userWatching = $services
-				->getWatchlistManager()
-				->isWatchedIgnoringRights( $this->user, $this->title );
-		} else {
-			$userWatching = $services
-				->getWatchedItemStore()
-				->isWatched( $this->user, $this->title );
-		}
+		$userWatching = $services
+			->getWatchlistManager()
+			->isWatchedIgnoringRights( $this->user, $this->title );
 
 		$userOptionsLookup = $services->getUserOptionsLookup();
 
@@ -473,21 +466,7 @@ class SlotEditor {
 
 		$services = MediaWikiServices::getInstance();
 
-		if ( method_exists( $services, 'getWatchlistManager' ) ) {
-			$services
-				->getWatchlistManager()
-				->setWatch( $watch, $this->user, $this->title );
-			return;
-		}
-
-		$store = $services->getWatchedItemStore();
-
-		if ( $watch ) {
-			$store->addWatch( $this->user, $this->title );
-		} else {
-			$store->removeWatch( $this->user, $this->title );
-		}
-
-		$this->user->invalidateCache();
+		$services->getWatchlistManager()
+			->setWatch( $watch, $this->user, $this->title );
 	}
 }

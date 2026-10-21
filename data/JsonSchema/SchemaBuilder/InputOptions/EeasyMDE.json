@@ -2,6 +2,10 @@
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "EasyMDE Widget Options",
 	"description": "Configuration options for the EasyMDE Markdown Editor widget",
+	"x-message": {
+		"label": "Reference: [https://github.com/ionaru/easy-markdown-editor easy-markdown-editor]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/EeasyMDE]]",
+		"x-label-format": "wikitext"
+	},
 	"type": "object",
 	"x-default-properties": [],
 	"properties": {

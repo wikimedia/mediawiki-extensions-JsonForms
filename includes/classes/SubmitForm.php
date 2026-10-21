@@ -391,6 +391,53 @@ class SubmitForm {
 	}
 
 	/**
+	 * @param stdClass $data The request data
+	 * @param array &$errors Reference to errors array
+	 * @return array
+	 */
+	protected function handleDeleteData( $data, &$errors ) {
+		$titleStr = $data->formDescriptor->edit;
+		$targetTitle = TitleClass::newFromText( $titleStr );
+
+		if ( !$targetTitle ) {
+			$errors[] = $this->context->msg( 'jsonforms-special-submit-title-not-valid' )->text();
+			return;
+		}
+
+		if ( !$this->validatePageAccess( $targetTitle, $data, $errors ) ) {
+			return;
+		}
+
+		$isNewPage = false;
+		$mainSlotContent = null;
+		$previousWikiPage = \JsonForms::getWikiPage( $targetTitle );
+		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage );
+		$metadata = \JsonForms::getMetadata( $previousWikiPage );
+
+		if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
+			unset( $metadata->slots->{$targetSlot} );
+		}
+
+		if ( empty( (array)$metadata->slots ) ) {
+			unset( $metadata->slots );
+		}
+
+		$slots = [];
+		$slots[$targetSlot] = [
+			'content' => null,
+		];
+
+		if ( !empty( (array)$metadata ) ) {
+			$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
+				'model' => 'json',
+				'content' => json_encode( $metadata )
+			];
+		}
+
+		return [ $targetTitle, $targetSlot, $slots ];
+	}
+
+	/**
 	 * Get target title from various sources
 	 *
 	 * @param stdClass $data The request data
@@ -587,10 +634,9 @@ class SubmitForm {
 	 * @param bool $isNewPage Whether this is a new page
 	 * @param string|null $mainSlotContent The main slot content
 	 * @param WikiPage $previousWikiPage The reference wiki page
-	 * @param WikiPage $wikiPage The target wiki page
 	 * @return string The target slot name
 	 */
-	protected function determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage, $wikiPage ) {
+	protected function determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage ) {
 		// Check if slot is explicitly specified
 		if (
 			isset( $data->formDescriptor ) &&
@@ -605,7 +651,7 @@ class SubmitForm {
 		}
 
 		// Check previous metadata for existing slot
-		$previousMetadata = \JsonForms::getMetadata( $wikiPage );
+		$previousMetadata = \JsonForms::getMetadata( $previousWikiPage );
 		if ( $previousMetadata && isset( $previousMetadata->slots ) && is_object( $previousMetadata->slots ) ) {
 			$slots = $previousMetadata->slots;
 			if ( property_exists( $slots, SLOT_ROLE_JSONFORMS_DATA ) ) {
@@ -666,10 +712,9 @@ class SubmitForm {
 	 * @param string $targetSlot The target slot name
 	 * @param string $contentModelMainSlot The main slot content model
 	 * @param stdClass|null $previousMetadata Previous metadata if exists
-	 * @param bool $isDeleteSchema Whether schema is being deleted
 	 * @return stdClass The built metadata object
 	 */
-	protected function buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata = null, $isDeleteSchema = false ) {
+	protected function buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata = null ) {
 		$metadata = $this->initializeMetadata( $previousMetadata, $contentModelMainSlot );
 
 		if ( !isset( $metadata->slots->{SlotRecord::MAIN}->editor ) ) {
@@ -677,10 +722,10 @@ class SubmitForm {
 		}
 
 		// Set target slot metadata (if not main and not deleting schema)
-		if ( $targetSlot !== SlotRecord::MAIN && !$isDeleteSchema ) {
+		if ( $targetSlot !== SlotRecord::MAIN ) {
 			$this->setTargetSlotMetadata( $metadata, $data, $targetSlot );
 
-		} elseif ( $targetSlot === SlotRecord::MAIN && !$isDeleteSchema ) {
+		} elseif ( $targetSlot === SlotRecord::MAIN ) {
 			$this->setMainSlotSchema( $metadata, $data );
 		}
 
@@ -800,14 +845,13 @@ class SubmitForm {
 	 * @param string|null $mainSlotContent The main slot content
 	 * @param string $contentModelMainSlot The main slot content model
 	 * @param stdClass $metadata The metadata object
-	 * @param bool $deleteSchema Whether schema is being deleted
 	 * @return array The built slots array
 	 */
-	protected function buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema = false ) {
+	protected function buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata ) {
 		$slots = [];
 
 		// Add JSON data slot if we have data and not deleting
-		if ( $dataToSave !== null && !$deleteSchema ) {
+		if ( $dataToSave !== null ) {
 			$slots[$targetSlot] = [
 				'model' => 'json',
 				'content' => json_encode( $dataToSave )
@@ -860,7 +904,10 @@ class SubmitForm {
 	 * @return mixed The processed data
 	 */
 	protected function handlePartialEdit( $data, $previousWikiPage, $targetSlot, $dataToSave, &$errors ) {
-		if ( empty( $data->formDescriptor->edit_path ) ) {
+		if (
+			empty( $data->formDescriptor->edit_path ) ||
+			empty( $data->formDescriptor->edit )
+		) {
 			return $dataToSave;
 		}
 
@@ -1162,8 +1209,10 @@ class SubmitForm {
 			return;
 		}
 
-		$editPath = $data->formDescriptor->edit_path ?? '';
-		if ( empty( $editPath ) ) {
+		if (
+			empty( $data->formDescriptor->edit_path ) ||
+			empty( $data->formDescriptor->edit )
+		) {
 			$schemas = $data->structuredValue->schemas;
 			// $slotMetadata->jsonPaths = $data->structuredValue->jsonPaths;
 
@@ -1182,6 +1231,8 @@ class SubmitForm {
 			);
 
 		} else {
+			$editPath = $data->formDescriptor->edit_path;
+
 			[ $shouldAppend, $editPath ] = SchemaUtils::parseAppendPath( $editPath );
 			$slotMetadata->jsonPaths = $slotMetadata->jsonPaths ?? new stdClass();
 
@@ -1192,21 +1243,37 @@ class SubmitForm {
 
 			$edit_jsonpath = $data->formDescriptor->edit_jsonpath;
 
+			$stringEndsWith = static function ( $str, $suffix ) {
+				return substr( $str, -strlen( $suffix ) ) === $suffix;
+			};
+
 			if ( empty( $edit_jsonpath ) ) {
 				// determine from slotMetadata
 				if ( isset( $slotMetadata->jsonPaths->{$editPath} ) ) {
 					$edit_jsonpath = $slotMetadata->jsonPaths->$editPath;
 				}
+
 			} else {
+				if ( strpos( $edit_jsonpath, '{{{' ) !== false ) {
+					$errors[] = $this->context->msg( 'jsonforms-special-unexpanded-parameter' )->text();
+					return;
+				}
+
 				// a dot shouldn't be appended here, so it's a safe check
 				[ $_, $edit_jsonpath ] = SchemaUtils::parseAppendPath( $edit_jsonpath );
+
+				$edit_jsonpathNoItems = $edit_jsonpath;
+				if ( $shouldAppend && $stringEndsWith( $edit_jsonpathNoItems, '.items' ) ) {
+					$edit_jsonpathNoItems = substr( $edit_jsonpathNoItems, 0, strrpos( $edit_jsonpathNoItems, '.' ) );
+				}
 
 				// check from slotMetadata
 				if (
 					isset( $slotMetadata->jsonPaths->{$editPath} ) &&
-					$slotMetadata->jsonPaths->$editPath !== $edit_jsonpath
+					$slotMetadata->jsonPaths->$editPath !== $edit_jsonpathNoItems
 				) {
-					$errors[] = $this->context->msg( 'jsonforms-special-incorrect-jsonpath' )->text();
+					$errors[] = $this->context->msg( 'jsonforms-special-incorrect-jsonpath',
+						$slotMetadata->jsonPaths->{$editPath} . ( $shouldAppend ? '.items' : '' ), $edit_jsonpath )->text();
 					return;
 				}
 			}
@@ -1215,10 +1282,6 @@ class SubmitForm {
 				$errors[] = $this->context->msg( 'jsonforms-special-missing-jsonpath' )->text();
 				return;
 			}
-
-			$stringEndsWith = static function ( $str, $suffix ) {
-				return substr( $str, -strlen( $suffix ) ) === $suffix;
-			};
 
 			if ( $shouldAppend && !$stringEndsWith( $edit_jsonpath, '.items' ) ) {
 				$edit_jsonpath = $edit_jsonpath . '.items';
@@ -1229,9 +1292,21 @@ class SubmitForm {
 				$schemas->{$edit_jsonpath . ( $jsonPath ? '.' . $jsonPath : '' )} = $schema;
 			}
 
+			// @see also handlePartialEdit
 			if ( $shouldAppend ) {
 				$baseData = $this->getExistingDataOfSlot( $wikiPage, $targetSlot );
+
+				if ( !is_array( $baseData ) && !is_object( $baseData ) ) {
+					$errors[] = $this->context->msg( 'jsonforms-special-submit-basedata-expected-object' )->text();
+					return;
+				}
+
 				$partialData = SchemaUtils::getValueByPath( $baseData, $editPath );
+				if ( !is_array( $partialData ) ) {
+					$errors[] = $this->context->msg( 'jsonforms-special-submit-partialdata-expected-array' )->text();
+					return;
+				}
+
 				$editPath = $editPath . '.' . count( $partialData );
 			}
 
@@ -1500,7 +1575,7 @@ class SubmitForm {
 		}
 
 		// \JsonForms::setMetadata( $this->context, $wikiPage, $metadata );
-		if ( !$processedData['isNewPage'] ) {
+		if ( empty( $processedData['isNewPage'] ) ) {
 			$wikiPage->doPurge();
 		}
 

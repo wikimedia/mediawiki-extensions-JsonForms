@@ -29,6 +29,11 @@ function JsonFormsPageForm( el, data ) {
 	this.isPopup = this.formDescriptor.view === 'popup';
 	this.editor = null;
 	this.debug = this.formDescriptor.editor_options.debug;
+
+	this.hasData = JsonForms.Utilities.getNestedProp(
+		[ 'form', 'editor' ],
+		this.startval
+	);
 }
 
 OO.inheritClass( JsonFormsPageForm, JsonForms );
@@ -55,9 +60,10 @@ JsonFormsPageForm.prototype.initialize = async function () {
 			...defaultOptions.callbacks,
 			actions: {
 				...defaultOptions.callbacks.actions,
-				outerFormNavButton: function ( editor ) {
-					this.onNavButton( editor );
-				}.bind( this )
+				validateButton: this.formButton.bind( this ),
+				deleteButton: this.formButton.bind( this ),
+				submitButton: this.formButton.bind( this ),
+				gobackButton: this.formButton.bind( this )
 			}
 		}
 	};
@@ -186,11 +192,12 @@ JsonFormsPageForm.prototype.initButtons = function ( jsonEditor ) {
 	const validateButton = jsonEditor.getEditor( 'root.footer.buttons.validate' );
 	const submitButton = jsonEditor.getEditor( 'root.footer.buttons.submit' );
 	const gobackButton = jsonEditor.getEditor( 'root.header.buttons.goback' );
+	const deleteButton = jsonEditor.getEditor( 'root.footer.buttons.delete' );
 	const summaryInput = jsonEditor.getEditor( 'root.footer.summary' );
 	const minorInput = jsonEditor.getEditor( 'root.footer.minor' );
 
 	if ( this.formDescriptor.action === 'none' ) {
-		const editors = [ submitButton, gobackButton, validateButton, summaryInput, minorInput ];
+		const editors = [ submitButton, deleteButton, gobackButton, validateButton, summaryInput, minorInput ];
 
 		for ( const editor of editors ) {
 			if ( editor ) {
@@ -229,6 +236,10 @@ JsonFormsPageForm.prototype.initButtons = function ( jsonEditor ) {
 
 	if ( minorInput ) {
 		minorInput.theme.toggle( minorInput.container, false );
+	}
+
+	if ( !this.hasData ) {
+		deleteButton.theme.toggle( deleteButton.container, false );
 	}
 };
 
@@ -340,18 +351,12 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 			_resolveEditorReady( editor );
 		},
 		setupProcess: ( dialog ) => {
-			const hasData = JsonForms.Utilities.getNestedProp(
-				[ 'form', 'editor' ],
-				this.startval
-			);
-
 			const getMode = () => {
 				if ( this.formDescriptor.action === 'none' ) {
 					return 'none';
 				}
 
 				let ret = ( this.hasOptions ? 'validate' : 'submit-single' );
-
 				if ( this.hasData ) {
 					ret += '-delete';
 				}
@@ -398,48 +403,69 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 
 				case 'validate&submit':
 				case 'submit':
+					{
+						const optionsEditor = dialog.optionsEditor;
+						const optionsEditorValidationResults = optionsEditor.validate();
+
+						if ( optionsEditorValidationResults.length ) {
+							if ( this.debug ) {
+								console.log(
+									'optionsEditorValidationResults',
+									optionsEditorValidationResults
+								);
+							}
+							JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
+							return;
+						}
+
+						const innerformEditor = dialog.editor.getEditor( 'root.form.editor' );
+						const innerEditor = innerformEditor.input.editor;
+
+						const innerEditorValidationResults = innerEditor.validate();
+
+						if ( innerEditorValidationResults.length ) {
+							if ( this.debug ) {
+								console.log(
+									'innerEditorValidationResults',
+									innerEditorValidationResults
+								);
+							}
+							JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
+							return;
+						}
+						return getActionProcess.call( this, action ).next( () => {
+							// return promise
+							const optionsEditorOptions =
+								optionsEditor.getEditor( 'root.form.options' );
+							return this.submitForm( innerEditor, optionsEditorOptions ).then(
+								( res ) => {
+									if ( res !== false ) {
+										dialog.close( { action } );
+									}
+								}
+							);
+						} );
+					}
+					break;
+
 				case 'delete': {
 					const optionsEditor = dialog.optionsEditor;
-					const optionsEditorValidationResults = optionsEditor.validate();
-
-					if ( optionsEditorValidationResults.length ) {
-						if ( this.debug ) {
-							console.log(
-								'optionsEditorValidationResults',
-								optionsEditorValidationResults
-							);
-						}
-						JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
-						return;
-					}
-
 					const innerformEditor = dialog.editor.getEditor( 'root.form.editor' );
 					const innerEditor = innerformEditor.input.editor;
 
-					const innerEditorValidationResults = innerEditor.validate();
-
-					if ( innerEditorValidationResults.length ) {
-						if ( this.debug ) {
-							console.log(
-								'innerEditorValidationResults',
-								innerEditorValidationResults
+					JsonForms.Alert(
+						this.getMsg( 'delete-data' ),
+						{ size: 'small' },
+						() => {
+							this.deleteFormData( innerEditor, optionsEditor ).then(
+								( res ) => {
+									if ( res !== false ) {
+										dialog.close( { action } );
+									}
+								}
 							);
 						}
-						JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
-						return;
-					}
-					return getActionProcess.call( this, action ).next( () => {
-						// return promise
-						const optionsEditorOptions =
-							optionsEditor.getEditor( 'root.form.options' );
-						return this.submitForm( innerEditor, optionsEditorOptions ).then(
-							( res ) => {
-								if ( res !== false ) {
-									dialog.close( { action } );
-								}
-							}
-						);
-					} );
+					);
 				}
 			}
 		}
@@ -498,7 +524,7 @@ JsonFormsPageForm.prototype.createPopup = async function ( config ) {
 };
 
 // inline form only
-JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
+JsonFormsPageForm.prototype.formButton = function ( editor ) {
 	const jsonEditor = editor.jsoneditor;
 	const formEditor = jsonEditor.getEditor( 'root.form' );
 
@@ -551,6 +577,7 @@ JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
 				}
 			}
 			break;
+
 		case 'goback':
 			{
 				booklet.setPage( 'root.form.main' );
@@ -571,40 +598,119 @@ JsonFormsPageForm.prototype.onNavButton = function ( editor ) {
 			}
 			break;
 
-		case 'validate': {
-			const innerEditorValidationResults = innerEditor.validate();
-			if ( this.debug ) {
-				console.log( 'innerEditorValidationResults', innerEditorValidationResults );
-			}
-			// the inner editor
-			if ( innerEditorValidationResults.length ) {
+		case 'validate':
+			{
+				const innerEditorValidationResults = innerEditor.validate();
 				if ( this.debug ) {
-					console.log(
-						'innerEditorValidationResults',
-						innerEditorValidationResults
-					);
+					console.log( 'innerEditorValidationResults', innerEditorValidationResults );
 				}
-				JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
-				return;
-			} else {
-				booklet.setPage( 'root.form.options' );
-				validateButton.theme.toggle( validateButton.container, false );
-				submitButton.theme.toggle( submitButton.container, true );
-				gobackButton.theme.toggle( gobackButton.container, true );
+				// the inner editor
+				if ( innerEditorValidationResults.length ) {
+					if ( this.debug ) {
+						console.log(
+							'innerEditorValidationResults',
+							innerEditorValidationResults
+						);
+					}
+					JsonForms.Alert( this.getMsg( 'there-are-errors' ) );
+					return;
 
-				const summaryInput = jsonEditor.getEditor( 'root.footer.summary' );
-				const minorInput = jsonEditor.getEditor( 'root.footer.minor' );
+				} else {
+					booklet.setPage( 'root.form.options' );
+					validateButton.theme.toggle( validateButton.container, false );
+					submitButton.theme.toggle( submitButton.container, true );
+					gobackButton.theme.toggle( gobackButton.container, true );
 
-				if ( summaryInput ) {
-					summaryInput.theme.toggle( summaryInput.container, true );
-				}
+					const summaryInput = jsonEditor.getEditor( 'root.footer.summary' );
+					const minorInput = jsonEditor.getEditor( 'root.footer.minor' );
 
-				if ( minorInput ) {
-					minorInput.theme.toggle( minorInput.container, true );
+					if ( summaryInput ) {
+						summaryInput.theme.toggle( summaryInput.container, true );
+					}
+
+					if ( minorInput ) {
+						minorInput.theme.toggle( minorInput.container, true );
+					}
 				}
 			}
+			break;
+
+		case 'delete': {
+			editor.disable();
+			const optionsEditor = jsonEditor.getEditor( 'root.form.options' );
+			JsonForms.Alert(
+				this.getMsg( 'delete-data' ),
+				{ size: 'small' },
+				() => {
+					this.deleteFormData( innerEditor, optionsEditor )
+						.then( () => editor.enable() )
+						.catch( ( err ) => {
+							console.error( 'API error:', err );
+							editor.enable();
+						} );
+				}
+			).then( ( accepted ) => {
+				if ( !accepted ) {
+					editor.enable();
+				}
+			} );
 		}
 	}
+};
+
+JsonFormsPageForm.prototype.deleteFormData = function ( innerEditor, optionsEditor ) {
+	const formDescriptor = { ...this.formDescriptor };
+	formDescriptor.action = 'delete';
+
+	const data = {
+		options: optionsEditor.getValue(),
+		formDescriptor,
+
+		// submit processor
+		processor: 'PageForms'
+	};
+
+	const payload = {
+		data: JSON.stringify( data ),
+		action: 'jsonforms-submit-form'
+	};
+
+	// console.log('payload', payload);
+	return new Promise( ( resolve, reject ) => {
+		new mw.Api()
+			.postWithToken( 'csrf', payload )
+			.done( ( thisRes ) => {
+				if ( this.debug ) {
+					console.log( 'thisRes', thisRes );
+				}
+				let result = thisRes[ payload.action ].result;
+				result = JSON.parse( result );
+				if ( result.errors && result.errors.length ) {
+					const config = {
+						htmlMessage: mw.msg(
+							'jsonforms-jsmodule-return-errors',
+							result.errors.join( ' ,' )
+						),
+						type: 'error'
+					};
+					resolve( false );
+					if ( !this.isPopup ) {
+						const nonModalDialog = new JsonForms.NonModalDialog();
+						nonModalDialog.open( config );
+					} else {
+						JsonForms.Alert( config.htmlMessage );
+					}
+				} else {
+					window.location.reload();
+					resolve( result );
+				}
+			} )
+			.fail( ( thisRes ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'jsonforms-delete-data', thisRes );
+				reject( thisRes );
+			} );
+	} );
 };
 
 JsonFormsPageForm.prototype.submitForm = function ( innerEditor, optionsEditor ) {

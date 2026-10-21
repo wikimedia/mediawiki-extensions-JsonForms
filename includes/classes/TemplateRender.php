@@ -84,8 +84,8 @@ class TemplateRender extends BaseRender {
 		$dataArray = is_array( $value ) ? $value : (array)$value;
 		$paramsDisplay = $params;
 		$paramsDisplay[ 'data' ] = $value;
-		$params[ 'children' ] = implode( $children );
 
+		$objects = [];
 		foreach ( $children as $k => $v ) {
 			if ( array_key_exists( $k, $params ) ) {
 				$params[ '_' . $k ] = $params[$k];
@@ -93,7 +93,14 @@ class TemplateRender extends BaseRender {
 			}
 			$params[ $k ] = $v;
 			$paramsDisplay[ $k ] = is_scalar( $dataArray[$k] ) ? (string)$v : '<subitem>';
+
+			// 'print_scalar' is deprecated, since scalars should be
+			// always be printed from the container
+			if ( !is_scalar( $dataArray[$k] ) || !empty( $this->parameters['print_scalar'] ) ) {
+				$objects[] = $v;
+			}
 		}
+		$params[ 'children' ] = implode( $objects );
 
 		$params['params'] = '<details><pre>' .
 			json_encode(
@@ -172,10 +179,7 @@ class TemplateRender extends BaseRender {
 					NS_TEMPLATE,
 				);
 
-				if ( empty( $this->parameters['print_scalar'] ) ) {
-					$ret[$key] = $this->processTemplate( $templateName, $params );
-
-				} elseif ( $titleTemplate && $titleTemplate->isKnown() ) {
+				if ( $titleTemplate && $titleTemplate->isKnown() ) {
 					$ret[$key] = $this->processTemplate( $templateName, $params );
 
 				} else {

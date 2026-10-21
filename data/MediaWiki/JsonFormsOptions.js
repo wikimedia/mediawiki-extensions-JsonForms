@@ -13,17 +13,17 @@ export default {
 
 	// after the editor has been initialized and
 	// before is ready
-	onInit: function (jsonFormsInstance, editor) {
-		editor.on('ready', () => {
+	onInit: function (jsonFormsInstance, jsoneditor) {
+		jsoneditor.on('ready', () => {
 			// update editor with new config
 			// const config = {}
 			// jsonFormsInstance.createEditor( jsonFormsInstance.el, { ...jsonFormsInstance.config, ...config } );
 		});
 
-		editor.on('change', () => {});
+		jsoneditor.on('change', () => {});
 
 		// subeditor access
-		const editorAB = editor.watch('root.a.b', (editor) => {
+		const editorAB = jsoneditor.watch('root.a.b', (editor) => {
 			// do something when the value changes
 			// console.log('^^editorAB', editor.getValue());
 		});
@@ -32,8 +32,8 @@ export default {
 		// for each editor in the page, including nested editors
 		// in the same form
 		const context = this;
-		const onPagedLayoutSetPage = function (thisJsonFormsInstance, editor, eventData) {
-			// console.log('event onPagedLayoutSetPage via event registration', editor, eventData);
+		const onPagedLayoutSetPage = function (thisJsonFormsInstance, jsoneditor, eventData) {
+			// console.log('event onPagedLayoutSetPage via event registration', jsoneditor, eventData);
 		};
 		jsonFormsInstance.registerEvent(
 			context,
@@ -59,12 +59,12 @@ export default {
 				}
 
 				return {
-					source: (jseditor, { item, watched }) => {
+					source: (editor, { item, watched }) => {
 						const jsonForm = jseditor.jsoneditor.jsonFormsInstance;
 
 						if (
-							!jseditor.schema['x-enum-provider-config'] ||
-							!jseditor.schema['x-enum-provider-config'].article
+							!editor.schema['x-enum-provider-config'] ||
+							!editor.schema['x-enum-provider-config'].article
 						) {
 							console.log(
 								'A key "article" must be specified in an object with key "x-enum-provider-config" in the enum schema',
@@ -73,7 +73,7 @@ export default {
 							return [];
 						}
 
-						const pageTitle = jseditor.schema['x-enum-provider-config'].article;
+						const pageTitle = editor.schema['x-enum-provider-config'].article;
 						if (cache[pageTitle]) {
 							return cache[pageTitle];
 						}
@@ -83,11 +83,11 @@ export default {
 							return cache[pageTitle];
 						});
 					},
-					filter: (jseditor, { item, watched }) => {
+					filter: (editor, { item, watched }) => {
 						return true;
 					},
-					title: (jseditor, { item, watched }) => item.text,
-					value: (jseditor, { item, watched }) => item.value,
+					title: (editor, { item, watched }) => item.text,
+					value: (editor, { item, watched }) => item.value,
 				};
 			},
 
@@ -96,7 +96,7 @@ export default {
 				let pending = null;
 
 				return {
-					source: (jseditor, { item, watched }) => {
+					source: (editor, { item, watched }) => {
 						if (cache) return cache;
 						if (pending) return pending;
 
@@ -125,11 +125,11 @@ export default {
 
 						return pending;
 					},
-					filter: (jseditor, { item, watched }) => {
+					filter: (editor, { item, watched }) => {
 						return true;
 					},
-					title: (jseditor, { item, watched }) => item.text,
-					value: (jseditor, { item, watched }) => item.value,
+					title: (editor, { item, watched }) => item.text,
+					value: (editor, { item, watched }) => item.value,
 				};
 			},
 		},
@@ -139,7 +139,7 @@ export default {
 				let pending = null;
 
 				return {
-					search: async (jseditor_editor, input) => {
+					search: async (editor, input) => {
 						// If we have cached results, filter them based on input
 						if (cache) {
 							if (!input) return cache;
@@ -185,8 +185,8 @@ export default {
 
 						return pending;
 					},
-					getResultValue: (jseditor_editor, result) => result.value,
-					renderResult: (jseditor_editor, result, props) => result.text,
+					getResultValue: (editor, result) => result.value,
+					renderResult: (editor, result, props) => result.text,
 				};
 			},
 		},
@@ -200,8 +200,12 @@ export default {
 				const jsonForm = jsonEditor.jsonFormsInstance;
 				const validation = jsonEditor.validate();
 				if (!validation.length) {
-					editor.disable();
 					const optionsEditor = jsonForm.getEditor('root.form.options');
+					if (!jsonForm .submitForm ) {
+						// out of context
+						return;
+					}
+					editor.disable();
 					jsonForm
 						.submitForm(jsonEditor, optionsEditor)
 						.then(() => editor.enable())
@@ -222,38 +226,38 @@ export default {
 		// the converter name must then be used in the schema using x-value-converter: [converter name]
 		converters: {},
 
-		preprocessSchema: function (editor, schema) {
+		preprocessSchema: function (jsoneditor, schema) {
 			return schema;
 		},
 
-		preprocessData: function (editor, data) {
+		preprocessData: function (jsoneditor, data) {
 			return data;
 		},
 
-		postprocessData: function (editor, data) {
+		postprocessData: function (jsoneditor, data) {
 			return data;
 		},
 
 		events: {
-			initialized: function (editor, eventData) {
+			initialized: function (jsoneditor, eventData) {
 				// console.log('event initialized via options', editor, eventData);
 			},
-			ready: function (editor, eventData) {
+			ready: function (jsoneditor, eventData) {
 				// console.log('event ready via options', editor, eventData);
 			},
-			change: function (editor, eventData) {
+			change: function (jsoneditor, eventData) {
 				// console.log('event change via options', editor, eventData);
 			},
-			buildComplete: function (editor, eventData) {
+			buildComplete: function (jsoneditor, eventData) {
 				// console.log('event buildComplete via options', editor, eventData);
 			},
-			pagedLayoutSetPage: function (editor, eventData) {
+			pagedLayoutSetPage: function (jsoneditor, eventData) {
 				// console.log('event pagedLayoutSetPage via options', editor, eventData);
 			},
-			fancyTreeSelectItem: function (editor, eventData) {
+			fancyTreeSelectItem: function (jsoneditor, eventData) {
 				// console.log('event fancyTreeSelectItem via options', editor, eventData);
 			},
-			fancyTreeClickItem: function (editor, eventData) {
+			fancyTreeClickItem: function (jsoneditor, eventData) {
 				// console.log('event fancyTreeClickItem via options', editor, eventData);
 			},
 		},

@@ -583,6 +583,31 @@
 								"path": "x-input",
 								"op": "==",
 								"value": "OO.ui.ComboBoxInputWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.TagMultiselectWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.MenuTagMultiselectWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "OO.ui.CheckboxMultiselectInputWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "ButtonMultiselectWidget"
+							},
+							{
+								"path": "x-input",
+								"op": "==",
+								"value": "LookupMultiselect"
 							}
 						]
 					}
@@ -858,7 +883,7 @@
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions/{{x-input}}"
 						}
 					]
 				},
@@ -979,7 +1004,7 @@
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions/{{x-input}}"
 						}
 					]
 				},
@@ -1116,7 +1141,7 @@
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions/{{x-input}}"
 						}
 					]
 				},
@@ -1277,7 +1302,7 @@
 					"links": [
 						{
 							"rel": "describedBy",
-							"href": "JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+							"href": "JsonSchema:SchemaBuilder/InputOptions/{{x-input}}"
 						}
 					]
 				},
@@ -1483,6 +1508,10 @@
 							"type": "string",
 							"description": "label format",
 							"enum": ["text", "html", "wikitext"]
+						},
+						"x-label-template": {
+							"type": "string",
+							"description": "label template (overrides label, usually used in conjunction with x-watch)"
 						},
 						"icon": {
 							"type": "string",
@@ -2188,10 +2217,10 @@
 			"stringMultiselect": {
 				"allOf": [
 					{
-						"$ref": "#/definitions/string"
+						"$ref": "#/definitions/stringOptionsMultiselect"
 					},
 					{
-						"$ref": "#/definitions/stringOptionsMultiselect"
+						"$ref": "#/definitions/string"
 					}
 				]
 			},

@@ -8,9 +8,9 @@
 
 	EnumProviders.prototype.sameLevelProperties = function () {
 		return {
-			source: ( jseditor, { item, watched } ) => {
-				if ( jseditor.isMetaSchema ) {
-					let parent = jseditor;
+			source: ( editor, { item, watched } ) => {
+				if ( editor.isMetaSchema ) {
+					let parent = editor;
 					let properties = null;
 					while ( parent ) {
 						parent = parent.parentEditor;
@@ -59,11 +59,11 @@
 		};
 
 		return {
-			source: ( jseditor, { item, watched } ) => {
-				const jsoneditor = jseditor.jsoneditor;
+			source: ( editor, { item, watched } ) => {
+				const jsoneditor = editor.jsoneditor;
 
-				if ( jseditor.isMetaSchema ) {
-					let parent = jseditor;
+				if ( editor.isMetaSchema ) {
+					let parent = editor;
 					let properties = [];
 					while ( parent ) {
 						parent = parent.parentEditor;
@@ -92,7 +92,7 @@
 
 	EnumProviders.prototype.metaSchemaArrayFormatToInput = function () {
 		return {
-			source: ( jseditor, { item, watched } ) => {
+			source: ( editor, { item, watched } ) => {
 				const format = watched[ 'x-format' ] || watched.format;
 
 				// called before watch is aailable, return null
@@ -126,15 +126,15 @@
 
 				}
 			},
-			filter: ( jseditor, { item, watched } ) => true,
-			title: ( jseditor, { item, watched } ) => item.text,
-			value: ( jseditor, { item, watched } ) => item.value
+			filter: ( editor, { item, watched } ) => true,
+			title: ( editor, { item, watched } ) => item.text,
+			value: ( editor, { item, watched } ) => item.value
 		};
 	};
 
 	EnumProviders.prototype.metaSchemaIntegerFormatToInput = function () {
 		return {
-			source: ( jseditor, { item, watched } ) => {
+			source: ( editor, { item, watched } ) => {
 				const format = watched[ 'x-format' ] || watched.format;
 
 				// called before watch is aailable, return null
@@ -154,15 +154,15 @@
 						return [ 'RatingWidget' ];
 				}
 			},
-			filter: ( jseditor, { item, watched } ) => true,
-			title: ( jseditor, { item, watched } ) => item.text,
-			value: ( jseditor, { item, watched } ) => item.value
+			filter: ( editor, { item, watched } ) => true,
+			title: ( editor, { item, watched } ) => item.text,
+			value: ( editor, { item, watched } ) => item.value
 		};
 	};
 
 	EnumProviders.prototype.metaSchemaFormatToInput = function () {
 		return {
-			source: ( jseditor, { item, watched } ) => {
+			source: ( editor, { item, watched } ) => {
 				const format = watched[ 'x-format' ] || watched.format;
 
 				// called before watch is aailable, return null
@@ -171,9 +171,19 @@
 					return null;
 				}
 
+				const hookRes = JsonForms.prototype.hooks.call( this, 'metaSchemaFormatToInput',
+					[ editor, { item, watched } ] );
+
+				if ( Array.isArray( hookRes ) ) {
+					return hookRes;
+				}
+
 				switch ( format ) {
 					case 'captcha':
 						return [ 'captcha' ];
+
+					case 'code':
+						return [ 'Ace' ];
 
 					case 'color':
 						return [ 'ColorPicker' ];
@@ -186,7 +196,7 @@
 						return [ 'mw.widgets.DateInputWidget' ];
 
 					case 'json':
-						return [ 'JsonEditor', 'FancyTree', 'JsonForms' ];
+						return [ 'JsonEditor', 'JsonForms' ];
 
 					case 'tree':
 						return [ 'FancyTree' ];
@@ -268,9 +278,9 @@
 						return [ 'VisualEditor', 'WikiEditor' ];
 				}
 			},
-			filter: ( jseditor, { item, watched } ) => true,
-			title: ( jseditor, { item, watched } ) => item.text,
-			value: ( jseditor, { item, watched } ) => item.value
+			filter: ( editor, { item, watched } ) => true,
+			title: ( editor, { item, watched } ) => item.text,
+			value: ( editor, { item, watched } ) => item.value
 		};
 	};
 
@@ -307,7 +317,7 @@
 
 		// key/value object, this is also supported
 		return {
-			source: ( jseditor, { item, watched } ) => {
+			source: ( editor, { item, watched } ) => {
 				const role = ( watched && watched.role ) || 'main';
 				// console.log('contentModelByRole role',role,roleContentModelMap)
 

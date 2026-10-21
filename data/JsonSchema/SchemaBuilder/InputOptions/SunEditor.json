@@ -2,8 +2,11 @@
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$id": "https://wikisphere.org/wiki/JsonSchema:SchemaBuilder/SunEditorOptions",
 	"title": "SunEditor Options",
-	"description": "Reference: [https://suneditor.com/options https://suneditor.com/options]",
 	"x-description-format": "wikitext",
+	"x-message": {
+		"label": "Reference: [https://suneditor.com/options SunEditor options]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/SunEditor]]",
+		"x-label-format": "wikitext"
+	},
 	"@comment": "Schema for SunEditor rich text editor configuration options",
 	"x-layout": "paged",
 	"x-layout-config": {
@@ -231,7 +234,7 @@
 		"iframe_cssFileName": {
 			"oneOf": [
 				{ "type": "string" },
-				{ "type": "array", "items": { "type": "string" } }
+				{ "type": "array", "items": { "type": "string", "default": "https://cdn.jsdelivr.net/npm/suneditor@3.3.3/dist/suneditor.min.css" } }
 			],
 			"description": "CSS filename for iframe",
 			"default": "suneditor"

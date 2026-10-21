@@ -22,6 +22,7 @@
 			"uniqueItems": true,
 			"items": {
 				"type": "object",
+				"title": "Author",
 				"properties": {
 					"first_name": {
 						"type": "string",

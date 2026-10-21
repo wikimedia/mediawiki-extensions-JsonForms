@@ -20,6 +20,7 @@
  */
 
 /* eslint-disable es-x/no-rest-spread-properties */
+/* eslint-disable prefer-arrow-callback */
 
 function JsonFormsManageSchemas( el, data ) {
 	JsonFormsManageSchemas.super.call( this, el, data );
@@ -107,12 +108,18 @@ JsonFormsManageSchemas.prototype.onFormButton = function ( action, buttonEditor 
 					this.getMsg( 'rename-schema' ),
 					{ size: 'small' },
 					() => {
-						this.submitForm( innerEditor ).catch( ( err ) => console.error( 'API error:', err )
-						);
+						this.submitForm( innerEditor )
+							.then( () => buttonEditor.enable() )
+							.catch( ( err ) => {
+								console.error( 'API error:', err );
+								buttonEditor.enable();
+							} );
 					}
-				);
-
-				buttonEditor.enable();
+				).then( ( accepted ) => {
+					if ( !accepted ) {
+						buttonEditor.enable();
+					}
+				} );
 				return;
 			}
 
@@ -199,8 +206,6 @@ JsonFormsManageSchemas.prototype.adjustFormSchema = function () {
 
 	delete ret.properties.footer.properties.minor;
 	delete ret.properties.footer.properties.summary;
-	delete ret.properties.footer[ 'x-css-class' ];
-	delete ret.properties.footer.properties.buttons[ 'x-css-class' ];
 
 	return ret;
 };
@@ -314,6 +319,56 @@ resolve()
 };
 
 $( () => {
+	const OOUIRelatedWidgets = [
+		'OO.ui.ButtonMenuSelectWidget',
+		'OO.ui.ButtonSelectWidget',
+		'OO.ui.RadioSelectInputWidget',
+		'OO.ui.DropdownInputWidget',
+		'OO.ui.TagMultiselectWidget',
+		'OO.ui.MenuTagMultiselectWidget',
+		'OO.ui.CheckboxMultiselectInputWidget',
+		'ButtonMultiselectWidget',
+		'LookupMultiselect',
+		'mw.widgets.TitlesMultiselectWidget',
+		'mw.widgets.UsersMultiselectWidget',
+		'mw.widgets.CategoryMultiselectWidget',
+		'OO.ui.NumberInputWidget',
+		'OO.ui.TagMultiselectWidget',
+		'OO.ui.NumberInputWidget',
+		'OO.ui.CheckboxInputWidget',
+		'OO.ui.ToggleSwitchWidget',
+		'null',
+		'info',
+		'button',
+		'ColorPicker',
+		'mw.widgets.DateTimeInputWidget',
+		'mw.widgets.DateInputWidget',
+		'OO.ui.HiddenInputWidget',
+		'OO.ui.SelectFileWidget',
+		'month',
+		'OO.ui.TextInputWidget',
+		'OO.ui.DropdownInputWidget',
+		'OO.ui.RadioSelectInputWidget',
+		'OO.ui.ButtonSelectWidget',
+		'OO.ui.ComboBoxInputWidget',
+		'LookupElement',
+		'OO.ui.TextInputWidget',
+		'OO.ui.MultilineTextInputWidget',
+		'OO.ui.TextInputWidget',
+		'mw.widgets.TitleInputWidget',
+		'mw.widgets.UserInputWidget',
+		'uuid',
+		'week'
+	];
+
+	JsonForms.registerHook( 'onDescribedByFetchSchema', function ( ref, jsonFormsInstance ) {
+		// convert to JsonSchema:SchemaBuilder/InputOptions#/definitions/{{x-input}}"
+		const baseName = ref.split( /[\\/]/ ).pop();
+		if ( OOUIRelatedWidgets.includes( baseName ) ) {
+			return 'JsonSchema:SchemaBuilder/InputOptions#/definitions/' + baseName;
+		}
+	} );
+
 	$( '.jsonforms-form-wrapper' ).each( async function ( index, el ) {
 		this.el = el;
 		const data = $( el ).data().formData;

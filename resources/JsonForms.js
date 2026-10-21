@@ -43,10 +43,10 @@ function JsonForms( el, data ) {
 	this.callbacksMap = {
 		enum_providers: 'enumProviders',
 		autocomplete_providers: 'autocompleteProviders',
-		converters: 'valueConverters'
-		// actions: 'actions',
-		// events: 'events',
-		// template: 'template'
+		converters: 'valueConverters',
+		actions: 'actions',
+		events: 'events',
+		template: 'template'
 	};
 }
 
@@ -84,9 +84,6 @@ JsonForms.prototype.getValidContexts = function ( objName, funcName ) {
 
 	if ( this.callbacksMap[ objName ] && this[ this.callbacksMap[ objName ] ] ) {
 		contexts.push( this[ this.callbacksMap[ objName ] ] );
-
-	} else if ( this[ objName ] ) {
-		contexts.push( this[ objName ] );
 	}
 
 	if ( !contexts.length ) {
@@ -146,6 +143,28 @@ JsonForms.prototype.registerEnumProvider = function ( name, fn ) {
 
 JsonForms.prototype.registerAction = function ( name, fn ) {
 	JsonForms.Actions.prototype[ name ] = fn;
+};
+
+JsonForms.registerHook = function ( name, fn ) {
+	( JsonForms.hooks[ name ] = JsonForms.hooks[ name ] || [] ).push( fn );
+};
+
+JsonForms.prototype.hooks = function ( name, args ) {
+	// available hooks:
+	// * getRegularInputWidget
+	// * metaSchemaFormatToInput (enum provider)
+	// * onDescribedByFetchSchema (alter ref value)
+	const list = JsonForms.hooks[ name ];
+	if ( !list ) {
+		return;
+	}
+
+	for ( let i = 0; i < list.length; i++ ) {
+		const result = list[ i ].apply( this, args );
+		if ( result !== undefined ) {
+			return result;
+		}
+	}
 };
 
 JsonForms.prototype.createDefaultEditor = function ( config = {} ) {
@@ -215,7 +234,14 @@ JsonForms.prototype.getModule = async function ( str ) {
 };
 
 JsonForms.prototype.parseSchemaId = function ( str ) {
-	return typeof str === 'string' ? str.split( 'JsonSchema:' )[ 1 ].split( '/' ).pop() : '';
+	if ( typeof str !== 'string' ) {
+		return '';
+	}
+	const arr = str.split( 'JsonSchema:' );
+	if ( arr.length < 2 ) {
+		return '';
+	}
+	return arr[ 1 ].split( '/' ).pop();
 };
 
 JsonForms.prototype.getMsg = function ( key, params ) {
@@ -454,6 +480,9 @@ JsonForms.prototype.processTemplate = function ( str, vars, options = {} ) {
 		return vars[ trimmedPath ] !== undefined ? vars[ trimmedPath ] : '';
 	} );
 };
+
+// static hooks
+JsonForms.hooks = {};
 
 // or use mw.hook
 JsonForms.emitter = new OO.EventEmitter();

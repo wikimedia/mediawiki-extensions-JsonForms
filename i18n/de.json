@@ -98,7 +98,7 @@
 	"jsonforms-special-submit-missing-data": "Fehlende Daten",
 	"jsonforms-special-submit-cannot-load-schema": "Schema kann nicht geladen werden",
 	"jsonforms-special-missing-jsonpath": "Fehlender jsonpath",
-	"jsonforms-special-incorrect-jsonpath": "Jsonpath sieht falsch aus. Er kann für vorhandene Daten weggelassen werden",
+	"jsonforms-special-incorrect-jsonpath": "Jsonpath sieht falsch aus. Er kann für vorhandene Daten weggelassen werden. (erwartet: '$1', angegeben: '$2')",
 	"jsonforms-special-unexpanded-parameter": "nicht expandierte Parameter in edit_path oder edit_jsonpath",
 
 	"jsonforms-special-submit-return-no-return-url": "Rücksprung-URL kann nicht ermittelt werden",
@@ -108,7 +108,9 @@
 	"jsonforms-special-submit-rename-file-target-title-exists": "Umbenennen der Datei von \"$1\" nach \"$2\" fehlgeschlagen, Titel existiert bereits",
 
 	"jsonforms-special-submit-target-source-slot-conflict": "Ein Seitenformular kann keine Daten im Haupt-Slot desselben Artikels speichern",
-	"jsonforms-special-submit-source": "Basisdaten sind kein Objekt oder Array",
+	"jsonforms-special-submit-source-data-error": "Basisdaten sind kein Objekt oder Array",
+	"jsonforms-special-submit-basedata-expected-object": "(Pfad- oder JSONPath-Fehler) Basisdaten sind kein Objekt oder Array",
+	"jsonforms-special-submit-partialdata-expected-array": "(Pfad- oder JSONPath-Fehler) Teil-Daten sollten ein Array sein",
 
 	"jsonforms-parserfunction-error-no-form-name": "Kein Formularname",
 	"jsonforms-parserfunction-error-no-form": "Kein Formular",
@@ -336,9 +338,10 @@
 	"jsonforms-formschema-createpageform-debug-desc": "Debug-Modus aktivieren",
 
 	"jsonforms-instance-there-are-errors": "Es sind Fehler vorhanden",
-	"jsonforms-instance-rename-schema": "Dadurch wird das Schema umbenannt, ok?",
-	"jsonforms-instance-delete-article": "Den Artikel des Schemas löschen, ok?",
+	"jsonforms-instance-rename-schema": "Dadurch wird das Schema umbenannt, ok ?",
+	"jsonforms-instance-delete-article": "Den Artikel des Schemas löschen, ok ?",
 	"jsonforms-instance-schema-required": "Schema ist erforderlich",
+	"jsonforms-instance-delete-data": "Formulardaten löschen, ok ?",
 
 	"jsonforms-editor-error-value-must-be-a-valid": "Wert muss ein gültiger $1 sein",
 	"jsonforms-editor-error-notset": "Eigenschaft muss festgelegt sein",

@@ -39,6 +39,24 @@ class EditSchema extends SubmitForm {
 		$services = MediaWikiServices::getInstance();
 		$errors = [];
 
+		$schemaName = !empty( $data->metadata->schemaName ) ? $data->metadata->schemaName : null;
+		if ( !$schemaName ) {
+			[ $targetTitle, $targetSlot, $slots ] = $this->handleDeleteData( $data, $errors );
+			if ( count( $errors ) ) {
+				return ResultWrapper::failure( $errors[0] );
+			}
+			$processedData = [
+				'slots' => $slots,
+				'targetTitle' => $targetTitle,
+				'targetSlot' => $targetSlot,
+			];
+			$returnData = [
+				'targetTitle' => $targetTitle->getFullText(),
+				'returnUrl' => $targetTitle->getLocalURL(),
+			];
+			return ResultWrapper::success( [ $processedData, $returnData ] );
+		}
+
 		$targetTitle = $this->getTargetTitleFromData( $data, $errors );
 		if ( !$targetTitle ) {
 			return ResultWrapper::failure( $errors[0] );
@@ -47,9 +65,6 @@ class EditSchema extends SubmitForm {
 		if ( !$this->validatePageAccess( $targetTitle, $data, $errors ) ) {
 			return ResultWrapper::failure( $errors[0] );
 		}
-
-		$schemaName = $data->metadata->schemaName;
-		$deleteSchema = empty( $schemaName );
 
 		$wikiPage = \JsonForms::getWikiPage( $targetTitle );
 		if ( !$wikiPage ) {
@@ -68,49 +83,30 @@ class EditSchema extends SubmitForm {
 		$isDataOnly = $targetSlot === SlotRecord::MAIN;
 
 		$contentModelMainSlot = $this->getContentModel( $data, $targetTitle );
-		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata, $deleteSchema );
+		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata );
 
-		if ( $deleteSchema ) {
-			if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
-				unset( $metadata->slots->{$targetSlot} );
-			}
+		$slotMetadata = &$metadata->slots->{$targetSlot};
+		$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
+
+		if ( count( $errors ) ) {
+			return ResultWrapper::failure( $errors[0] );
 		}
 
-		$dataToSave = null;
-		if ( !$deleteSchema ) {
-			$slotMetadata = &$metadata->slots->{$targetSlot};
-			$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );
+		$dataToSave = $this->postProcessJsonData(
+			$data->value,
+			$data->structuredValue,
+			$slotMetadata,
+			$targetSlot,
+			$wikiPage,
+			$errors
+		);
 
-			if ( count( $errors ) ) {
-				return ResultWrapper::failure( $errors[0] );
-			}
-
-			$dataToSave = $this->postProcessJsonData(
-				$data->value,
-				$data->structuredValue,
-				$slotMetadata,
-				$targetSlot,
-				$wikiPage,
-				$errors
-			);
-
-			if ( count( $errors ) ) {
-				return ResultWrapper::failure( $errors[0] );
-			}
+		if ( count( $errors ) ) {
+			return ResultWrapper::failure( $errors[0] );
 		}
 
 		$mainSlotContent = null;
-		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema );
-
-		if ( $deleteSchema ) {
-			$slots[$targetSlot] = [
-				'content' => null,
-			];
-		}
-
-		if ( empty( (array)$metadata->slots ) ) {
-			unset( $metadata->slots );
-		}
+		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata );
 
 		$isNewPage = !$wikiPage->exists();
 

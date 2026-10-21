@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"x-message": {
+		"label": "Schema: [[JsonSchema:SchemaBuilder/InputOptions/RatingWidget]]",
+		"x-label-format": "wikitext"
+	},
+	"properties": {
+		"ratingLength": {
+			"type": "integer",
+			"description": "length (only for integer type)"
+		}
+	}
+}

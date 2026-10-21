@@ -1,0 +1,24 @@
+{
+	"type": "object",
+	"x-message": {
+		"label": "Reference: [https://www.mediawiki.org/wiki/Extension:JsonForms JsonForms]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/JsonForms]]",
+		"x-label-format": "wikitext"
+	},
+	"x-default-properties": [],
+	"properties": {
+		"schemaName": {
+			"type": "string",
+			"title": "schema",
+			"default": "",
+			"x-enum-provider": "jsonSchemas"
+		},
+		"schema": {
+			"type": "string",
+			"title": "schema",
+			"x-hidden": "true",
+			"x-watch": "schemaName",
+			"x-template": "JsonSchema:{{schemaName}}"
+		}
+	}
+}
+

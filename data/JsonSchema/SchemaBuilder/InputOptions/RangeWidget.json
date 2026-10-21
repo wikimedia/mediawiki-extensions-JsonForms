@@ -1,0 +1,19 @@
+{
+	"type": "object",
+	"x-message": {
+		"label": "Schema: [[JsonSchema:SchemaBuilder/InputOptions/RangeWidget]]",
+		"x-label-format": "wikitext"
+	},
+	"x-default-properties": [],
+	"properties": {
+		"step": {
+			"type": "number",
+			"description": "step"
+		},
+		"valueMask": {
+			"type": "string",
+			"default": "%v"
+		}
+	}
+}
+

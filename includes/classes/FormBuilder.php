@@ -123,7 +123,7 @@ class FormBuilder {
 	private function shouldLoadExistingData(): bool {
 		// force action edit
 		if ( !empty( $this->formDescriptor->edit_path ) ) {
-			$this->formDescriptor->action === 'edit';
+			$this->formDescriptor->action = 'edit';
 		}
 
 		$isCreateAction = property_exists( $this->formDescriptor, 'action' ) &&
@@ -131,6 +131,13 @@ class FormBuilder {
 
 		if ( $isCreateAction ) {
 			$this->formDescriptor->edit = null;
+		}
+
+		if (
+			!empty( $this->formDescriptor->edit_path ) &&
+			empty( $this->formDescriptor->edit )
+		) {
+			$this->formDescriptor->edit_path = null;
 		}
 
 		return !empty( $this->formDescriptor->edit ) && !$isCreateAction;

@@ -128,7 +128,7 @@ class ManageSchemas extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
-		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage, $wikiPage );
+		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage );
 
 		if ( count( $errors ) ) {
 			return ResultWrapper::failure( $errors[0] );
@@ -171,8 +171,7 @@ class ManageSchemas extends SubmitForm {
 				break;
 		}
 
-		$deleteSchema = false;
-		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema );
+		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata );
 
 		$processedData = [
 			'slots' => $slots,

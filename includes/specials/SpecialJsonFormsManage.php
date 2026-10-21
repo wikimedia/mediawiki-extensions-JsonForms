@@ -196,10 +196,6 @@ class SpecialJsonFormsManage extends SpecialPage {
 		$startVal = [];
 		switch ( $item ) {
 			case 'form':
-				$specialpage_title = SpecialPage::getTitleFor(
-					'JsonFormsManage',
-					'Schemas',
-				);
 				$message = new \OOUI\MessageWidget( [
 					'type' => 'info',
 					'label' => new \OOUI\HtmlSnippet(
@@ -261,7 +257,7 @@ class SpecialJsonFormsManage extends SpecialPage {
 				break;
 		}
 
-		if ( $pageid ) {
+		if ( $action === 'edit' ) {
 			$specialPageTitle = SpecialPage::getTitleFor(
 				'JsonFormsManage',
 				$par,
@@ -270,7 +266,9 @@ class SpecialJsonFormsManage extends SpecialPage {
 				'jsonforms-special-manage-returnlink',
 				$specialPageTitle->getFullText(),
 			);
+		}
 
+		if ( $pageid ) {
 			$out->addHTML(
 				HtmlClass::rawElement(
 					'p',

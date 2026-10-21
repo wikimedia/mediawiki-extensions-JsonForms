@@ -47,7 +47,7 @@
 							"x-title-format": "wikitext",
 							"x-format": "button",
 							"x-css-inline": "display:none",
-							"x-button-action": "outerFormNavButton",
+							"x-button-action": "gobackButton",
 							"x-input-config": {
 								"icon": "arrowPrevious",
 								"framed": false,
@@ -166,7 +166,7 @@
 							"x-title-format": "wikitext",
 							"x-css-inline": "display:none",
 							"x-format": "button",
-							"x-button-action": "outerFormNavButton",
+							"x-button-action": "validateButton",
 							"x-input-config": {
 								"flags": ["primary", "progressive"]
 							}
@@ -177,9 +177,19 @@
 							"x-title-format": "wikitext",
 							"x-css-inline": "display:none",
 							"x-format": "button",
-							"x-button-action": "outerFormNavButton",
+							"x-button-action": "submitButton",
 							"x-input-config": {
 								"flags": ["primary", "progressive"]
+							}
+						},
+						"delete": {
+							"type": "null",
+							"title": "{{int:jsonforms-formschema-delete}}",
+							"x-title-format": "wikitext",
+							"x-format": "button",
+							"x-button-action": "deleteButton",
+							"x-input-config": {
+								"flags": ["destructive"]
 							}
 						}
 					}

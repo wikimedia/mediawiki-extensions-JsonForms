@@ -56,14 +56,14 @@
 			action: 'delete',
 			label: 'delete',
 			flags: 'destructive',
-			modes: [ 'validate-delete', 'submit-single-delete' ]
+			modes: [ 'validate-delete', 'submit-single-delete', 'submit-delete' ]
 		},
 		// { action: 'help',icon: 'help', modes: ['validate', 'validate-delete',  'submit', 'submit-delete','submit-single', 'submit-single-delete' ], label: 'Help' },
 		{
 			action: 'validate',
-			modes: [ 'validate', 'validate-delete' ],
 			label: 'validate',
-			flags: [ 'primary', 'progressive' ]
+			flags: [ 'primary', 'progressive' ],
+			modes: [ 'validate', 'validate-delete' ]
 		},
 		{
 			action: 'back',
@@ -256,9 +256,11 @@ SimpleDialog.prototype.getSetupProcess = function (data) {
 				.openWindow( 'message', $.extend( obj, options ) )
 				// closed.then((action) => action.action === 'accept');
 				.closed.then( function ( action ) {
-					return action.action === 'accept' && callback ?
-						callback.apply( this ) :
-						undefined;
+					const accepted = action && action.action === 'accept';
+					if ( accepted && callback ) {
+						callback.apply( this );
+					}
+					return accepted;
 				} )
 		);
 	}

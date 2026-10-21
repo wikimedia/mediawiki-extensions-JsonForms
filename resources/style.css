@@ -79,6 +79,7 @@
 		0 1px 5px rgba( 0, 0, 0, 0.2 ),
 		0 2px 2px rgba( 0, 0, 0, 0.14 ),
 		0 3px 1px -2px rgba( 0, 0, 0, 0.12 );
+	border-radius: 4px;
 }
 
 .jsonforms-form:not( .jsonforms-form-popup ) {
@@ -466,11 +467,15 @@
 }
 
 /*
-.jsonforms-schemabuilder-resizable {
+.jsonforms-schemabuilder-preview-container {
 	width: 400px;
 	box-shadow: -4px 0 8px -4px rgba( 0,0,0,0.3 );
 }
 */
+
+.jsonforms-schemabuilder-preview-body {
+	overflow: auto;
+}
 
 .jsonforms-message-widget {
 	margin: 12px;

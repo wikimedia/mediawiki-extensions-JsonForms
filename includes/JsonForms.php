@@ -745,6 +745,8 @@ class JsonForms {
 	 * @return stdClass|false
 	 */
 	public static function getSourceSchema( $name, $path = null ) {
+		$services = MediaWikiServices::getInstance();
+
 		// JsonSchema:SchemaBuilder/EnumProvider
 		// from the api
 		if ( !$path ) {
@@ -752,7 +754,7 @@ class JsonForms {
 			if ( $title && $title->isKnown() ) {
 				$name = $title->getText();
 				$ns = $title->getNamespace();
-				$formattedNamespaces = MediaWikiServices::getInstance()
+				$formattedNamespaces = $services
 					->getContentLanguage()
 					->getFormattedNamespaces();
 				$path = $formattedNamespaces[$ns];
@@ -771,6 +773,13 @@ class JsonForms {
 			$name;
 
 		$filePath = __DIR__ . '/../data/' . $path . '/' . $name . '.json';
+
+		$services
+			->getHookContainer()
+			->run( 'JsonForms::GetLatestResource', [
+				&$titleText,
+				&$filePath,
+		] );
 
 		$content = self::getLatestResource( $titleText, $filePath );
 		if ( $content ) {
@@ -1588,49 +1597,36 @@ class JsonForms {
 
 	/**
 	 * @param Title $title
-	 * @param array slots
-	 * @param int|null $timestamp
+	 * @param array $slotsData
 	 * @param array &$errors []
-	 * @return
+	 * @return array
 	 */
-	public static function importRevision( $title, $slots, $timestamp, &$errors = [] ) {
+	public static function prepareSlotData( $title, $slotsData, &$errors = [] ) {
 		$services = MediaWikiServices::getInstance();
-		$wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
+		$wikiPage = self::getWikiPage( $title );
 
-		$wikiPage = new WikiPage( $title );
 		if ( !$wikiPage ) {
 			$errors[] = 'cannot create wikipage';
 			return false;
 		}
 
-		$slotsData = [];
-		foreach ( $slots as $value ) {
-			$slotsData[$value['role']] = $value;
+		if ( self::isList( $slotsData ) ) {
+			$slotsData = array_column( $slotsData, null, 'role' );
 		}
 
 		if ( !array_key_exists( SlotRecord::MAIN, $slotsData ) ) {
-			$slotsData = array_merge(
-				[
-					SlotRecord::MAIN => [
-						'model' => 'wikitext',
-						'text' => '',
-					],
-				],
-				$slotsData,
-			);
+			$slotsData[ SlotRecord::MAIN ] = [
+				'model' => 'wikitext',
+				'text' => '',
+			];
 		}
 
+		$slotRoleRegistry = MediaWikiServices::getInstance()->getSlotRoleRegistry();
 		$oldRevisionRecord = $wikiPage->getRevisionRecord();
-		$slotRoleRegistry = $services->getSlotRoleRegistry();
 		$contentHandlerFactory = $services->getContentHandlerFactory();
 		$contentModels = $contentHandlerFactory->getContentModels();
 
-		$revision = new WikiRevision();
-		$revision->setTitle( $title );
-		$revision->setTimestamp( $timestamp ?? wfTimestampNow() );
-
-		// $content = $this->makeContent( $title, $revId, $revisionInfo );
-		// $revision->setContent( SlotRecord::MAIN, $content );
+		$ret = [];
 		foreach ( $slotsData as $role => $value ) {
 			if ( empty( $value['text'] ) && $role !== SlotRecord::MAIN ) {
 				continue;
@@ -1641,10 +1637,12 @@ class JsonForms {
 				in_array( $value['model'], $contentModels )
 			) {
 				$modelId = $value['model'];
+
 			} elseif ( $slotRoleRegistry->getRoleHandler( $role ) ) {
 				$modelId = $slotRoleRegistry
 					->getRoleHandler( $role )
 					->getDefaultModel( $title );
+
 			} elseif (
 				$oldRevisionRecord !== null &&
 				$oldRevisionRecord->hasSlot( $role )
@@ -1674,11 +1672,64 @@ class JsonForms {
 				}
 			}
 
-			$content = ContentHandler::makeContent(
+			$ret[$role] = ContentHandler::makeContent(
 				$value['text'],
 				$title,
 				$modelId,
 			);
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * @param User $user
+	 * @param Title|MediaWiki\Title\Title $title
+	 * @param array $slotsData
+	 * @param array &$errors []
+	 * @return bool
+	 */
+	public static function saveRevision( $user, $title, $slotsData, &$errors = [] ) {
+		$wikiPage = self::getWikiPage( $title );
+		$pageUpdater = $wikiPage->newPageUpdater( $user );
+		$contents = self::prepareSlotData( $title, $slotsData, $errors );
+
+		if ( count( $errors ) ) {
+			return;
+		}
+
+		foreach ( $contents as $role => $content ) {
+			$pageUpdater->setContent( $role, $content );
+		}
+
+		$summary = '';
+		$flags = EDIT_INTERNAL | EDIT_AUTOSUMMARY;
+		$comment = CommentStoreComment::newUnsavedComment( $summary );
+		$newRevision = $pageUpdater->saveRevision( $comment, $flags );
+		$status = $pageUpdater->getStatus();
+
+		return $status->isOK();
+	}
+
+	/**
+	 * @param Title $title
+	 * @param array slotsData
+	 * @param int|null $timestamp
+	 * @param array &$errors []
+	 * @return
+	 */
+	public static function importRevision( $title, $slotsData, $timestamp, &$errors = [] ) {
+		$revision = new WikiRevision();
+		$revision->setTitle( $title );
+		$revision->setTimestamp( $timestamp ?? wfTimestampNow() );
+
+		$contents = self::prepareSlotData( $title, $slotsData, $errors );
+
+		if ( count( $errors ) ) {
+			return;
+		}
+
+		foreach ( $contents as $role => $content ) {
 			$revision->setContent( $role, $content );
 		}
 

@@ -1,0 +1,7 @@
+{
+	"type": "object",
+	"x-message": {
+		"label": "Reference: [https://www.mediawiki.org/wiki/Extension:VisualEditor VisualEditor]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/VisualEditor]]",
+		"x-label-format": "wikitext"
+	}
+}

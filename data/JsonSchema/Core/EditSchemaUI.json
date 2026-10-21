@@ -133,6 +133,7 @@
 							"description": "{{int:jsonforms-formschema-print-scalar-desc}}",
 							"x-description-format": "wikitext",
 							"default": false,
+							"x-hidden": true,
 							"x-dependency": {
 								"path": "show_infobox",
 								"op": "==",

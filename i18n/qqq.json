@@ -93,7 +93,10 @@
 	"jsonforms-special-submit-rename-file-invalid-name": "Error message when renaming a file fails due to an invalid title. Parameters:\n* $1 - the source title\n* $2 - the target title",
 	"jsonforms-special-submit-rename-file-target-title-exists": "Error message when renaming a file fails because the target title exists. Parameters:\n* $1 - the source title\n* $2 - the target title",
 	"jsonforms-special-submit-target-source-slot-conflict": "Error message when a pageform tries to save data in the main slot of the same article",
-	"jsonforms-special-submit-source": "Error message when the base data is not an object or array",
+	"jsonforms-special-submit-source-data-error": "Error message when the base data is not an object or array",
+	"jsonforms-special-submit-basedata-expected-object": "Error message when the base data is not an object or array",
+	"jsonforms-special-submit-partialdata-expected-array": "Error message when the partial data is not an array",
+
 	"jsonforms-parserfunction-error-no-form-name": "Parser function error when no form name is provided",
 	"jsonforms-parserfunction-error-no-form": "Parser function error when no form is found",
 	"jsonforms-parserfunction-error-no-schema": "Parser function error when no schema is found",
@@ -317,6 +320,7 @@
 	"jsonforms-instance-rename-schema": "Confirmation message before renaming a schema",
 	"jsonforms-instance-delete-article": "Confirmation message before deleting a schema",
 	"jsonforms-instance-schema-required": "Error message when a schema is required",
+	"jsonforms-instance-delete-data": "Error message when deleting form data",
 
 	"jsonforms-editor-error-value-must-be-a-valid": "Validation error message. Parameter:\n* $1 - the expected type",
 	"jsonforms-editor-error-notset": "Validation error message",

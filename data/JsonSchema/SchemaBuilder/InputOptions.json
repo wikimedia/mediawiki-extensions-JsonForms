@@ -279,7 +279,7 @@
 		},
 		"OO.ui.InputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.InputWidget OO.ui.InputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.InputWidget OO.ui.InputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.InputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -290,7 +290,7 @@
 		},
 		"OO.ui.TextInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.TextInputWidget OO.ui.TextInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.TextInputWidget OO.ui.TextInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.TextInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -489,7 +489,7 @@
 		},
 		"OO.ui.ToggleSwitchWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ToggleSwitchWidget OO.ui.ToggleSwitchWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ToggleSwitchWidget OO.ui.ToggleSwitchWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ToggleSwitchWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -543,7 +543,7 @@
 		},
 		"OO.ui.ButtonWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonWidget OO.ui.ButtonWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonWidget OO.ui.ButtonWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ButtonWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -566,7 +566,7 @@
 		},
 		"OO.ui.ButtonMenuSelectWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonMenuSelectWidget OO.ui.ButtonMenuSelectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonMenuSelectWidget OO.ui.ButtonMenuSelectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ButtonMenuSelectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -600,7 +600,7 @@
 		},
 		"OO.ui.MenuSelectWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MenuSelectWidget OO.ui.MenuSelectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MenuSelectWidget OO.ui.MenuSelectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.MenuSelectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -611,7 +611,7 @@
 		},
 		"OO.ui.RadioSelectInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.RadioSelectInputWidget OO.ui.RadioSelectInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.RadioSelectInputWidget OO.ui.RadioSelectInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.RadioSelectInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -622,7 +622,7 @@
 		},
 		"OO.ui.NumberInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.NumberInputWidget OO.ui.NumberInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.NumberInputWidget OO.ui.NumberInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.NumberInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -748,7 +748,7 @@
 		},
 		"OO.ui.MenuTagMultiselectWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MenuTagMultiselectWidget OO.ui.MenuTagMultiselectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MenuTagMultiselectWidget OO.ui.MenuTagMultiselectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.MenuTagMultiselectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -780,7 +780,7 @@
 		},
 		"OO.ui.ComboBoxInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ComboBoxInputWidget OO.ui.ComboBoxInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ComboBoxInputWidget OO.ui.ComboBoxInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ComboBoxInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -803,7 +803,7 @@
 		},
 		"OO.ui.MultilineTextInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MultilineTextInputWidget OO.ui.MultilineTextInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.MultilineTextInputWidget OO.ui.MultilineTextInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.MultilineTextInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -845,7 +845,7 @@
 		},
 		"OO.ui.MultiselectWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonSelectWidget OO.ui.ButtonSelectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonSelectWidget OO.ui.ButtonSelectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.MultiselectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -856,7 +856,7 @@
 		},
 		"OO.ui.ButtonSelectWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonSelectWidget OO.ui.ButtonSelectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.ButtonSelectWidget OO.ui.ButtonSelectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.ButtonSelectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -875,7 +875,7 @@
 		},
 		"OO.ui.CheckboxInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.CheckboxInputWidget OO.ui.CheckboxInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.CheckboxInputWidget OO.ui.CheckboxInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.CheckboxInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -894,7 +894,7 @@
 		},
 		"OO.ui.CheckboxMultiselectInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.CheckboxMultiselectInputWidget OO.ui.CheckboxMultiselectInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.CheckboxMultiselectInputWidget OO.ui.CheckboxMultiselectInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.CheckboxMultiselectInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -905,7 +905,7 @@
 		},
 		"OO.ui.DropdownInputWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.DropdownInputWidget OO.ui.DropdownInputWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.DropdownInputWidget OO.ui.DropdownInputWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.DropdownInputWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -958,100 +958,6 @@
 				}
 			]
 		},
-		"intl-tel-input": {
-			"x-message": {
-				"label": "Reference: [https://github.com/jackocnr/intl-tel-input intl-tel-input]",
-				"x-label-format": "wikitext"
-			},
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"type": "object",
-					"x-default-properties": [],
-					"properties": {
-						"allowDropdown": {
-							"type": "boolean",
-							"description": "Whether or not to allow the dropdown"
-						},
-						"autoInsertDialCode": {
-							"type": "boolean",
-							"description": "When enabled (requires nationalMode to be disabled), the international dial code will be automatically inserted into the input"
-						},
-						"autoPlaceholder": {
-							"type": "string",
-							"description": "Set the input's placeholder to an example number for the selected country, and update it if the country changes"
-						},
-						"customContainer": {
-							"type": "string",
-							"description": "Additional classes to add to the parent div."
-						},
-						"customPlaceholder": {
-							"type": "string",
-							"description": "Change the placeholder generated by autoPlaceholder. Must return a string"
-						},
-						"excludeCountries": {
-							"type": "array",
-							"items": {
-								"type": "string"
-							},
-							"description": "In the dropdown, display all countries except the ones you specify here."
-						},
-						"formatOnDisplay": {
-							"type": "boolean",
-							"description": "Format the input value (according to the nationalMode option) during initialisation, and on setNumber. Requires the utilsScript option"
-						},
-						"geoIpLookup": {
-							"type": "boolean",
-							"description": "When setting initialCountry to 'auto', you must use this option to specify a custom function that looks up the user's location, and then calls the success callback with the relevant country code"
-						},
-						"hiddenInput": {
-							"type": "string",
-							"description": "Add a hidden input with the given name."
-						},
-						"initialCountry": {
-							"type": "string",
-							"description": "Set the initial country selection by specifying its country code"
-						},
-						"nationalMode": {
-							"type": "boolean",
-							"description": "Format numbers in the national format, rather than the international format."
-						},
-						"onlyCountries": {
-							"type": "array",
-							"items": {
-								"type": "string"
-							},
-							"description": "In the dropdown, display only the countries you specify"
-						},
-						"placeholderNumberType": {
-							"type": "string",
-							"description": "Specify one of the keys from the global enum intlTelInputUtils.numberType"
-						},
-						"preferredCountries": {
-							"type": "array",
-							"items": {
-								"type": "string"
-							},
-							"description": "Specify the countries to appear at the top of the list"
-						},
-						"separateDialCode": {
-							"type": "boolean",
-							"description": "Display the country dial code next to the selected flag"
-						},
-						"showFlags": {
-							"type": "boolean",
-							"description": "Set this to false to hide the flags e.g. for political reasons"
-						},
-						"utilsScript": {
-							"type": "string",
-							"description": "Enable formatting/validation etc. by specifying the URL of the included utils.js script (or alternatively just point it to the file on cdnjs.com)"
-						}
-					}
-				}
-			]
-		},
 		"LookupElement": {
 			"allOf": [
 				{
@@ -1074,7 +980,7 @@
 		"OO.ui.TagMultiselectWidget": {
 			"type": "object",
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.TagMultiselectWidget OO.ui.TagMultiselectWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.TagMultiselectWidget OO.ui.TagMultiselectWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.TagMultiselectWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [
@@ -1114,22 +1020,6 @@
 				}
 			]
 		},
-		"RatingWidget": {
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"type": "object",
-					"properties": {
-						"ratingLength": {
-							"type": "integer",
-							"description": "length (only for integer type)"
-						}
-					}
-				}
-			]
-		},
 		"LookupMultiselect": {
 			"allOf": [
 				{
@@ -1144,96 +1034,9 @@
 				}
 			]
 		},
-		"RangeWidget": {
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				},
-				{
-					"type": "object",
-					"x-default-properties": [],
-					"properties": {
-						"step": {
-							"type": "number",
-							"description": "step"
-						},
-						"valueMask": {
-							"type": "string",
-							"default": "%v"
-						}
-					}
-				}
-			]
-		},
-		"VisualEditor": {
-			"$ref": "#/definitions/commonProperties"
-		},
-		"EasyMDE": {
-			"type": "object",
-			"x-message": {
-				"label": "Reference: [https://github.com/ionaru/easy-markdown-editor easy-markdown-editor]",
-				"x-label-format": "wikitext"
-			},
-			"$ref": "JsonSchema:SchemaBuilder/EeasyMDEOptions"
-		},
-		"JsonEditor": {
-			"type": "object",
-			"x-message": {
-				"label": "Reference: [https://github.com/josdejong/jsoneditor JsonEditor options]",
-				"x-label-format": "wikitext"
-			},
-			"$ref": "JsonSchema:SchemaBuilder/JsonEditorOptions"
-		},
-		"SunEditor": {
-			"type": "object",
-			"x-message": {
-				"label": "Reference: [https://suneditor.com/options SunEditor options]",
-				"x-label-format": "wikitext"
-			},
-			"$ref": "JsonSchema:SchemaBuilder/SunEditorOptions"
-		},
-		"FancyTree": {
-			"type": "object",
-			"x-message": {
-				"label": "Reference: [https://wwwendt.de/tech/fancytree/doc/jsdoc/ Api reference]",
-				"x-label-format": "wikitext"
-			},
-			"$ref": "JsonSchema:SchemaBuilder/FancyTreeOptions"
-		},
-		"Autocomplete": {
-			"type": "object",
-			"x-message": {
-				"label": "Reference: [https://github.com/trevoreyre/autocomplete/tree/master/packages/autocomplete-js autocomplete-js]",
-				"x-label-format": "wikitext"
-			},
-			"allOf": [
-				{
-					"$ref": "#/definitions/commonProperties"
-				}
-			]
-		},
-		"JsonForms": {
-			"type": "object",
-			"x-default-properties": [],
-			"properties": {
-				"schemaName": {
-					"type": "string",
-					"title": "schema",
-					"default": "",
-					"x-enum-provider": "jsonSchemas"
-				},
-				"schema": {
-					"type": "string",
-					"title": "schema",
-					"x-hidden": "true",
-					"x-watch": "schemaName",
-					"x-template": "JsonSchema:{{schemaName}}"
-				}
-			}
-		},
 		"OO.ui.SelectFileWidget": {
 			"x-message": {
-				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.SelectFileWidget OO.ui.SelectFileWidget]",
+				"label": "Reference: [https://doc.wikimedia.org/mediawiki-core/1.39.5/js/#!/api/OO.ui.SelectFileWidget OO.ui.SelectFileWidget]. Schema: [[JsonSchema:SchemaBuilder/InputOptions#/definitions/OO.ui.SelectFileWidget]]",
 				"x-label-format": "wikitext"
 			},
 			"allOf": [

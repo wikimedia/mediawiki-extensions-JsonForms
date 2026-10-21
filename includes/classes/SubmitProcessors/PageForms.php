@@ -87,6 +87,26 @@ class PageForms extends SubmitForm {
 			);
 		}
 
+		if (
+			$data->formDescriptor->action === 'delete' &&
+			!empty( $data->formDescriptor->edit )
+		) {
+			[ $targetTitle, $targetSlot, $slots ] = $this->handleDeleteData( $data, $errors );
+			if ( count( $errors ) ) {
+				return ResultWrapper::failure( $errors[0] );
+			}
+			$processedData = [
+				'slots' => $slots,
+				'targetTitle' => $targetTitle,
+				'targetSlot' => $targetSlot,
+			];
+			$returnData = [
+				'targetTitle' => $targetTitle->getFullText(),
+				'returnUrl' => $targetTitle->getLocalURL(),
+			];
+			return ResultWrapper::success( [ $processedData, $returnData ] );
+		}
+
 		if ( !isset( $data->options ) ) {
 			$data->options = new stdClass();
 		}
@@ -145,7 +165,7 @@ class PageForms extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
-		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage, $wikiPage );
+		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage );
 
 		if (
 			$targetTitle->getFullText() === $data->config->currentTitle &&
@@ -186,10 +206,7 @@ class PageForms extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
-		// @TODO
-		$deleteSchema = false;
-
-		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata, $deleteSchema );
+		$slots = $this->buildSlots( $targetSlot, $dataToSave, $mainSlotContent, $contentModelMainSlot, $metadata );
 
 		$processedData = [
 			'slots' => $slots,

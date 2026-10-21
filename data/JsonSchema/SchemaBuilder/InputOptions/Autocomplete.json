@@ -1,0 +1,7 @@
+{
+	"type": "object",
+	"x-message": {
+		"label": "Reference: [https://github.com/trevoreyre/autocomplete/tree/master/packages/autocomplete-js autocomplete-js]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/Autocomplete]]",
+		"x-label-format": "wikitext"
+	}
+}

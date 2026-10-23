@@ -202,6 +202,7 @@ class SchemaUtils {
 							$current[$key] = [];
 						}
 						$current[$key][] = $value;
+
 					} else {
 						if ( !property_exists( $current, $key ) ) {
 							if ( !$createMissing ) {
@@ -241,6 +242,7 @@ class SchemaUtils {
 					$current[$key] = $isNextNumeric ? [] : new stdClass();
 				}
 				$current = &$current[$key];
+
 			} else {
 				// object
 				if ( !property_exists( $current, $key ) ) {
@@ -249,6 +251,64 @@ class SchemaUtils {
 					}
 					// Create array or object
 					$current->$key = $isNextNumeric ? [] : new stdClass();
+				}
+				$current = &$current->$key;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Delete the value at a given path and collect the deleted paths
+	 *
+	 * @param mixed &$obj
+	 * @param string $path
+	 * @param array &$deletedPaths
+	 *
+	 * @return bool
+	 */
+	public static function deleteValueByPath( &$obj, $path, array &$deletedPaths = [] ): bool {
+		if ( !is_object( $obj ) && !is_array( $obj ) ) {
+			return false;
+		}
+
+		if ( empty( $path ) ) {
+			return false;
+		}
+
+		$normalizedPath = preg_replace( '/\[(\d+)\]/', '.$1', $path );
+		$keys = explode( '.', $normalizedPath );
+		$current = &$obj;
+
+		foreach ( $keys as $i => $key ) {
+			$isLast = $i === count( $keys ) - 1;
+
+			if ( $isLast ) {
+				if ( is_array( $current ) ) {
+					if ( !array_key_exists( $key, $current ) ) {
+						return false;
+					}
+					unset( $current[$key] );
+				} else {
+					if ( !property_exists( $current, $key ) ) {
+						return false;
+					}
+					unset( $current->$key );
+				}
+				$deletedPaths[] = $normalizedPath;
+				return true;
+			}
+
+			// navigate
+			if ( is_array( $current ) ) {
+				if ( !isset( $current[$key] ) ) {
+					return false;
+				}
+				$current = &$current[$key];
+			} else {
+				if ( !property_exists( $current, $key ) ) {
+					return false;
 				}
 				$current = &$current->$key;
 			}

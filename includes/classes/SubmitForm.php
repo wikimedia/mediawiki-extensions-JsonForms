@@ -414,23 +414,71 @@ class SubmitForm {
 		$targetSlot = $this->determineTargetSlot( $data, $isNewPage, $mainSlotContent, $previousWikiPage );
 		$metadata = \JsonForms::getMetadata( $previousWikiPage );
 
-		if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
-			unset( $metadata->slots->{$targetSlot} );
+		$slots = [];
+		if (
+			empty( $data->formDescriptor->edit_path ) ||
+			empty( $data->formDescriptor->edit )
+		) {
+			if ( isset( $metadata->slots ) && is_object( $metadata->slots ) ) {
+				unset( $metadata->slots->{$targetSlot} );
+			}
+
+			$slots[$targetSlot] = [
+				'model' => 'json',
+				'content' => null,
+			];
+
+		} else {
+			$baseData = $this->getExistingDataOfSlot( $previousWikiPage, $targetSlot );
+
+			if ( !is_array( $baseData ) && !is_object( $baseData ) ) {
+				$errors[] = $this->context->msg( 'jsonforms-special-submit-source-data-error' )->text();
+				return;
+			}
+
+			$deletedPaths = [];
+			if ( !SchemaUtils::deleteValueByPath( $baseData, $data->formDescriptor->edit_path, $deletedPaths ) ) {
+				$errors[] = $this->context->msg( 'jsonforms-special-submit-path-not-found' )->text();
+				return;
+			}
+
+			$slots[$targetSlot] = [
+				'model' => 'json',
+				'content' => json_encode( $baseData ),
+			];
+
+			if (
+				!empty( $deletedPaths ) &&
+				isset( $metadata->slots->{$targetSlot} ) &&
+				is_object( $metadata->slots->{$targetSlot} )
+			) {
+				$slotMetadata = &$metadata->slots->{$targetSlot};
+				if ( isset( $slotMetadata->jsonPaths ) && is_object( $slotMetadata->jsonPaths ) ) {
+					foreach ( $slotMetadata->jsonPaths as $path => $jsonPath ) {
+						foreach ( $deletedPaths as $deletedPath ) {
+							if ( strpos( $path . '.', $deletedPath ) === 0 ) {
+								unset( $slotMetadata->jsonPaths->{$path} );
+							}
+						}
+					}
+					foreach ( $deletedPaths as $deletedPath ) {
+						unset( $slotMetadata->jsonPaths->{$path} );
+					}
+				}
+
+				// deletes the reference
+				unset( $slotMetadata );
+			}
 		}
 
-		if ( empty( (array)$metadata->slots ) ) {
+		if ( !isset( $metadata->slots ) || empty( (array)$metadata->slots ) ) {
 			unset( $metadata->slots );
 		}
 
-		$slots = [];
-		$slots[$targetSlot] = [
-			'content' => null,
-		];
-
-		if ( !empty( (array)$metadata ) ) {
+		if ( is_object( $metadata ) && !empty( (array)$metadata ) ) {
 			$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
 				'model' => 'json',
-				'content' => json_encode( $metadata )
+				'content' => json_encode( $metadata ),
 			];
 		}
 

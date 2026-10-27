@@ -619,6 +619,7 @@ class InfoboxRender extends BaseRender {
 	 * @return string
 	 */
 	private function renderCategoryLink( string $categoryName ): string {
+		$categoryName = trim( $categoryName );
 		$categoryTitle = TitleClass::newFromText( $categoryName, NS_CATEGORY );
 
 		if ( !$categoryTitle ) {

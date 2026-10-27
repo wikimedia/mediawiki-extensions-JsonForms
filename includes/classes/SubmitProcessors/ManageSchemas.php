@@ -33,17 +33,11 @@ use SpecialPage;
 class ManageSchemas extends SubmitForm {
 
 	/**
-	 * @param WikiPage $wikiPage
+	 * @param stdClass $metadata
 	 * @param array $data
 	 * @return stdClass
 	 */
-	private function updateSchemaMetadata( $wikiPage, $data ) {
-		$metadata = \JsonForms::getMetadata( $wikiPage );
-
-		if ( !$metadata || !is_object( $metadata ) ) {
-			$metadata = new stdClass();
-		}
-
+	private function updateSchemaMetadata( $metadata, $data ) {
 		if ( !isset( $metadata->processedSchema ) ) {
 			$metadata->processedSchema = [];
 
@@ -101,6 +95,11 @@ class ManageSchemas extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
+		// used by setTargetSlotMetadata
+		$data->metadata = (object)[
+			'schemaName' => $targetTitle->getText()
+		];
+
 		$previousPage = $this->getPreviousPage( $data );
 		$previousTargetTitle = $previousPage ?: $targetTitle;
 
@@ -134,6 +133,11 @@ class ManageSchemas extends SubmitForm {
 			return ResultWrapper::failure( $errors[0] );
 		}
 
+		$previousMetadata = \JsonForms::getMetadata( $previousWikiPage );
+		$contentModelMainSlot = 'json';
+		$metadata = $this->buildMetadata( $data, $targetSlot, $contentModelMainSlot, $previousMetadata );
+		$slotMetadata = &$metadata->slots->{$targetSlot};
+
 		$dataToSave = $this->postProcessJsonData(
 			$data->value,
 			$data->structuredValue,
@@ -150,23 +154,19 @@ class ManageSchemas extends SubmitForm {
 		// eg. https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
 		$parsedId = explode( 'JsonSchema:', $data->schemaId )[ 1 ];
 
-		$metadata = [];
 		switch ( $parsedId ) {
 			case 'SchemaBuilder/MetaSchema':
 				// update
-				$metadata = $this->updateSchemaMetadata( $wikiPage, $data );
+				$metadata = $this->updateSchemaMetadata( $metadata, $data );
 				$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsManage', 'Schemas' );
 
 				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $targetTitle->getFullText() ] );
-
 				$returnData['returnUrl'] = $url;
 				break;
 
 			case 'Core/CreatePageForm':
 				$specialpage_title = SpecialPage::getTitleFor( 'JsonFormsManage', 'Forms' );
-
 				$url = $specialpage_title->getLinkURL( [ 'action' => 'edit', 'pagename' => $targetTitle->getFullText() ] );
-
 				$returnData['returnUrl'] = $url;
 				break;
 		}

@@ -203,7 +203,10 @@ class JsonFormsHooks {
 
 		if ( $data && !empty( $data['categories'] ) ) {
 			foreach ( $data['categories'] as $category ) {
-				$parserOutput->addCategory( $category );
+				$category = trim( (string)$category );
+				if ( $category !== '' ) {
+					$parserOutput->addCategory( $category );
+				}
 			}
 		}
 	}

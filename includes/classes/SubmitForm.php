@@ -1473,8 +1473,8 @@ class SubmitForm {
 	 */
 	protected function hasSlotData( $metadata, $slotKey, $property ) {
 		return $metadata &&
-			   isset( $metadata->slots->{$slotKey}->{$property} ) &&
-			   !empty( $metadata->slots->{$slotKey}->{$property} );
+			isset( $metadata->slots->{$slotKey}->{$property} ) &&
+			!empty( $metadata->slots->{$slotKey}->{$property} );
 	}
 
 	/**

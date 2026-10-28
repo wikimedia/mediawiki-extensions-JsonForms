@@ -53,21 +53,22 @@ class TemplateRender extends BaseRender {
 			$children = [];
 		}
 
-		$params = $this->createParams( '', $data, $children, [], '', $templatePrefix );
+		$params = $this->createParams( null, '', $data, $children, [], '', $templatePrefix );
 
 		return $this->processTemplate( $templatePrefix, $params );
 	}
 
 	/**
+	 * @param stdClass $node
 	 * @param string $key
-	 * @param array $value
+	 * @param mixed $value
 	 * @param array $children
 	 * @param array $pathArr
 	 * @param string $path
 	 * @param string $templateName
 	 * @return string
 	 */
-	public function createParams( $key, $value, $children, $pathArr, $path, $templateName ) {
+	public function createParams( $node, $key, $value, $children, $pathArr, $path, $templateName ) {
 		$params = [
 			'key' => $key,
 			'properties' => implode( ', ', array_keys( $children ) ),
@@ -78,14 +79,24 @@ class TemplateRender extends BaseRender {
 			'path' => $path,
 			'jsonpath' => $this->getJsonPath( $path ),
 			'depth' => count( $pathArr ),
+			'type' => gettype( $value ),
 			'templateName' => $templateName
 		];
+
+		$isLeaf = !is_array( $value ) && !is_object( $value );
+		if ( $isLeaf && is_array( $node ) ) {
+			$params['value'] = $value;
+			$params['isFirst'] = $key === 0;
+			$params['isLast'] = $key === count( (array)$node ) - 1;
+		}
 
 		$dataArray = is_array( $value ) ? $value : (array)$value;
 		$paramsDisplay = $params;
 		$paramsDisplay[ 'data' ] = $value;
 
 		$objects = [];
+		$titleTemplate = TitleClass::newFromText( $templateName, NS_TEMPLATE );
+		$hasTemplate = $titleTemplate && $titleTemplate->isKnown();
 		foreach ( $children as $k => $v ) {
 			if ( array_key_exists( $k, $params ) ) {
 				$params[ '_' . $k ] = $params[$k];
@@ -94,21 +105,19 @@ class TemplateRender extends BaseRender {
 			$params[ $k ] = $v;
 			$paramsDisplay[ $k ] = is_scalar( $dataArray[$k] ) ? (string)$v : '<subitem>';
 
-			// 'print_scalar' is deprecated, since scalars should be
-			// always be printed from the container
-			if ( !is_scalar( $dataArray[$k] ) || !empty( $this->parameters['print_scalar'] ) ) {
+			if ( !is_scalar( $dataArray[$k] ) || $hasTemplate ) {
 				$objects[] = $v;
 			}
 		}
-		$params[ 'children' ] = implode( $objects );
 
+		$params[ 'children' ] = implode( $objects );
 		$params['params'] = '<details><pre>' .
-			json_encode(
-				$paramsDisplay,
+			htmlentities( json_encode(
+				 $paramsDisplay,
 				JSON_PRETTY_PRINT |
 				JSON_UNESCAPED_UNICODE |
 				JSON_UNESCAPED_SLASHES,
-			) .
+			) ) .
 			'</pre></details>';
 
 		return $params;
@@ -159,27 +168,17 @@ class TemplateRender extends BaseRender {
 					$templatePrefix,
 				);
 
-				$params = $this->createParams( $key, $value, $children, $newPath, $pathStr, $templateName );
+				$params = $this->createParams( $node, $key, $value, $children, $newPath, $pathStr, $templateName );
 				$ret[$key] = $this->processTemplate( $templateName, $params );
 
-			// Leaf
+			// leaf
 			} else {
-				$params = [
-					'key' => $key,
-					'path' => $pathStr,
-					'value' => $value,
-					'type' => gettype( $value ),
-					'childrenCount' => 0,
-					'templateName' => $templateName
-				];
-				$params[$key] = $value;
+				$titleTemplate = TitleClass::newFromText( $templateName, NS_TEMPLATE );
+				$hasTemplate = $titleTemplate && $titleTemplate->isKnown();
+				$children = [];
+				$params = $this->createParams( $node, $key, $value, $children, $newPath, $pathStr, $templateName );
 
-				$titleTemplate = TitleClass::newFromText(
-					$templateName,
-					NS_TEMPLATE,
-				);
-
-				if ( $titleTemplate && $titleTemplate->isKnown() ) {
+				if ( $hasTemplate || !empty( $this->parameters['print_scalar'] ) ) {
 					$ret[$key] = $this->processTemplate( $templateName, $params );
 
 				} else {
@@ -261,6 +260,7 @@ class TemplateRender extends BaseRender {
 				'title' => $this->parser->getTitle(),
 			] );
 			$frameId = 'empty';
+
 			$text = $luaStandaloneEngine->expandTemplate(
 				$frameId,
 				$titleText,

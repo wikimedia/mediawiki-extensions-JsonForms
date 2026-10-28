@@ -1581,6 +1581,16 @@ class SubmitForm {
 
 		$wikiPage = \JsonForms::getWikiPage( $processedData['targetTitle'] );
 
+		// @ATTENTION, if the target page contains a parser function jsonformsrender,
+		// \JsonForms::getSlotContent will be called by the hook onMultiContentSave
+		// before the content is saved, therefore we need to inject the new
+		// content through a global variable before saving the content
+		if ( isset( $processedData['targetSlot'] ) ) {
+			$targetSlot_ = $processedData['targetSlot'];
+			$slotContent_ = $processedData['slots'][$targetSlot_]['content'];
+			\JsonForms::setSlotContentRuntime( $targetSlot_, $slotContent_ );
+		}
+
 		$ret = $slotEditor->editSlots(
 			$this->user,
 			$wikiPage,

@@ -113,6 +113,7 @@ class EditSchema extends SubmitForm {
 		$processedData = [
 			'slots' => $slots,
 			'targetTitle' => $targetTitle,
+			'targetSlot' => $targetSlot,
 			'isNewPage' => $isNewPage,
 			'metadata' => $metadata,
 			'updateStrategy' => 'merge',

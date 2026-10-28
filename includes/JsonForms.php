@@ -48,6 +48,9 @@ class JsonForms {
 	/** @var array */
 	private static $slotsCache = [];
 
+	/** @var array */
+	private static $slotContentRuntime = [];
+
 	/** @var int */
 	public static $queryLimit = 500;
 
@@ -1055,11 +1058,26 @@ class JsonForms {
 	}
 
 	/**
+	 * @param string $role
+	 * @param string $content
+	 * @return
+	 */
+	public static function setSlotContentRuntime( $role, $content ) {
+		self::$slotContentRuntime[$role] = $content;
+	}
+
+	/**
 	 * @param WikiPage $wikiPage
 	 * @param string $role
 	 * @return null|string
 	 */
 	public static function getSlotContent( $wikiPage, $role = SlotRecord::MAIN ) {
+		if ( array_key_exists( $role, self::$slotContentRuntime ) ) {
+			$ret = self::$slotContentRuntime[$role];
+			unset( self::$slotContentRuntime[$role] );
+			return $ret;
+		}
+
 		$slots = self::getSlots( $wikiPage );
 		if ( !is_array( $slots ) ) {
 			return;

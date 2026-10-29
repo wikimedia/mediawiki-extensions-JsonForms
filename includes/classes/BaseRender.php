@@ -69,14 +69,38 @@ class BaseRender {
 	 * param User $user
 	 * param Title $title
 	 * param array $parameters
-	 * param stdClass $slotMetadata null
+	 * param stdClass $slotMetadata|null
 	 */
-	public function __construct( $user, $title, $parameters, $slotMetadata ) {
+	public function __construct( $user, $title, $parameters, $slotMetadata = null ) {
 		$this->user = $user;
 		$this->title = $title;
 		$this->parameters = $parameters;
+
+		if ( $slotMetadata ) {
+			$this->buildSchemaMap( $slotMetadata );
+		}
+	}
+
+	/**
+	 * @param stdClass $slotMetadata
+	 */
+	public function buildSchemaMap( $slotMetadata ) {
 		$this->jsonPaths = $this->getJsonPaths( $slotMetadata );
 		$this->schemaMap = $this->getSchemaMap( $slotMetadata );
+	}
+
+	/**
+	 * @param array $jsonPaths
+	 */
+	public function setJsonPaths( $jsonPaths ) {
+		$this->jsonPaths = $jsonPaths;
+	}
+
+	/**
+	 * @param array $schemaMap
+	 */
+	public function setSchemaMap( $schemaMap ) {
+		$this->schemaMap = $schemaMap;
 	}
 
 	/**

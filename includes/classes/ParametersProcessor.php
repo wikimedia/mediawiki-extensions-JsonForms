@@ -80,8 +80,11 @@ class ParametersProcessor {
 		return $parameters;
 	}
 
-	public function buildOptionsSchema() {
-		$this->optionsSchema = $this->mergeDefaults( $this->defaultParameters, $this->named );
+	/**
+	 * @param array|null $named
+	 */
+	public function buildOptionsSchema( $named = null ) {
+		$this->optionsSchema = $this->mergeDefaults( $this->defaultParameters, $named ?? $this->named );
 	}
 
 	/**
@@ -114,7 +117,7 @@ class ParametersProcessor {
 
 			} else {
 				// set value
-				$result[$key]['user_value'] = $this->castValueByType(
+				$result[$key]['user_value'] = self::castValueByType(
 					$result[$key]['type'] ?? 'string',
 					$value,
 					$result[$key]['default'] ?? null
@@ -216,12 +219,48 @@ class ParametersProcessor {
 	}
 
 	/**
+	 * @param array|stdClass $params
+	 * @param array $paramsSchema
+	 * @return array
+	 */
+	public static function applySchemaDefaults( $params, $paramsSchema ) {
+		if ( is_object( $params ) ) {
+			$params = json_decode( json_encode( $params ), true );
+		}
+		if ( !is_array( $params ) ) {
+			$params = [];
+		}
+
+		$result = $params;
+		foreach ( $paramsSchema as $key => [ $default, $type ] ) {
+			$provided = $params[ $key ] ?? null;
+			$type = strtolower( (string)$type );
+
+			if ( $type === 'bool' || $type === 'boolean' ) {
+				$result[ $key ] = $provided === null
+					? (bool)$default
+					: ( $provided === '' ? false : (bool)filter_var( $provided, FILTER_VALIDATE_BOOLEAN ) );
+				continue;
+			}
+
+			$missing = $provided === null || ( $type !== 'string' && $provided === '' );
+			$result[ $key ] = self::castValueByType(
+				$type,
+				$missing ? $default : $provided,
+				$default
+			);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * @param string $type
 	 * @param mixed $value
 	 * @param mixed $default null
 	 * @return mixed
 	 */
-	protected function castValueByType( ?string $type, $value, $default = null ) {
+	protected static function castValueByType( ?string $type, $value, $default = null ) {
 		if ( $value === null ) {
 			return $default;
 		}
@@ -250,7 +289,7 @@ class ParametersProcessor {
 				return (string)$value;
 
 			case 'array':
-				return is_array( $value ) ? $value : $this->splitString( $value );
+				return is_array( $value ) ? $value : self::splitString( $value );
 
 			case 'array-chunks':
 				return is_array( $value ) ? $value : str_split( (string)$value );
@@ -265,12 +304,12 @@ class ParametersProcessor {
 				// Convert to array if needed
 				$values = is_array( $value )
 					? $value
-					: $this->splitString( (string)$value );
+					: self::splitString( (string)$value );
 
 				$subType = explode( '-', $type )[1] ?? null;
 				$result = [];
 				foreach ( $values as $v ) {
-					$result[] = $this->castValueByType( $subType, $v, $default );
+					$result[] = self::castValueByType( $subType, $v, $default );
 				}
 				return $result;
 
@@ -283,7 +322,7 @@ class ParametersProcessor {
 	 * @param string $str
 	 * @return array
 	 */
-	protected function splitString( string $str ): array {
+	protected static function splitString( string $str ): array {
 		return array_map( 'trim', explode( ',', $str ) );
 	}
 

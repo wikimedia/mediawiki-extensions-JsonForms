@@ -1242,6 +1242,7 @@ class SubmitForm {
 			return;
 		}
 
+		// @TODO create a separate class to simplify this method
 		if (
 			empty( $data->formDescriptor->edit_path ) ||
 			empty( $data->formDescriptor->edit )
@@ -1353,12 +1354,23 @@ class SubmitForm {
 			}
 		}
 
+		$jsonPathToCleanPath = static function ( $jsonPath ) use ( $data ) {
+			foreach ( $data->structuredValue->jsonPaths as $path => $jsonPath_ ) {
+				if ( $jsonPath_ === $jsonPath && isset( $data->structuredValue->cleanPaths->{$path} ) ) {
+					return $data->structuredValue->cleanPaths->{$path};
+				}
+			}
+			return null;
+		};
+
 		$thisClass = $this;
 		foreach ( $schemas as $jsonPath => $schema ) {
 			$schemaMetadata->processedSchema[ $jsonPath ] =	(object)array_filter( (array)$schema,
 				static function ( $value ) use ( $thisClass ) {
 					return !$thisClass->isEmptyValue( $value );
 				} );
+
+			$schemaMetadata->processedSchema[$jsonPath]->cleanPath = $jsonPathToCleanPath( $jsonPath );
 		}
 
 		return $this->saveSchemaMetadata( $this->user, $schemaWikiPage, $schemaMetadata, $errors );

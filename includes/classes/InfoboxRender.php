@@ -188,6 +188,8 @@ class InfoboxRender extends BaseRender {
 	 * @return string
 	 */
 	public function render( $processedData ) {
+		$this->checkMetadataConsistency( $processedData );
+
 		$childrenHtml = $this->renderNode( $processedData, [], [], 0 );
 		return $this->rootContainer( $processedData, $childrenHtml );
 	}

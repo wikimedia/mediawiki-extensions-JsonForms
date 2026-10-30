@@ -29,6 +29,9 @@ use MediaWiki\MediaWikiServices;
 
 class Importer {
 
+	/** @var User */
+	private $user;
+
 	/** @var string */
 	private $prefix;
 
@@ -56,7 +59,8 @@ class Importer {
 	/**
 	 * @param string $path
 	 */
-	public function __construct( $path, $prefix, $callbackRefs, $callbackPagename, $callbackContent = null ) {
+	public function __construct( $user, $path, $prefix, $callbackRefs, $callbackPagename, $callbackContent = null ) {
+		$this->user = $user;
 		$this->prefix = $prefix;
 		$this->callbackRefs = $callbackRefs;
 		$this->callbackPagename = $callbackPagename;
@@ -91,8 +95,16 @@ class Importer {
 				echo $titleStr . "\n";
 				$title_ = TitleClass::newFromText( $titleStr );
 
-				$timestamp = $value['timestamp'] ?? wfTimestampNow();
-				\JsonForms::importRevision( $title_, $slots, $timestamp, $this->errors );
+				// use importRevision only if the article does not exist,
+				// otherwise the slot metadata if present will be lost
+				if ( $title_->isKnown() ) {
+					$res_ = \JsonForms::saveRevision( $this->user, $title_, $slots, $this->errors );
+
+				} else {
+					$timestamp = $value['timestamp'] ?? wfTimestampNow();
+					\JsonForms::importRevision( $title_, $slots, $timestamp, $this->errors );
+				}
+
 				if ( !count( $this->errors ) ) {
 					echo ' (success)' . PHP_EOL;
 				} else {

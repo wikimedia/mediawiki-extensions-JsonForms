@@ -35,6 +35,7 @@ use User;
 class BaseRender {
 	protected string $schemaName;
 	protected User $user;
+	protected stdClass $slotMetadata;
 
 	/** @var Title|TitleClass */
 	protected $title;
@@ -77,6 +78,7 @@ class BaseRender {
 		$this->parameters = $parameters;
 
 		if ( $slotMetadata ) {
+			$this->slotMetadata = $slotMetadata;
 			$this->buildSchemaMap( $slotMetadata );
 		}
 	}
@@ -195,10 +197,88 @@ class BaseRender {
 	}
 
 	/**
+	 * @param stdClass $data
+	 */
+	protected function checkMetadataConsistency( $data ) {
+		if ( !$this->slotMetadata ) {
+			return;
+		}
+		if ( empty( $this->slotMetadata->schemaRevision ) ) {
+			return;
+		}
+
+		$checkType = static function ( $value, $type ) {
+			$actualType = gettype( $value );
+
+			if ( $actualType === 'double' ) {
+				$actualType = 'number';
+			}
+			if ( $actualType === 'NULL' ) {
+				$actualType = 'null';
+			}
+
+			return ( $type === $actualType )
+			|| ( $type === 'number' && $actualType === 'integer' );
+		};
+
+		$thisClass = $this;
+		$callback = static function ( &$parent, $key, &$value, $pathArr ) use ( $thisClass, &$checkType ) {
+			$path = implode( '.', $pathArr );
+			$parentPath = $pathArr;
+			$last = array_pop( $parentPath );
+			$schema = $thisClass->getSchemaInfo( $path, $last, $parentPath );
+
+			if ( !empty( $schema['type'] ) && !$checkType( $value, $schema['type'] ) ) {
+				return false;
+			}
+		};
+		$path = [];
+		$parent = null;
+		$parentKey = null;
+		$completed = true;
+		SchemaUtils::traverseSchema( $data, $callback, $path, $parent, $parentKey, $completed );
+
+		if ( $completed ) {
+			return;
+		}
+
+		// use compatible schema if the schema does not match with data
+		$revision = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionById( $this->slotMetadata->schemaRevision );
+
+		if ( $revision === null ) {
+			return;
+		}
+
+		try {
+			$content = $revision->getContent( SLOT_ROLE_JSONFORMS_METADATA );
+		} catch ( \Exception $e ) {
+			// echo $e->getMessage();
+			return;
+		}
+
+		if ( $content === null ) {
+			   return;
+		}
+
+		$text = $content->getText();
+		$metadata = json_decode( $text, true );
+		if (
+			!$metadata ||
+			!isset( $metadata['processedSchema'] )
+		) {
+			return;
+		}
+
+		$this->schemaMap = $metadata['processedSchema'];
+	}
+
+	/**
 	 * Get schema info for a property path
 	 *
 	 * @param string $path
-	 * @param string $key
+	 * @param mixed $key
 	 * @param array $parentPathArr
 	 * @return array
 	 */

@@ -95,7 +95,7 @@ class ImportData extends Maintenance {
 			return json_encode( $json );
 		};
 
-		$importer = new Importer( $dirPath, $prefix, $callbackRefs, $callbackPagename, $callbackContent );
+		$importer = new Importer( $user, $dirPath, $prefix, $callbackRefs, $callbackPagename, $callbackContent );
 		$importer->doImport();
 	}
 

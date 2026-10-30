@@ -806,7 +806,7 @@ class SubmitForm {
 
 		// @TODO this is not correct, since there could be multiple edit_schema
 		if ( !empty( $data->formDescriptor->edit_schema_revision ) ) {
-			$slotMetadata->schemaRevision = $data->formDescriptor->edit_schema_revision;
+			$slotMetadata->editSchemaRevision = $data->formDescriptor->edit_schema_revision;
 		}
 
 		$slotMetadata->schema = $schema;

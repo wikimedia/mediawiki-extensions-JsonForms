@@ -45,6 +45,8 @@ class TemplateRender extends BaseRender {
 	 * @return string
 	 */
 	public function render( $data ) {
+		$this->checkMetadataConsistency( $data );
+
 		$templatePrefix = 'Template:' . ( $this->parameters['template'] ?? $this->parameters['schema'] );
 
 		if ( is_array( $data ) || is_object( $data ) ) {

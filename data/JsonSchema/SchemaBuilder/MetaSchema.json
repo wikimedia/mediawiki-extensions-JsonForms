@@ -1163,7 +1163,11 @@
 					"description": "Custom format type"
 				},
 				"x-input": {
-					"enum": ["OO.ui.TagMultiselectWidget"],
+					"enum": [
+						"OO.ui.TagMultiselectWidget",
+						"ButtonMultiselectWidget",
+						"OO.ui.MenuTagMultiselectWidget"
+					],
 					"type": "string",
 					"x-dependency": {
 						"path": "x-format",

@@ -27,8 +27,6 @@ define( 'SLOT_ROLE_JSONFORMS_METADATA', 'jsonforms-metadata' );
 use MediaWiki\Extension\JsonForms\Aliases\Html as HtmlClass;
 
 class JsonFormsHooks {
-	/** @var array */
-	public static $PageUpdate = [];
 
 	/**
 	 * @param array $credits
@@ -170,11 +168,6 @@ class JsonFormsHooks {
 		$title,
 		ParserOutput &$parserOutput,
 	) {
-		// $key = $title->getFullText();
-		// if ( self::$PageUpdate[$key] ) {
-		//	$parserOutput->setExtensionData( 'JsonForms', self::$PageUpdate[$key] );
-		//}
-
 		$wikiPage = \JsonForms::getWikiPage( $title );
 		if ( !$wikiPage ) {
 			return;
@@ -193,9 +186,7 @@ class JsonFormsHooks {
 		$data = json_decode( $data, true );
 
 		// this includes annotated categories and tracking categories
-		$getCategoriesMethod = 'getCategoryNames';
-
-		$categoryNames = $parserOutput->$getCategoriesMethod();
+		$categoryNames = $parserOutput->getCategoryNames();
 
 		foreach ( $categoryNames as $category ) {
 			$parserOutput->addCategory( $category );

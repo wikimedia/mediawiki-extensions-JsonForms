@@ -1058,12 +1058,14 @@ class JsonForms {
 	}
 
 	/**
+	 * @param Title|MediaWiki\Title\Title $title
 	 * @param string $role
 	 * @param string $content
 	 * @return
 	 */
-	public static function setSlotContentRuntime( $role, $content ) {
-		self::$slotContentRuntime[$role] = $content;
+	public static function setSlotContentRuntime( $title, $role, $content ) {
+		$key = $title->getFullText() . $role;
+		self::$slotContentRuntime[ $key ] = $content;
 	}
 
 	/**
@@ -1072,9 +1074,9 @@ class JsonForms {
 	 * @return null|string
 	 */
 	public static function getSlotContent( $wikiPage, $role = SlotRecord::MAIN ) {
-		if ( array_key_exists( $role, self::$slotContentRuntime ) ) {
-			$ret = self::$slotContentRuntime[$role];
-			unset( self::$slotContentRuntime[$role] );
+		$key_ = $wikiPage->getTitle()->getFullText() . $role;
+		if ( array_key_exists( $key_, self::$slotContentRuntime ) ) {
+			$ret = self::$slotContentRuntime[ $key_ ];
 			return $ret;
 		}
 

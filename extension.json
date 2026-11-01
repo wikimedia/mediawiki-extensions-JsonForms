@@ -1,7 +1,7 @@
 {
 	"name": "JsonForms",
 	"author": "thomas-topway-it",
-	"version": "1.2.6",
+	"version": "1.2.7",
 	"url": "https://www.mediawiki.org/wiki/Extension:JsonForms",
 	"descriptionmsg": "jsonforms-extension-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -206,6 +206,7 @@
 				"oojs-ui.styles.icons-layout",
 				"oojs-ui.styles.icons-movement",
 				"oojs-ui.styles.icons-moderation",
+				"oojs-ui.styles.icons-media",
 				"oojs-ui.styles.icons-accessibility",
 				"oojs-ui-toolbars",
 				"oojs-ui-windows",
@@ -216,6 +217,7 @@
 				"mediawiki.widgets.CategoryMultiselectWidget",
 				"mediawiki.widgets.UserInputWidget",
 				"mediawiki.widgets.UsersMultiselectWidget",
+				"mediawiki.widgets.MediaSearch",
 				"mediawiki.Upload"
 			],
 			"messages": [
@@ -275,6 +277,7 @@
 				"jsonforms-editor-property-exists",
 				"jsonforms-editor-lookupmultiselect-placeholder",
 				"jsonforms-instance-there-are-errors",
+				"jsonforms-instance-popup-button-info-message",
 				"jsonforms-instance-rename-schema",
 				"jsonforms-instance-delete-article",
 				"jsonforms-instance-schema-required",

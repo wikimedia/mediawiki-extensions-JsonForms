@@ -341,6 +341,7 @@
 	"jsonforms-formschema-createpageform-debug-desc": "Enable debug mode",
 
 	"jsonforms-instance-there-are-errors": "There are errors",
+	"jsonforms-instance-popup-button-info-message": "Using schema <a target=\"_blank\" href=\"$1\">$2</a> via form descriptor <a target=\"_blank\" href=\"$3\">$4</a>",
 	"jsonforms-instance-rename-schema": "This will rename the schema, ok ?",
 	"jsonforms-instance-delete-article": "Delete schema's article, ok ?",
 	"jsonforms-instance-schema-required": "schema is required",

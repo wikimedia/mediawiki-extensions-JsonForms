@@ -338,6 +338,7 @@
 	"jsonforms-formschema-createpageform-debug-desc": "Debug-Modus aktivieren",
 
 	"jsonforms-instance-there-are-errors": "Es sind Fehler vorhanden",
+	"jsonforms-instance-popup-button-info-message": "Verwendung des Schemas <a target=\"_blank\" href=\"$1\">$2</a> über den Formulardeskriptor <a target=\"_blank\" href=\"$3\">$4</a>",
 	"jsonforms-instance-rename-schema": "Dadurch wird das Schema umbenannt, ok ?",
 	"jsonforms-instance-delete-article": "Den Artikel des Schemas löschen, ok ?",
 	"jsonforms-instance-schema-required": "Schema ist erforderlich",

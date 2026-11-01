@@ -152,6 +152,7 @@ class SpecialJsonFormsEdit extends SpecialPage {
 			'edit' => $editTitle->getFullText(),
 			'editor_options' => (object)[
 				'base_options' => 'MediaWiki:JsonFormsOptions',
+				// 'debug' => true
 			],
 			'width' => 'auto'
 		];

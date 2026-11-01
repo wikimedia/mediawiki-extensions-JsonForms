@@ -69,6 +69,7 @@ class NewArticle extends SubmitForm {
 		// eg. https://wikisphere.org/wiki/JsonSchema:Core/NewArticleDataOnly
 		$parsedId = explode( 'JsonSchema:', $data->schemaId )[ 1 ];
 
+		// @TODO rely on the schema instead
 		$hasSchema = $parsedId !== 'Core/NewArticleRegular';
 		if ( $hasSchema ) {
 			$this->processStructuredValue( $data, $slotMetadata, $targetSlot, $wikiPage, $errors );

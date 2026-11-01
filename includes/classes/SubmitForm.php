@@ -460,6 +460,12 @@ class SubmitForm {
 			unset( $metadata->slots );
 		}
 
+		if ( !empty( $data->options->categories ) && is_array( $data->options->categories ) ) {
+			$metadata->categories = $data->options->categories;
+		} else {
+			unset( $metadata->categories );
+		}
+
 		if ( is_object( $metadata ) && !empty( (array)$metadata ) ) {
 			$slots[SLOT_ROLE_JSONFORMS_METADATA] = [
 				'model' => 'json',
@@ -765,10 +771,8 @@ class SubmitForm {
 		// Add categories if provided
 		if ( !empty( $data->options->categories ) && is_array( $data->options->categories ) ) {
 			$metadata->categories = $data->options->categories;
-		}
-
-		if ( !empty( $data->value->categories ) && is_array( $data->value->categories ) ) {
-			$metadata->categories = $data->value->categories;
+		} else {
+			unset( $metadata->categories );
 		}
 
 		return $metadata;
@@ -1405,6 +1409,8 @@ class SubmitForm {
 	protected function addCategories( $metadata, $data ) {
 		if ( !empty( $data->value->categories ) && is_array( $data->value->categories ) ) {
 			$metadata->categories = $data->value->categories;
+		} else {
+			unset( $metadata->categories );
 		}
 	}
 
@@ -1597,10 +1603,16 @@ class SubmitForm {
 		// \JsonForms::getSlotContent will be called by the hook onMultiContentSave
 		// before the content is saved, therefore we need to inject the new
 		// content through a global variable before saving the content
-		if ( isset( $processedData['targetSlot'] ) ) {
+		if ( $processedData['targetTitle'] && isset( $processedData['slots'] ) && !empty( $processedData['targetSlot'] ) ) {
 			$targetSlot_ = $processedData['targetSlot'];
 			$slotContent_ = $processedData['slots'][$targetSlot_]['content'];
-			\JsonForms::setSlotContentRuntime( $targetSlot_, $slotContent_ );
+			\JsonForms::setSlotContentRuntime( $processedData['targetTitle'], $targetSlot_, $slotContent_ );
+		}
+
+		if ( $processedData['targetTitle'] && isset( $processedData['slots'] ) && isset( $processedData['slots'][SLOT_ROLE_JSONFORMS_METADATA] ) ) {
+			$targetSlot_ = SLOT_ROLE_JSONFORMS_METADATA;
+			$slotContent_ = $processedData['slots'][$targetSlot_]['content'];
+			\JsonForms::setSlotContentRuntime( $processedData['targetTitle'], $targetSlot_, $slotContent_ );
 		}
 
 		$ret = $slotEditor->editSlots(

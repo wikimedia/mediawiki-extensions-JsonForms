@@ -45,6 +45,7 @@ class EditSchema extends SubmitForm {
 			if ( count( $errors ) ) {
 				return ResultWrapper::failure( $errors[0] );
 			}
+
 			$processedData = [
 				'slots' => $slots,
 				'targetTitle' => $targetTitle,
@@ -54,6 +55,7 @@ class EditSchema extends SubmitForm {
 				'targetTitle' => $targetTitle->getFullText(),
 				'returnUrl' => $targetTitle->getLocalURL(),
 			];
+
 			return ResultWrapper::success( [ $processedData, $returnData ] );
 		}
 

@@ -317,6 +317,7 @@
 	"jsonforms-formschema-createpageform-debug-desc": "Description for the debug option",
 
 	"jsonforms-instance-there-are-errors": "Message shown when there are errors",
+	"jsonforms-instance-popup-button-info-message": "Popup-button form's info message",
 	"jsonforms-instance-rename-schema": "Confirmation message before renaming a schema",
 	"jsonforms-instance-delete-article": "Confirmation message before deleting a schema",
 	"jsonforms-instance-schema-required": "Error message when a schema is required",

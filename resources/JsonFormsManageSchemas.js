@@ -340,7 +340,6 @@ $( () => {
 		'null',
 		'info',
 		'button',
-		'ColorPicker',
 		'mw.widgets.DateTimeInputWidget',
 		'mw.widgets.DateInputWidget',
 		'OO.ui.HiddenInputWidget',

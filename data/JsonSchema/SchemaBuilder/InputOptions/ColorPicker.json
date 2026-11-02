@@ -1,0 +1,50 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "ColorPicker Options",
+	"description": "Configuration options for the EasyMDE Markdown Editor widget",
+	"x-message": {
+		"label": "Reference: [https://www.mediawiki.org/wiki/Extension:OOJSPlus Extension:OOJSPlus]. Schema: [[JsonSchema:SchemaBuilder/InputOptions/ColorPicker]]",
+		"x-label-format": "wikitext"
+	},
+	"type": "object",
+	"x-default-properties": [],
+	"properties": {
+		"title": {
+			"type": "string"
+		},
+		"icon": {
+			"type": "string"
+		},
+		"colors": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"returnType": {
+			"type": "string"
+		},
+		"popup": {
+			"type": "object",
+			"properties": {
+				"width": {
+					"type": "string"
+				},
+				"padded": {
+					"type": "boolean"
+				},
+				"autoClose": {
+					"type": "boolean"
+				}
+			}
+		}
+	}
+}

@@ -60,7 +60,7 @@ export default {
 
 				return {
 					source: (editor, { item, watched }) => {
-						const jsonForm = jseditor.jsoneditor.jsonFormsInstance;
+						const jsonForm = editor.jsoneditor.jsonFormsInstance;
 
 						if (
 							!editor.schema['x-enum-provider-config'] ||

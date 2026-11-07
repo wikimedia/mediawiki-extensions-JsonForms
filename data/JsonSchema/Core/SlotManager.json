@@ -89,7 +89,6 @@
 					"type": "string",
 					"title": "{{int:jsonforms-formschema-editor}}",
 					"x-title-format": "wikitext",
-					"default": "source",
 					"x-watch": "content_model",
 					"x-enum-provider": "editorByContentModel"
 				},

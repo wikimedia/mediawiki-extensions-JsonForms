@@ -1,8 +1,7 @@
-// use IIFE, this ensure name is scoped
-
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-case-declarations */
 
+// IIFE ensures the names are scoped
 ( function () {
 	function Events() {}
 

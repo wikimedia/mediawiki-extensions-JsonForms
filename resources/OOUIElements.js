@@ -21,7 +21,7 @@
 
 /* global JsonForms, jQuery */
 
-// use IIFE, this ensure name is scoped
+// IIFE ensures the names are scoped
 ( function ( $ ) {
 	function createWindowManager() {
 		const windowManager = new OO.ui.WindowManager( {

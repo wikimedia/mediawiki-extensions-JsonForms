@@ -1,6 +1,6 @@
-// use IIFE, this ensure name is scoped
-
 /* eslint-disable no-underscore-dangle */
+
+// IIFE ensures the names are scoped
 ( function () {
 	'use strict';
 	function AutocompleteProviders() {

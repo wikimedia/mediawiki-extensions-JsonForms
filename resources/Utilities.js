@@ -22,7 +22,7 @@
 /* global JsonForms */
 /* eslint-disable es-x/no-rest-spread-properties */
 
-// use IIFE, this ensure name is scoped
+// IIFE ensures the names are scoped
 ( function () {
 	function Utilities() {}
 

@@ -19,10 +19,10 @@
  * @copyright Copyright ©2026, https://wikisphere.org
  */
 
-// use IIFE, this ensure name is scoped
 /* eslint-disable es-x/no-rest-spread-properties */
-
 /* global JsonForms */
+
+// IIFE ensures the names are scoped
 ( function () {
 	function Converters() {
 		this.survey = new JsonForms.ValueConverters.Survey();

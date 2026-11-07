@@ -240,7 +240,6 @@ JsonFormsTests.prototype.onChange = async function ( editor ) {
 JsonFormsTests.prototype.getGitHubContents = async function ( config ) {
 	const url = `https://api.github.com/repos/${ config.owner }/${ config.repo }/contents/${ config.path }`;
 
-	// console.log(url);
 	try {
 		const response = await fetch( url, {
 			headers: {
@@ -249,13 +248,27 @@ JsonFormsTests.prototype.getGitHubContents = async function ( config ) {
 		} );
 
 		if ( !response.ok ) {
-			throw new Error( `HTTP error! status: ${ response.status }` );
+			// GitHub error responses are always JSON
+			const json = await response.json();
+
+			const err = new Error(
+				`HTTP ${ response.status }: ${ json.message || 'no message' }`
+			);
+			err.status = response.status;
+			err.json = json;
+			throw err;
 		}
 
 		const data = await response.json();
 		return data;
 	} catch ( error ) {
 		console.error( 'Error fetching repository contents:', url, error );
+
+		JsonForms.Alert(
+			( error.json && error.json.message ) ||
+				`Error fetching repository contents at "${ url }"`
+		);
+
 		throw error;
 	}
 };
